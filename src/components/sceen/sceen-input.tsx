@@ -9,11 +9,9 @@ export function useBarcodeScanner(onScan: (code: string) => void) {
 
     useEffect(() => {
         function handleKeydown(e: KeyboardEvent) {
-            // faqat bitta belgili simvollarni olamiz
             if (e.key.length === 1) {
                 buffer.current += e.key;
 
-                // agar eski timeout bo‘lsa — to‘xtatamiz
                 if (timeoutRef.current) {
                     clearTimeout(timeoutRef.current);
                 }
