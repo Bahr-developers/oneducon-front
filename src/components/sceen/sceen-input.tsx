@@ -22,7 +22,6 @@ export function useBarcodeScanner(onScan: (code: string) => void) {
                 }, SCAN_TIMEOUT);
             }
         }
-
         window.addEventListener("keydown", handleKeydown);
         return () => window.removeEventListener("keydown", handleKeydown);
     }, [onScan]);
