@@ -3,9 +3,7 @@ import { useEffect, useRef } from "react";
 export function useBarcodeScanner(onScan: (code: string) => void) {
     const buffer = useRef("");
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    // vaqt chegarasi (ms)
-    const SCAN_TIMEOUT = 50; // skaner belgilarini aniqlash uchun
+    const SCAN_TIMEOUT = 50; 
 
     useEffect(() => {
         function handleKeydown(e: KeyboardEvent) {
@@ -15,8 +13,6 @@ export function useBarcodeScanner(onScan: (code: string) => void) {
                 if (timeoutRef.current) {
                     clearTimeout(timeoutRef.current);
                 }
-
-                // skanner yozishni tugatgan deb o‘ylaydigan vaqt
                 timeoutRef.current = setTimeout(() => {
                     // barcode yakunlandi
                     if (buffer.current.length > 0) {
