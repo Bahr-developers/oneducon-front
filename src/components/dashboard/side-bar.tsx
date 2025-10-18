@@ -46,7 +46,6 @@ export function AppSidebar({
     const { pathname } = useLocation();
     const { t } = useTranslation();
     const navItems = useNavItems();
-
     return (
         <aside
             className={cn(
@@ -63,7 +62,6 @@ export function AppSidebar({
                             </Link>
                         )}
                     </div>
-
                     <button
                         onClick={onToggle}
                         aria-label="Toggle sidebar"
