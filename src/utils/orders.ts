@@ -27,10 +27,14 @@ interface OrderData {
     payments: PaymentItem[]
     debts: DebtItem[]
 }
+interface getParams {
+    limit: number,
+    page: number
+}
 
 export const orderUtils = {
-    getOrders: async () => {
-        const { data } = await customAxios.get('orders')
+    getOrders: async ({ limit, page }: getParams) => {
+        const { data } = await customAxios.get(`orders?page=${page}&limit=${limit}`)
         return data
     },
 

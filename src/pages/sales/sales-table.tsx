@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { orderUtils } from "@/utils/orders";
 import { order } from "@/types";
 import PaginationContyent from "@/components/_components/pagination";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 
 const SalesTableSkeleton = () => {
@@ -48,25 +48,23 @@ const SalesTableSkeleton = () => {
 }
 
 const SalesTable = () => {
-    const { data: sales, isLoading } = useQuery<{ data: order[] }>({
-        queryKey: ['get_all_orders'],
-        queryFn: orderUtils.getOrders
-    })
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const { data: sales, isLoading } = useQuery<{ data: order[], total: number }>({
+        queryKey: ['get_all_orders', currentPage, postsPerPage],
+        queryFn: async () => await orderUtils.getOrders({ limit: postsPerPage, page: currentPage })
+    })
 
-    const totalPages = Math.max(1, Math.ceil((sales?.data?.length || 1) / postsPerPage));
+
+    console.log(sales);
+
+    const totalPages = Math.max(1, Math.ceil((sales?.total || 1) / postsPerPage));
 
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [currentPage, totalPages]);
 
-    const startIndex = (currentPage - 1) * postsPerPage;
-    const paginated = useMemo(() => sales?.data?.slice(startIndex, startIndex + postsPerPage), [
-        sales,
-        startIndex,
-        postsPerPage,
-    ]);
+    const paginated = sales?.data
     return (
         <div className="mt-10">
             <div className="flex justify-between items-center gap-3 mb-5 flex-wrap">
@@ -159,7 +157,7 @@ const SalesTable = () => {
                 }}
                 postsPerPage={postsPerPage}
                 setCurrentPage={(n) => setCurrentPage(n)}
-                totalPosts={sales?.data?.length || 0}
+                totalPosts={sales?.total || 0}
             />
         </div>
     );
