@@ -36,7 +36,7 @@ export interface debt {
     store_id: string;
     price: number;
     reminder: string;
-    status: 'UNPAID' | 'PAID';
+    status: string;
 }
 export interface client {
     id: string;
@@ -71,5 +71,4 @@ export interface order {
     debts?: debt[];            // hozir bo'sh array ko'rinadi — lekin type qo'yildi
     total_price: number;       // misolda 109
     created_at?: string;
-    // qo'shimcha maydonlar (status, updated_at, etc.) kerak bo'lsa shu yerga qo'shing
 }

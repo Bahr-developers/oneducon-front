@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { Eye, HandCoins, Search } from "lucide-react";
+import { HandCoins, Search } from "lucide-react";
 import FilterData from "./filter-data";
 import { useQuery } from "@tanstack/react-query";
 import { orderUtils } from "@/utils/orders";
 import { order } from "@/types";
 import PaginationContyent from "@/components/_components/pagination";
 import { useEffect, useState } from "react";
+import ViewSale from "./view-sale";
 
 
 const SalesTableSkeleton = () => {
@@ -116,13 +117,7 @@ const SalesTable = () => {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-x-2 justify-center items-center">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-9 w-9"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
+                                            <ViewSale {...el} />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
