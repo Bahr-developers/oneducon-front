@@ -22,51 +22,72 @@ import { categoryType, product } from "@/types";
 import { categoryUtils } from "@/utils/categories";
 import ProductView from "./product-view";
 import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import PaginationContyent from "@/components/_components/pagination";
+import { useDebounce } from "@/components/functions/useDebounce";
+import { useQueryParams } from "@/components/functions/query-params";
+import ProductsTableSkeleton from "./product-skeleton";
 
-const ProductsTableSkeleton = () => {
-    return (
-        <TableBody>
-            {[...Array(7)].map((_, i) => (
-                <TableRow key={i}>
-                    <TableCell>
-                        <Skeleton className="h-5 w-12" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-32" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-24" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-24" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-16" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-20" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                        <div className="flex gap-x-3 justify-center items-center">
-                            <Skeleton className="h-8 w-8 rounded" />
-                            <Skeleton className="h-8 w-8 rounded" />
-                        </div>
-                    </TableCell>
-                </TableRow>
-            ))}
-        </TableBody>
-    )
-}
+
 
 const Productstable = () => {
-    const { data: procusts, isLoading } = useQuery({
-        queryKey: ['get_all_procusts'],
-        queryFn: productUtils.getProducts
+    const { updateURL, getParam } = useQueryParams();
+
+    // URL dan qiymatlarni olish
+    const [postsPerPage, setPostsPerPage] = useState<number>(
+        () => parseInt(getParam('limit', '5'))
+    );
+    const [currentPage, setCurrentPage] = useState<number>(
+        () => parseInt(getParam('page', '1'))
+    );
+    const [searchQuery, setSearchQuery] = useState<string>(
+        () => getParam('search', '')
+    );
+    const [selectedCategory, setSelectedCategory] = useState<string>(
+        () => getParam('category', '')
+    );
+
+    // Debounced search
+    const debouncedSearch = useDebounce(searchQuery, 500);
+
+    // URL ni yangilash
+    useEffect(() => {
+        updateURL({
+            search: debouncedSearch,
+            category: selectedCategory,
+            page: currentPage.toString(),
+            limit: postsPerPage.toString(),
+        });
+    }, [debouncedSearch, selectedCategory, currentPage, postsPerPage, updateURL]);
+
+    // API query
+    const { data: procusts, isLoading } = useQuery<{ data: product[], total: number }>({
+        queryKey: ['get_all_procusts', debouncedSearch, selectedCategory, postsPerPage, currentPage],
+        queryFn: async () => await productUtils.getProducts({
+            limit: postsPerPage,
+            page: currentPage,
+            search: debouncedSearch,
+            category: selectedCategory
+        })
     })
+
     const { data: categories, isLoading: categoriesLoading } = useQuery({
         queryKey: ['get_all_categories'],
         queryFn: categoryUtils.getCategory
     })
+
+
+
+
+
+
+    const totalPages = Math.max(1, Math.ceil((procusts?.total || 1) / postsPerPage));
+
+    useEffect(() => {
+        if (currentPage > totalPages) setCurrentPage(1);
+    }, [currentPage, totalPages]);
+
+    const paginated = procusts?.data
 
     return (
         <div className="mt-4">
@@ -77,10 +98,14 @@ const Productstable = () => {
                         <Input
                             type="search"
                             placeholder="Qidirish..."
-                            className="h-11 pl-10 bg-background"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-12 pl-10 bg-background"
                         />
                     </div>
-                    <Select>
+                    <Select
+                        value={selectedCategory}
+                        onValueChange={(value) => setSelectedCategory(value)}>
                         <SelectTrigger className="w-full sm:w-[280px] h-11">
                             <SelectValue placeholder="Kategoriya" />
                         </SelectTrigger>
@@ -110,14 +135,14 @@ const Productstable = () => {
                                 <TableHead className="font-semibold">Sotuv narxi</TableHead>
                                 <TableHead className="font-semibold">Miqdori</TableHead>
                                 <TableHead className="font-semibold">O'lchov</TableHead>
-                                <TableHead className="text-right font-semibold">Amallar</TableHead>
+                                <TableHead className="text-center font-semibold">Amallar</TableHead>
                             </TableRow>
                         </TableHeader>
                         {isLoading ? (
                             <ProductsTableSkeleton />
-                        ) : procusts?.data?.length > 0 ? (
+                        ) : (paginated?.length ?? 0) > 0 ? (
                             <TableBody>
-                                {procusts.data.map((el: product, index: number) => (
+                                {paginated?.map((el: product, index: number) => (
                                     <TableRow
                                         key={el.id}
                                         className="hover:bg-muted/50 transition-colors"
@@ -148,7 +173,7 @@ const Productstable = () => {
                                             {el.unit.name}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex gap-x-2 justify-center items-center">
+                                            <div className="flex gap-x-4 justify-center  items-center">
                                                 <EditProsucts {...el} />
                                                 <ProductView {...el} />
                                             </div>
@@ -168,6 +193,16 @@ const Productstable = () => {
                     </Table>
                 </div>
             </div>
+            <PaginationContyent
+                currentPage={currentPage}
+                setPostPerPage={(n) => {
+                    setPostsPerPage(n);
+                    setCurrentPage(1);
+                }}
+                postsPerPage={postsPerPage}
+                setCurrentPage={(n) => setCurrentPage(n)}
+                totalPosts={procusts?.total || 0}
+            />
         </div>
     );
 };

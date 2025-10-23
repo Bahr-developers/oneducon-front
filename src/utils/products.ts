@@ -15,9 +15,17 @@ interface productData {
     store_id?: number
 }
 
+interface getParams {
+    limit: number,
+    page: number,
+    search?: string;
+    category?: string
+}
+
+
 export const productUtils = {
-    getProducts: async () => {
-        const { data } = await customAxios.get('products')
+    getProducts: async ({ limit, page, search }: getParams) => {
+        const { data } = await customAxios.get(`products?page=${page}&limit=${limit}&search=${search}`)
         return data
     },
     getProductByID: async (id: string) => {
