@@ -7,12 +7,16 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Send } from "lucide-react";
+import { Search, Send } from "lucide-react";
 import EditDepts from "./edit-dabts";
 import { useQuery } from "@tanstack/react-query";
 import { debtsUtils } from "@/utils/debts";
 import { debt } from "@/types";
 import { Button } from "@/components/ui/button";
+import PaginationContyent from "@/components/_components/pagination";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/components/functions/useDebounce";
 
 const DebtsTableSkeleton = () => {
     return (
@@ -44,13 +48,38 @@ const DebtsTableSkeleton = () => {
 }
 
 const DebtsTable = () => {
+    const [postsPerPage, setPostsPerPage] = useState<number>(5);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [search, setSearch] = useState('');
+
+    const debouncedSearch = useDebounce(search)
     const { data: debts, isLoading } = useQuery({
-        queryKey: ['debts_all'],
-        queryFn: debtsUtils.getDebts
+        queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
+        queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
+
+
+
+    const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
+
+    useEffect(() => {
+        if (currentPage > totalPages) setCurrentPage(1);
+    }, [currentPage, totalPages]);
+
+    const paginated = debts?.data
 
     return (
         <div className="mt-5">
+            <div className="relative w-full sm:w-[450px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Qidirish..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-12 pl-10 bg-background"
+                />
+            </div>
             <div className="border rounded-xl overflow-hidden bg-card">
                 <Table>
                     <TableHeader>
@@ -64,9 +93,9 @@ const DebtsTable = () => {
                     </TableHeader>
                     {isLoading ? (
                         <DebtsTableSkeleton />
-                    ) : debts?.data?.length > 0 ? (
+                    ) : paginated?.length > 0 ? (
                         <TableBody>
-                            {debts?.data.map((el: debt) => (
+                            {paginated?.map((el: debt) => (
                                 <TableRow
                                     key={el.id}
                                     className="hover:bg-muted/50 transition-colors"
@@ -110,6 +139,16 @@ const DebtsTable = () => {
                     )}
                 </Table>
             </div>
+            <PaginationContyent
+                currentPage={currentPage}
+                setPostPerPage={(n) => {
+                    setPostsPerPage(n);
+                    setCurrentPage(1);
+                }}
+                postsPerPage={postsPerPage}
+                setCurrentPage={(n) => setCurrentPage(n)}
+                totalPosts={debts?.total || 0}
+            />
         </div>
     );
 };

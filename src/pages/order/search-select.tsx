@@ -17,7 +17,7 @@ export default function SearchSelect({ onSelect, selectedProduct }: SearchSelect
 
     const { data: products } = useQuery({
         queryKey: ['get_all_procusts'],
-        queryFn: productUtils.getProducts
+        queryFn: productUtils.getProductsAlls
     })
 
 
