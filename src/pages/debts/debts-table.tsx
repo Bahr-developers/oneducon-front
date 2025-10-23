@@ -70,7 +70,7 @@ const DebtsTable = () => {
 
     return (
         <div className="mt-5">
-            <div className="relative w-full sm:w-[450px]">
+            <div className="relative w-full sm:w-[450px] my-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                     type="search"
@@ -88,7 +88,7 @@ const DebtsTable = () => {
                             <TableHead className="font-semibold">Mijoz ID</TableHead>
                             <TableHead className="font-semibold">Narxi</TableHead>
                             <TableHead className="font-semibold">Eslatma</TableHead>
-                            <TableHead className="text-right font-semibold">Amallar</TableHead>
+                            <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
                     </TableHeader>
                     {isLoading ? (
