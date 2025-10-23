@@ -14,6 +14,9 @@ import FilterData from "./filter-data";
 import { useQuery } from "@tanstack/react-query";
 import { orderUtils } from "@/utils/orders";
 import { order } from "@/types";
+import PaginationContyent from "@/components/_components/pagination";
+import { useEffect, useMemo, useState } from "react";
+
 
 const SalesTableSkeleton = () => {
     return (
@@ -49,7 +52,21 @@ const SalesTable = () => {
         queryKey: ['get_all_orders'],
         queryFn: orderUtils.getOrders
     })
+    const [postsPerPage, setPostsPerPage] = useState<number>(5);
+    const [currentPage, setCurrentPage] = useState<number>(1);
 
+    const totalPages = Math.max(1, Math.ceil((sales?.data?.length || 1) / postsPerPage));
+
+    useEffect(() => {
+        if (currentPage > totalPages) setCurrentPage(1);
+    }, [currentPage, totalPages]);
+
+    const startIndex = (currentPage - 1) * postsPerPage;
+    const paginated = useMemo(() => sales?.data?.slice(startIndex, startIndex + postsPerPage), [
+        sales,
+        startIndex,
+        postsPerPage,
+    ]);
     return (
         <div className="mt-10">
             <div className="flex justify-between items-center gap-3 mb-5 flex-wrap">
@@ -77,9 +94,9 @@ const SalesTable = () => {
                     </TableHeader>
                     {isLoading ? (
                         <SalesTableSkeleton />
-                    ) : (sales?.data?.length ?? 0) > 0 ? (
+                    ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
-                            {sales?.data.map((el) => (
+                            {paginated?.map((el) => (
                                 <TableRow
                                     key={el.id}
                                     className="hover:bg-muted/50 transition-colors"
@@ -134,6 +151,16 @@ const SalesTable = () => {
                     )}
                 </Table>
             </div>
+            <PaginationContyent
+                currentPage={currentPage}
+                setPostPerPage={(n) => {
+                    setPostsPerPage(n);
+                    setCurrentPage(1);
+                }}
+                postsPerPage={postsPerPage}
+                setCurrentPage={(n) => setCurrentPage(n)}
+                totalPosts={sales?.data?.length || 0}
+            />
         </div>
     );
 };
