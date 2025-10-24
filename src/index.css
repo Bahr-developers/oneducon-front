@@ -1,51 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Faqat kerakli weight'larni qoldiring */
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-SemiBold.woff2') format('woff2'),
-    url('./fonts/Poppins-SemiBold.woff') format('woff');
-  font-weight: 600;
-  font-style: normal;
+  src: url('./fonts/Poppins-Regular.woff2') format('woff2');
+  font-weight: 400;
   font-display: swap;
+  /* Muhim! */
 }
 
 @font-face {
-  font-family: 'Onest';
-  src: url('./fonts/Onest-Regular.woff2') format('woff2'),
-    url('./fonts/Onest-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Onest';
-  src: url('./fonts/Onest-Medium.woff2') format('woff2'),
-    url('./fonts/Onest-Medium.woff') format('woff');
+  font-family: 'Poppins';
+  src: url('./fonts/Poppins-Medium.woff2') format('woff2');
   font-weight: 500;
-  font-style: normal;
   font-display: swap;
 }
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('./fonts/Poppins-Regular.woff2') format('woff2'),
-    url('./fonts/Poppins-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Poppins';
-  src: url('./fonts/Poppins-Medium.woff2') format('woff2'),
-    url('./fonts/Poppins-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
 
 @custom-variant dark (&:is(.dark *));
 
