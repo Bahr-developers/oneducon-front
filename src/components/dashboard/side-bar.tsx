@@ -69,10 +69,7 @@ export function AppSidebar({
                     >
                         {collapsed ? <ChevronRight size={55} strokeWidth={3} className="font-bold w-4 h-4" /> : <ChevronLeft size={25} strokeWidth={3} className="font-bold w-4 h-4" />}
                     </button>
-
                 </div>
-
-
                 <ScrollArea className="flex-1">
                     <nav className="pr-2 py-3 space-y-2 overflow-y-auto">
                         {navItems.map((n) => {
