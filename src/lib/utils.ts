@@ -20,7 +20,6 @@ export function formatDateOnly(dateString: string): string {
   });
 }
 
-
 export const formatDateServer = (date: Date | undefined): string => {
   if (!date) return '';
   return [
