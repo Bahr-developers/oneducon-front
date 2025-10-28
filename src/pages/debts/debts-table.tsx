@@ -61,6 +61,7 @@ const DebtsTable = () => {
     })
     const queryClient = useQueryClient()
 
+    console.log(debts);
 
 
     const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
@@ -98,8 +99,10 @@ const DebtsTable = () => {
                     <TableHeader>
                         <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                             <TableHead className="w-[120px] font-semibold">Buyurtma</TableHead>
-                            <TableHead className="font-semibold">Mijoz ID</TableHead>
-                            <TableHead className="font-semibold">Narxi</TableHead>
+                            <TableHead className="font-semibold">Mijoz</TableHead>
+                            <TableHead className="font-semibold">Telefon raqam</TableHead>
+                            <TableHead className="font-semibold">Umumiy narx</TableHead>
+                            <TableHead className="font-semibold">Qaytarish vaqti</TableHead>
                             <TableHead className="font-semibold">Eslatma</TableHead>
                             <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
@@ -119,8 +122,14 @@ const DebtsTable = () => {
                                     <TableCell className="text-muted-foreground">
                                         {el.client.name}
                                     </TableCell>
+                                    <TableCell className="text-foreground">
+                                        +{el.client.phone}
+                                    </TableCell>
                                     <TableCell className="font-medium">
-                                        {el.price?.toLocaleString()} so'm
+                                        {el?.order?.total_price?.toLocaleString()} so'm
+                                    </TableCell>
+                                    <TableCell className="font-medium text-center">
+                                        10.11.2025
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {el.reminder}
