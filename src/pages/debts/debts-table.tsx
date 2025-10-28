@@ -57,6 +57,7 @@ const DebtsTable = () => {
         queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
+    console.log(debts);
 
 
 
@@ -66,7 +67,7 @@ const DebtsTable = () => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [currentPage, totalPages]);
 
-    const paginated = debts?.data
+    const paginated = debts?.data || []
 
     return (
         <div className="mt-5">
@@ -93,7 +94,7 @@ const DebtsTable = () => {
                     </TableHeader>
                     {isLoading ? (
                         <DebtsTableSkeleton />
-                    ) : paginated?.length > 0 ? (
+                    ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
                             {paginated?.map((el: debt) => (
                                 <TableRow
