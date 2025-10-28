@@ -44,7 +44,7 @@ const Content = ({ children, title }: { children: React.ReactNode; title?: strin
     return (
         <div
             className={cn(
-                "absolute inset-0 z-50 bg-white dark:bg-neutral-900 p-6 overflow-y-auto"
+                "absolute inset-0 z-50 bg-white dark:bg-neutral-900 p-6 overflow-x-hidden"
             )}
         >
             <div className="flex items-center justify-between mb-4">

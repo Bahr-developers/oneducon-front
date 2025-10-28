@@ -13,6 +13,7 @@ export const authUtils = {
         })
         localStorage.setItem("accessToken", data?.data?.token);
         localStorage.setItem("storeId", data?.data?.store?.id);
+        localStorage.setItem("usd_rate", data?.data?.store?.usd_rate);
         return data
     },
     authAdmin: async ({ email, password }: AuthLogin) => {
