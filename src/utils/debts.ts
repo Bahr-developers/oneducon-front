@@ -14,7 +14,7 @@ interface debtsInfo {
     id: string
     price: number,
     reminder: string,
-    return_time: string,
+    return_time: Date | undefined,
     client_id: number
 }
 

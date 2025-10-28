@@ -136,7 +136,7 @@ const DebtsTable = () => {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-x-3 justify-center items-center">
-                                            <EditDepts />
+                                            <EditDepts {...el} />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
