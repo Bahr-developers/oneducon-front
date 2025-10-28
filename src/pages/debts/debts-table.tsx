@@ -9,7 +9,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Search, Send } from "lucide-react";
 import EditDepts from "./edit-dabts";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { debtsUtils } from "@/utils/debts";
 import { debt } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import PaginationContyent from "@/components/_components/pagination";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/components/functions/useDebounce";
+import toast from "react-hot-toast";
+import { DeleteConfirm } from "@/components/ui/alerd-dialog";
 
 const DebtsTableSkeleton = () => {
     return (
@@ -57,7 +59,7 @@ const DebtsTable = () => {
         queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
-    console.log(debts);
+    const queryClient = useQueryClient()
 
 
 
@@ -68,6 +70,16 @@ const DebtsTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = debts?.data || []
+    const deleteMutation = useMutation({
+        mutationFn: debtsUtils.deleteDebts,
+        onSuccess: () => {
+            toast.success("O'chirildi")
+            queryClient.invalidateQueries({ queryKey: ['debts_all'] })
+        },
+        onError: () => {
+            toast.error("Xatolik mavjud")
+        }
+    })
 
     return (
         <div className="mt-5">
@@ -105,7 +117,7 @@ const DebtsTable = () => {
                                         #{el.order_id}
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
-                                        {el.client_id}
+                                        {el.client.name}
                                     </TableCell>
                                     <TableCell className="font-medium">
                                         {el.price?.toLocaleString()} so'm
@@ -124,6 +136,7 @@ const DebtsTable = () => {
                                                 Xabar yuborish
                                                 <Send size={16} />
                                             </Button>
+                                            <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} />
                                         </div>
                                     </TableCell>
                                 </TableRow>
