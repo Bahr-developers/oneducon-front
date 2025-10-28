@@ -67,6 +67,9 @@ const SalesTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = sales?.data
+
+
+
     return (
         <div className="mt-10">
             <div className="flex justify-between items-center gap-3 mb-5 flex-wrap">

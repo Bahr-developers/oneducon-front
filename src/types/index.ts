@@ -3,6 +3,10 @@ export interface categoryType {
     name: string,
     store_id: string
 }
+export interface paymentType {
+    id: string,
+    name: string
+}
 export interface product {
     id: string
     name: string
@@ -52,13 +56,18 @@ export interface orderItem {
     id?: string;
     order_id: string;
     product_id?: string;
-    name?: string;
+    name: string;
+    count: number
+    discount: number
     quantity?: number;
     price?: number;
     total?: number;
+    product: product
 }
 export interface payment {
     id?: string;
+    price?: number
+    payment_type: paymentType
     payment_method?: string;
     amount?: number;
     paid_at?: string | null;

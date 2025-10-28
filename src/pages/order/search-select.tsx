@@ -46,13 +46,13 @@ export default function SearchSelect({ onSelect, selectedProduct }: SearchSelect
             />
 
             {isOpen && query && (
-                <ul className="absolute z-10 w-full bg-[#cec6c6] border dark:text-black rounded-lg mt-1 max-h-40 overflow-y-auto">
+                <ul className="absolute z-10 w-full bg-white border dark:text-black transition-colors rounded-lg mt-1 max-h-40 overflow-y-auto">
                     {filtered?.length > 0 ? (
                         filtered?.map((product: product) => (
                             <li
                                 key={product.id}
                                 onClick={() => handleSelect(product)}
-                                className="px-3 py-2 hover:bg-[#e0d3d3] cursor-pointer flex justify-between"
+                                className="px-3 py-2 hover:bg-[#e2e0e0c0] cursor-pointer transition-colors flex justify-between"
                             >
                                 <span>{product.name}</span>
                                 <span className="text-gray-500 text-sm">
