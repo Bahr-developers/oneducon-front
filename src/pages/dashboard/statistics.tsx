@@ -1,3 +1,4 @@
+import CountUp from "@/components/functions/count-up";
 
 const Statistics = () => {
     const data = [
@@ -22,7 +23,17 @@ const Statistics = () => {
             {data.map(el => (
                 <div className="w-full border p-4 rounded-xl" key={el.summa}>
                     <h4>{el.name}</h4>
-                    <p className='text-3xl font-medium mt-3'>{el.summa.toLocaleString()} {el.valyute}</p>
+                    <div className="flex items-center gap-x-2 text-3xl font-medium mt-3">
+                        <CountUp
+                            from={100}
+                            to={el.summa}
+                            separator=","
+                            direction="up"
+                            duration={1}
+                            className="count-up-text"
+                        />
+                        <p className='text-2xl'>{el.valyute}</p>
+                    </div>
                 </div>
             ))}
         </div>
