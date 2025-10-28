@@ -101,7 +101,7 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
                                 placeholder="User nomini kiriting..."
                                 className="w-[80%]"
                             />
-                            <CreateCustomer />
+                            <CreateCustomer title="" />
                         </div>
 
                         <DatePicker

@@ -16,7 +16,12 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-const CreateCustomer = () => {
+interface cusCreate {
+    title: string,
+    width?: string
+}
+
+const CreateCustomer = ({ title, width = '50px' }: cusCreate) => {
     const [open, setOpen] = useState(false)
     const [name, setName] = useState('')
     const [phone, setPhone] = useState({
@@ -59,8 +64,8 @@ const CreateCustomer = () => {
     }
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="flex items-center gap-x-2 cursor-pointer border p-2 rounded-lg">
-                Mijoz qo'shish    <Plus size={20} />
+            <DialogTrigger className={`flex items-center justify-center w-[50px] h-12  gap-x-2 cursor-pointer border p-2 rounded-lg text-[15px] font-medium + ${width}`}>
+                {title} <Plus size={20} />
             </DialogTrigger>
 
             <DialogContent w="w-[650px]">

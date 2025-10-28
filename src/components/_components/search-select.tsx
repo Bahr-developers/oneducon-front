@@ -118,7 +118,7 @@ function UniversalSearchSelect<T extends Record<string, any>>({
     };
 
     return (
-        <div ref={wrapperRef} className={`relative ${className}`}>
+        <div ref={wrapperRef} className={`relative w-full    ${className}`}>
             <div className="relative">
                 <Input
                     type="text"

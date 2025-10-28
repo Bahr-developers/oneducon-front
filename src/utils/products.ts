@@ -32,7 +32,10 @@ export const productUtils = {
         const { data } = await customAxios.get(`products`)
         return data
     },
-
+    getProductsLows: async ({ limit, page }: getParams) => {
+        const { data } = await customAxios.get(`products/low-stock?page=${page}&limit=${limit}`)
+        return data
+    },
     getProductByID: async (id: string) => {
         const { data } = await customAxios.get(`products/${id}`)
         return data

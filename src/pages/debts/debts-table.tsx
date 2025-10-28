@@ -9,7 +9,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Search, Send } from "lucide-react";
 import EditDepts from "./edit-dabts";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { debtsUtils } from "@/utils/debts";
 import { debt } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import PaginationContyent from "@/components/_components/pagination";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/components/functions/useDebounce";
+import toast from "react-hot-toast";
+import { DeleteConfirm } from "@/components/ui/alerd-dialog";
 
 const DebtsTableSkeleton = () => {
     return (
@@ -57,7 +59,9 @@ const DebtsTable = () => {
         queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
+    const queryClient = useQueryClient()
 
+    console.log(debts);
 
 
     const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
@@ -66,7 +70,17 @@ const DebtsTable = () => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [currentPage, totalPages]);
 
-    const paginated = debts?.data
+    const paginated = debts?.data || []
+    const deleteMutation = useMutation({
+        mutationFn: debtsUtils.deleteDebts,
+        onSuccess: () => {
+            toast.success("O'chirildi")
+            queryClient.invalidateQueries({ queryKey: ['debts_all'] })
+        },
+        onError: () => {
+            toast.error("Xatolik mavjud")
+        }
+    })
 
     return (
         <div className="mt-5">
@@ -85,15 +99,17 @@ const DebtsTable = () => {
                     <TableHeader>
                         <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                             <TableHead className="w-[120px] font-semibold">Buyurtma</TableHead>
-                            <TableHead className="font-semibold">Mijoz ID</TableHead>
-                            <TableHead className="font-semibold">Narxi</TableHead>
+                            <TableHead className="font-semibold">Mijoz</TableHead>
+                            <TableHead className="font-semibold">Telefon raqam</TableHead>
+                            <TableHead className="font-semibold">Umumiy narx</TableHead>
+                            <TableHead className="font-semibold">Qaytarish vaqti</TableHead>
                             <TableHead className="font-semibold">Eslatma</TableHead>
                             <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
                     </TableHeader>
                     {isLoading ? (
                         <DebtsTableSkeleton />
-                    ) : paginated?.length > 0 ? (
+                    ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
                             {paginated?.map((el: debt) => (
                                 <TableRow
@@ -104,17 +120,23 @@ const DebtsTable = () => {
                                         #{el.order_id}
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
-                                        {el.client_id}
+                                        {el.client.name}
+                                    </TableCell>
+                                    <TableCell className="text-foreground">
+                                        +{el.client.phone}
                                     </TableCell>
                                     <TableCell className="font-medium">
-                                        {el.price?.toLocaleString()} so'm
+                                        {el?.order?.total_price?.toLocaleString()} so'm
+                                    </TableCell>
+                                    <TableCell className="font-medium text-center">
+                                        10.11.2025
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {el.reminder}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-x-3 justify-center items-center">
-                                            <EditDepts />
+                                            <EditDepts {...el} />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -123,6 +145,7 @@ const DebtsTable = () => {
                                                 Xabar yuborish
                                                 <Send size={16} />
                                             </Button>
+                                            <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} />
                                         </div>
                                     </TableCell>
                                 </TableRow>

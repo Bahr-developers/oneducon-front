@@ -29,6 +29,7 @@ export interface user {
     usd_rate: number | null;
     user_id: string;
 }
+
 export interface debt {
     id: string;
     client_id: string;
@@ -37,7 +38,10 @@ export interface debt {
     price: number;
     reminder: string;
     status: string;
+    client: client;
+    order: order
 }
+
 export interface client {
     id: string;
     name: string;
