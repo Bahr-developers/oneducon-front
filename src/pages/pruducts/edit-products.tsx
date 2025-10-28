@@ -122,7 +122,6 @@ const EditProsucts = (product: product) => {
                                     type={field.type}
                                     className="h-12"
                                     placeholder={`${field.label} kiriting...`}
-                                    value={data[field.name] || ""}
                                     onChange={handleChange}
                                     onKeyDown={(e) => handleEnter(e, idx)}
                                     defaultValue={data[field.name]}

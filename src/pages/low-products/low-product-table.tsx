@@ -28,7 +28,7 @@ const LowProductTable = () => {
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { data: lowProducts, isLoading } = useQuery({
-        queryKey: ['hetlow-products'],
+        queryKey: ['get_all_procusts'],
         queryFn: async () => await productUtils.getProductsLows({ limit: postsPerPage, page: currentPage })
     })
     const totalPages = Math.max(1, Math.ceil((lowProducts?.total || 1) / postsPerPage));
