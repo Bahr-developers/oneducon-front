@@ -48,7 +48,7 @@ jobs:
           npm run build
           
           # Restart PM2 process
-          pm2 restart frontend || pm2 --name frontend serve --spa dist 3000
+          pm2 restart frontend || pm2 --name frontend serve --spa dist 4000
           
           # Save PM2 process list
           pm2 save
