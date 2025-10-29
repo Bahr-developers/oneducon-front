@@ -1,9 +1,9 @@
-module.exports = {
+export default {
   apps: [{
     name: 'frontend',
     script: 'npm',
     args: 'start',
-    cwd: '/var/www/onedukon/front',  // Update with your actual path
+    cwd: '/var/www/onedukon/front',
     instances: 1,
     autorestart: true,
     watch: false,
