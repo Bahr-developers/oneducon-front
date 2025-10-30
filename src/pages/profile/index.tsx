@@ -102,6 +102,7 @@ const StoreProfile = () => {
         onSuccess: () => {
             toast.success("Sozlamalar muvaffaqiyatli saqlandi!");
             queryClient.invalidateQueries({ queryKey: ['store', storeId] });
+            localStorage.setItem('usd_rate', String(usdRate))
         },
         onError: (err) => {
             const error = err as AxiosError<{ message: string }>;
