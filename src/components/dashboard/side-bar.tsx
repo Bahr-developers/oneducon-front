@@ -46,6 +46,7 @@ export function AppSidebar({
     const { pathname } = useLocation();
     const { t } = useTranslation();
     const navItems = useNavItems();
+    
     return (
         <aside
             className={cn(
