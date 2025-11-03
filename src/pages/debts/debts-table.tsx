@@ -6,7 +6,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Search, Send } from "lucide-react";
 import EditDepts from "./edit-dabts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -19,35 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/components/functions/useDebounce";
 import toast from "react-hot-toast";
 import { DeleteConfirm } from "@/components/ui/alerd-dialog";
-
-const DebtsTableSkeleton = () => {
-    return (
-        <TableBody>
-            {[...Array(5)].map((_, i) => (
-                <TableRow key={i}>
-                    <TableCell>
-                        <Skeleton className="h-5 w-20" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-28" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-24" />
-                    </TableCell>
-                    <TableCell>
-                        <Skeleton className="h-5 w-32" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                        <div className="flex gap-x-3 justify-center items-center">
-                            <Skeleton className="h-8 w-8 rounded" />
-                            <Skeleton className="h-9 w-32 rounded-md" />
-                        </div>
-                    </TableCell>
-                </TableRow>
-            ))}
-        </TableBody>
-    )
-}
+import DebtsTableSkeleton from "./debts-skeleton";
 
 const DebtsTable = () => {
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
@@ -60,9 +31,6 @@ const DebtsTable = () => {
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
     const queryClient = useQueryClient()
-
-    console.log(debts);
-
 
     const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
 
@@ -125,8 +93,8 @@ const DebtsTable = () => {
                                     <TableCell className="text-foreground">
                                         +{el.client.phone}
                                     </TableCell>
-                                    <TableCell className="font-medium">
-                                        {el?.order?.total_price?.toLocaleString()} so'm
+                                    <TableCell className="font-medium text-red-400">
+                                        {el?.price.toLocaleString()} so'm
                                     </TableCell>
                                     <TableCell className="font-medium text-center">
                                         10.11.2025
@@ -137,6 +105,7 @@ const DebtsTable = () => {
                                     <TableCell className="text-right">
                                         <div className="flex gap-x-3 justify-center items-center">
                                             <EditDepts {...el} />
+                                            <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -145,7 +114,6 @@ const DebtsTable = () => {
                                                 Xabar yuborish
                                                 <Send size={16} />
                                             </Button>
-                                            <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} />
                                         </div>
                                     </TableCell>
                                 </TableRow>

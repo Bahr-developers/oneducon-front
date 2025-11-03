@@ -19,6 +19,7 @@ interface OrderItemProps {
 
 const OrderItem = ({ item }: OrderItemProps) => {
     const dispatch = useAppDispatch();
+    console.log(item, 'aaaaaaaaa');
 
     const handleSelectProduct = (product: product) => {
         dispatch(setProductToItem({ id: item.id, product }));
@@ -39,9 +40,13 @@ const OrderItem = ({ item }: OrderItemProps) => {
     };
 
     const handleDiscountChange = (val: { raw: number }) => {
+        // Yangi: To'g'ri tekshirish
+        const discountValue = val?.raw ?? 0;
+        const numericDiscount = Number(discountValue);
+
         dispatch(updateOrderItem({
             id: item.id,
-            updates: { discount: val.raw },
+            updates: { discount: isNaN(numericDiscount) ? 0 : numericDiscount },
         }));
     };
 
@@ -98,7 +103,7 @@ const OrderItem = ({ item }: OrderItemProps) => {
             <label className="w-52">
                 <span className="my-1 block">Chegirma UZS</span>
                 <NumberInput
-                    value={item.discount}
+                    value={item.discount ?? 0}
                     onChange={handleDiscountChange}
                     placeholder="0"
                     className="w-full h-12"

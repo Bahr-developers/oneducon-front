@@ -23,7 +23,7 @@ import NumberInput from "@/components/_components/number-input";
 
 const EditDepts = (data: debt) => {
     const [reminder, setReminder] = useState(data?.reminder);
-    const [price, setPrice] = useState<string | number>(data.order.total_price)
+    const [price, setPrice] = useState<string | number>(data.price)
     const [selectedUser, setSelectedUser] = useState<client>(data.client);
     const handleReminderChange = (value: string) => {
         setReminder(value);

@@ -29,21 +29,25 @@ const NumberInput: React.FC<NumberInputProps> = ({
     }, [value]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = e.target.value.replace(/\D/g, ""); // faqat raqamlarni olish
-        const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // minglik format
+        const raw = e.target.value.replace(/\D/g, ""); // faqat raqamlar
+        const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // 1 000, 10 000
 
         setInputValue(formatted);
 
         if (onChange) {
-            onChange({ formatted, raw: Number(raw) || 0 });
+            onChange({
+                formatted,
+                raw: raw === "" ? 0 : Number(raw), // ⚠️ bu joy muhim
+            });
         }
     };
+
 
     return (
         <Input
             type="text"
             inputMode="numeric"
-            value={inputValue}
+            defaultValue={inputValue}
             readOnly={readonly}
             onChange={handleChange}
             placeholder={placeholder}
