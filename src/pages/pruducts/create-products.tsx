@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRef, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,46 +10,16 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { DollarSign, TrendingUp, X } from "lucide-react";
-
-// Mock data for demo
-const mockCategories = [
-    { id: "1", name: "Elektronika" },
-    { id: "2", name: "Kiyim" },
-    { id: "3", name: "Oziq-ovqat" }
-];
-
-const mockUnits = [
-    { id: "1", name: "dona" },
-    { id: "2", name: "kg" },
-    { id: "3", name: "litr" }
-];
-
-// Simple NumberInput component for formatting large numbers
-const NumberInput = ({ value, onChange, placeholder, className, readonly }: any) => {
-    const formatNumber = (num: number) => {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = e.target.value.replace(/\s/g, "");
-        const numValue = parseFloat(rawValue) || 0;
-        onChange({ raw: numValue, formatted: formatNumber(numValue) });
-    };
-
-    return (
-        <Input
-            type="text"
-            value={value ? formatNumber(value) : ""}
-            onChange={handleChange}
-            placeholder={placeholder}
-            className={className}
-            readOnly={readonly}
-        />
-    );
-};
+import NumberInput from "@/components/_components/number-input";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { productUtils } from "@/utils/products";
+import { categoryType, product } from "@/types";
+import { categoryUtils } from "@/utils/categories";
+import { unitUtils } from "@/utils/units";
+import toast from "react-hot-toast";
 
 interface ProductFormData {
-    name: string;
+    name: string | '';
     count: number;
     remine_count: number;
     tan_narx_uzb: number;
@@ -67,6 +37,20 @@ const ProductCreate = () => {
     const [isEditingRate, setIsEditingRate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([]);
+    // Validate form - all required fields filled
+    const isFormValid = useMemo(() => {
+        return !!(
+            data.name?.trim() &&
+            data.count &&
+            data.count > 0 &&
+            data.tan_narx_uzb &&
+            data.tan_narx_uzb > 0 &&
+            data.saler_narxi &&
+            data.saler_narxi > 0 &&
+            data.unitId &&
+            data.categoryId
+        );
+    }, [data]);
 
     const handleEnter = (e: React.KeyboardEvent, idx: number) => {
         if (e.key === "Enter") {
@@ -79,13 +63,61 @@ const ProductCreate = () => {
             }
         }
     };
+    const { data: productData } = useQuery<{ data: product[] }>({
+        queryKey: ['get_all_procusts'],
+        queryFn: productUtils.getProductsAlls
+    })
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { data: categories } = useQuery({
+        queryKey: ['get_catigories'],
+        queryFn: categoryUtils.getCategory
+    })
+
+    const { data: units } = useQuery({
+        queryKey: ['get_units'],
+        queryFn: unitUtils.getUnit
+    })
+    const products = productData?.data || []
+    console.log(products);
+
+
+    const [isDuplicate, setIsDuplicate] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
         setData(prev => ({
             ...prev,
-            [e.target.name]: e.target.value
+            name: value
         }));
+
+        // To‘liq mos nomni tekshirish
+        const exists = products.some(
+            (p) => p.name.toLowerCase() === value.trim().toLowerCase()
+        );
+
+        setIsDuplicate(exists);
+        setShowSuggestions(true);
     };
+
+    const handleSelect = (selected: string) => {
+        setData(prev => ({
+            ...prev,
+            name: selected
+        }));
+        setIsDuplicate(true); // tanlagan mahsulot mavjud
+        setShowSuggestions(false); // suggest yopilsin
+    };
+
+    const filteredProducts = useMemo(() => {
+        const nameValue = data.name ?? "";
+        if (!nameValue.trim()) return [];
+        return products
+            .filter((p) =>
+                p.name.toLowerCase().includes(nameValue.trim().toLowerCase())
+            )
+            .slice(0, 5);
+    }, [data.name, products]);
 
     const handleNumberChange = (name: string, value: number) => {
         setData(prev => ({
@@ -140,57 +172,42 @@ const ProductCreate = () => {
         }));
     };
 
-    const onHandleSubmit = async () => {
-        if (!data.name?.trim()) {
-            alert('Mahsulot nomini kiriting');
-            return;
+    const createProduct = useMutation({
+        mutationFn: productUtils.postProduct,
+        onSuccess: () => {
+            toast.success('Mahsulot muvaffaqiyatli yaratildi');
+            setIsSubmitting(false);
+            handleReset();
+        },
+        onError: (err) => {
+            console.log(err);
+            toast.error('Something went wrong!')
         }
-        if (!data.count || data.count <= 0) {
-            alert('Miqdorni kiriting');
-            return;
-        }
-        if (!data.tan_narx_uzb || data.tan_narx_uzb <= 0) {
-            alert('Tan narxini kiriting');
-            return;
-        }
-        if (!data.saler_narxi || data.saler_narxi <= 0) {
-            alert('Sotuv narxini kiriting');
-            return;
-        }
-        if (!data.unitId) {
-            alert("O'lchov birligini tanlang");
-            return;
-        }
-        if (!data.categoryId) {
-            alert('Kategoriyani tanlang');
-            return;
-        }
+    })
+
+    const onHandleSubmit = () => {
+        if (!isFormValid) return;
 
         setIsSubmitting(true);
 
-        // Simulate API call
         const productData = {
-            category_id: +data.categoryId,
-            cost_price: data.tan_narx_uzb,
+            category_id: +data.categoryId!,
+            cost_price: data.tan_narx_uzb!,
             cost_price_usd: data.tan_narx_dol || 0,
-            name: data.name,
-            quantity: data.count,
+            name: data.name!,
+            quantity: data.count!,
             reminder_quantity: data.remine_count || 0,
-            sale_price: data.saler_narxi,
+            sale_price: data.saler_narxi!,
             sale_price_usd: data.saler_narxi_dol || 0,
-            unit_id: +data.unitId,
+            unit_id: +data.unitId!,
             store_id: 1,
             usd_rate: usdRate
         };
 
         console.log('Sending to server:', productData);
 
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        createProduct.mutate(productData)
 
-        alert('Mahsulot muvaffaqiyatli yaratildi!');
-        setIsSubmitting(false);
-        handleReset();
     };
 
     const handleReset = () => {
@@ -211,8 +228,10 @@ const ProductCreate = () => {
         );
     }
 
+
+
     return (
-        <div className="fixed inset-0 z-50 bg-white dark:bg-neutral-900">
+        <div className="fixed inset-0 z-50 bg-white dark:bg-neutral-900 overflow-y-auto">
             <div className="min-h-screen p-6">
                 <div className="max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-6">
@@ -226,24 +245,43 @@ const ProductCreate = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                            {/* Mahsulot nomi */}
-                            <label className="w-full flex flex-col space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full ">
+                            <div className="relative w-full flex flex-col space-y-2">
                                 <span className="text-sm font-medium">
-                                    Mahsulot nomi <span className="text-red-500">*</span>
+                                    Masulot nomi <span className="text-red-500">*</span>
                                 </span>
                                 <Input
-                                    ref={el => { inputRefs.current[0] = el }}
                                     autoFocus
-                                    name="name"
                                     type="text"
-                                    className="h-12"
-                                    placeholder="Masalan: Samsung Galaxy S24"
-                                    value={data.name || ""}
-                                    onChange={handleTextChange}
+                                    ref={el => { inputRefs.current[0] = el }}
+                                    placeholder="Mahsulot nomi"
+                                    value={data.name ?? ''}
+                                    onChange={handleNameChange}
                                     onKeyDown={(e) => handleEnter(e, 0)}
+                                    onFocus={() => setShowSuggestions(true)}
+                                    className={`h-12 transition-all ${isDuplicate ? "border-red-500 text-red-600" : "border-gray-300"
+                                        }`}
+                                    autoComplete="off"
                                 />
-                            </label>
+                                {showSuggestions && filteredProducts.length > 0 && (
+                                    <ul className="absolute z-10 bg-white border rounded-md mt-20 shadow-lg w-full max-h-40">
+                                        {filteredProducts.map((p) => (
+                                            <li
+                                                key={p.id}
+                                                onClick={() => handleSelect(p.name)}
+                                                className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                {p.name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+
+                                {/* Duplicate xabar */}
+                                {isDuplicate && (
+                                    <p className="text-[12px] text-red-500 mt-1 absolute right-0 ">❌ Bu mahsulot mavjud</p>
+                                )}
+                            </div>
 
                             {/* Miqdori */}
                             <label className="w-full flex flex-col space-y-2">
@@ -251,17 +289,14 @@ const ProductCreate = () => {
                                     Miqdori <span className="text-red-500">*</span>
                                 </span>
                                 <NumberInput
+                                    ref={(el) => {
+                                        inputRefs.current[1] = el;
+                                    }}
                                     value={data.count || 0}
-                                    onChange={({ raw }: any) => handleNumberChange('count', raw)}
+                                    onChange={({ raw }) => handleNumberChange('count', raw)}
                                     placeholder="Masalan: 100"
                                     className="h-12"
-                                />
-                                <Input
-                                    ref={el => { inputRefs.current[1] = el }}
-                                    type="text"
-                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 1)}
-                                    tabIndex={-1}
                                 />
                             </label>
 
@@ -270,16 +305,13 @@ const ProductCreate = () => {
                                 <span className="text-sm font-medium">Eslatma miqdori</span>
                                 <NumberInput
                                     value={data.remine_count || 0}
-                                    onChange={({ raw }: any) => handleNumberChange('remine_count', raw)}
+                                    ref={(el) => {
+                                        inputRefs.current[2] = el;
+                                    }}
+                                    onChange={({ raw }) => handleNumberChange('remine_count', raw)}
                                     placeholder="Masalan: 10"
                                     className="h-12"
-                                />
-                                <Input
-                                    ref={el => { inputRefs.current[2] = el }}
-                                    type="text"
-                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 2)}
-                                    tabIndex={-1}
                                 />
                             </label>
 
@@ -298,16 +330,13 @@ const ProductCreate = () => {
                                 </span>
                                 <NumberInput
                                     value={usdRate}
-                                    onChange={({ raw }: any) => handleUsdRateChange(raw)}
+                                    ref={(el) => {
+                                        inputRefs.current[3] = el;
+                                    }}
+                                    onChange={({ raw }) => handleUsdRateChange(raw)}
                                     className={`h-12 ${!isEditingRate ? 'bg-muted cursor-not-allowed' : ''}`}
                                     readonly={!isEditingRate}
-                                />
-                                <Input
-                                    ref={el => { inputRefs.current[3] = el }}
-                                    type="text"
-                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 3)}
-                                    tabIndex={-1}
                                 />
                             </label>
 
@@ -317,17 +346,14 @@ const ProductCreate = () => {
                                     Tan narxi (UZS) <span className="text-red-500">*</span>
                                 </span>
                                 <NumberInput
+                                    ref={(el) => {
+                                        inputRefs.current[4] = el;
+                                    }}
                                     value={data.tan_narx_uzb || 0}
-                                    onChange={({ raw }: any) => handleCostPriceUZS(raw)}
+                                    onChange={({ raw }) => handleCostPriceUZS(raw)}
                                     placeholder="Masalan: 5 000 000"
                                     className="h-12"
-                                />
-                                <Input
-                                    ref={el => { inputRefs.current[4] = el }}
-                                    type="text"
-                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 4)}
-                                    tabIndex={-1}
                                 />
                             </label>
 
@@ -358,17 +384,14 @@ const ProductCreate = () => {
                                     Sotuv narxi (UZS) <span className="text-red-500">*</span>
                                 </span>
                                 <NumberInput
+                                    ref={(el) => {
+                                        inputRefs.current[6] = el;
+                                    }}
                                     value={data.saler_narxi || 0}
-                                    onChange={({ raw }: any) => handleSalePriceUZS(raw)}
+                                    onChange={({ raw }) => handleSalePriceUZS(raw)}
                                     placeholder="Masalan: 6 000 000"
                                     className="h-12"
-                                />
-                                <Input
-                                    ref={el => { inputRefs.current[6] = el }}
-                                    type="text"
-                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 6)}
-                                    tabIndex={-1}
                                 />
                             </label>
 
@@ -406,14 +429,16 @@ const ProductCreate = () => {
                                     }}
                                 >
                                     <SelectTrigger
-                                        ref={el => { inputRefs.current[8] = el }}
+                                        ref={(el) => {
+                                            inputRefs.current[8] = el;
+                                        }}
                                         className="w-full h-12"
                                         onKeyDown={(e) => handleEnter(e, 8)}
                                     >
                                         <SelectValue placeholder="Birlik tanlang..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {mockUnits.map((el) => (
+                                        {units?.data?.map((el: categoryType) => (
                                             <SelectItem key={el.id} value={el.id}>
                                                 {el.name}
                                             </SelectItem>
@@ -442,7 +467,7 @@ const ProductCreate = () => {
                                         <SelectValue placeholder="Kategoriya tanlang..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {mockCategories.map((el) => (
+                                        {categories?.data?.map((el: categoryType) => (
                                             <SelectItem key={el.id} value={el.id}>
                                                 {el.name}
                                             </SelectItem>
@@ -467,9 +492,9 @@ const ProductCreate = () => {
                             <Button
                                 ref={el => { inputRefs.current[10] = el }}
                                 onClick={onHandleSubmit}
-                                disabled={isSubmitting}
+                                disabled={!isFormValid || isSubmitting}
                                 size="lg"
-                                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? 'Yuklanmoqda...' : 'Yaratish'}
                             </Button>

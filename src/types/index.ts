@@ -21,6 +21,7 @@ export interface product {
     sale_price_usd: number
     usd_rate: number
     count: number
+    created_at: string
 }
 
 export interface user {

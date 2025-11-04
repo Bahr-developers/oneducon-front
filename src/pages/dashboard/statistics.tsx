@@ -23,7 +23,7 @@ const Statistics = () => {
                 <div className="w-full border p-4 rounded-xl" key={el.summa}>
                     <h4>{el.name}</h4>
                     <div className="flex items-center gap-x-2 text-3xl font-medium mt-3">
-                        {el.summa}
+                        {el.summa.toLocaleString()}
                         <p className='text-2xl'>{el.valyute}</p>
                     </div>
                 </div>

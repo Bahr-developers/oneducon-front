@@ -7,66 +7,169 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input";
 import { product } from "@/types";
-import { Eye } from "lucide-react";
+import { Eye, Package, Tag, DollarSign, Hash, Layers, Scale, Calendar } from "lucide-react";
 import { useState } from "react";
-
-const fields = [
-    { name: "name", label: "Nomi", type: "text" },
-    { name: "count", label: "Miqdori", type: "number" },
-    { name: "remine_count", label: "Eslatma miqdori", type: "number" },
-    { name: "tan_narx_uzb", label: "Tan narxi (UZS)", type: "number" },
-    { name: "tan_narx_dol", label: "Tan narxi ($)", type: "number" },
-    { name: "saler_narxi", label: "Sotuv narxi ($)", type: "number" },
-    { name: "category", label: "Category", type: "string" },
-    { name: "unit", label: "Birliklar", type: "string" },
-];
 
 const ProductView = (product: product) => {
     const [open, setOpen] = useState(false);
-    const [data] = useState<Record<string, string | number>>({
-        name: product.name,
-        count: product.quantity,
-        remine_count: product.reminder_quantity,
-        tan_narx_uzb: product.cost_price,
-        tan_narx_dol: product.cost_price_usd,
-        saler_narxi: product.sale_price,
-        category: product.category.name,
-        unit: product.unit.name,
-    });
+
+    const formatNumber = (num: number) => {
+        return new Intl.NumberFormat().format(num);
+    };
+
+    const formatCurrency = (amount: number, currency: string = 'UZS') => {
+        if (currency === 'UZS') {
+            return `${formatNumber(amount)} so'm`;
+        }
+        return `$${formatNumber(amount)}`;
+    };
+
+    const getStatusColor = (quantity: number) => {
+        if (quantity > 0) return "text-green-600 bg-green-50 border-green-200";
+        if (quantity === 0) return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return "text-red-600 bg-red-50 border-red-200";
+    };
+
+    const getStatusText = (quantity: number) => {
+        if (quantity > 0) return "Omborda mavjud";
+        if (quantity === 0) return "Qolmagan";
+        return "Kam qolgan";
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="flex items-center gap-x-2 cursor-pointer">
-                <Eye size={20} /></DialogTrigger>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Eye className="h-4 w-4" />
+                </Button>
+            </DialogTrigger>
 
-            <DialogContent w="md:w-[900px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto scroll-hidden">
                 <DialogHeader>
-                    <DialogTitle>Edit product</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2 text-xl">
+                        <Package className="h-5 w-5" />
+                        Mahsulot ma'lumotlari
+                    </DialogTitle>
                     <DialogDescription>
+                        Batafsil ma'lumotlarni ko'rib chiqing
                     </DialogDescription>
-                    <div className="grid grid-cols-2 gap-4">
-                        {fields.map((field) => (
-                            <label key={field.name} className="w-full flex flex-col space-y-1">
-                                <span>{field.label}</span>
-                                <Input
-                                    disabled
-                                    name={field.name}
-                                    type={field.type}
-                                    className="h-12"
-                                    placeholder={`${field.label} kiriting...`}
-                                    value={data[field.name]}
-                                />
-                            </label>
-                        ))}
-                    </div>
-
-                    <div className="w-full flex justify-end items-center gap-x-3 mt-3">
-                        <Button onClick={() => setOpen(false)}>Yopish</Button>
-                    </div>
-
                 </DialogHeader>
+
+                <div className="space-y-6">
+                    <div className="rounded-lg p-4 border shadow">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold ">{product.name}</h3>
+                                <p className="text-sm">ID: {product.id}</p>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(product.quantity)}`}>
+                                {getStatusText(product.quantity)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Information Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Quantity Information */}
+                        <div className="space-y-3">
+                            <h4 className="font-medium  flex items-center gap-2">
+                                <Layers className="h-4 w-4" />
+                                Miqdor ma'lumotlari
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center p-3 rounded-lg border">
+                                    <span className="text-sm">Jami miqdor:</span>
+                                    <span className={`font-semibold ${product.quantity < 0 ? 'text-red-600' : ''}`}>
+                                        {formatNumber(product.quantity)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 rounded-lg border">
+                                    <span className="text-sm">Eslatma miqdori:</span>
+                                    <span className="font-semibold ">
+                                        {formatNumber(product.reminder_quantity)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Category & Unit */}
+                        <div className="space-y-3">
+                            <h4 className="font-medium  flex items-center gap-2">
+                                <Tag className="h-4 w-4" />
+                                Kategoriya va o'lchov
+                            </h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center p-3 rounded-lg border">
+                                    <span className="text-sm">Kategoriya:</span>
+                                    <span className="font-semibold ">{product.category.name}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 rounded-lg border">
+                                    <span className="text-sm">O'lchov birligi:</span>
+                                    <span className="font-semibold  flex items-center gap-1">
+                                        <Scale className="h-3 w-3" />
+                                        {product.unit.name}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Price Information */}
+                    <div className="space-y-3">
+                        <h4 className="font-medium  flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            Narx ma'lumotlari
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="p-3 rounded-lg border border-blue-100">
+                                <div className="text-sm text-blue-600">Tan narxi (UZS)</div>
+                                <div className="text-lg font-bold text-blue-900">
+                                    {formatCurrency(product.cost_price, 'UZS')}
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-lg border border-green-100">
+                                <div className="text-sm text-green-600">Tan narxi ($)</div>
+                                <div className="text-lg font-bold text-green-900">
+                                    {formatCurrency(product.cost_price_usd, 'USD')}
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-lg border border-purple-100">
+                                <div className="text-sm text-purple-600">Sotuv narxi ($)</div>
+                                <div className="text-lg font-bold text-purple-900">
+                                    {formatCurrency(product.sale_price, 'USD')}
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-lg border border-orange-100">
+                                <div className="text-sm text-orange-600">USD kursi</div>
+                                <div className="text-lg font-bold text-orange-900">
+                                    {formatNumber(product.usd_rate)} so'm
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Additional Information */}
+                    <div className="space-y-3">
+                        <h4 className="font-medium  flex items-center gap-2">
+                            <Hash className="h-4 w-4" />
+                            Qo'shimcha ma'lumotlar
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="flex gap-x-6 items-center p-3 rounded-lg">
+                                <span className="text-sm">Do'kon ID:</span>
+                                <span className="font-medium ">#{product.store_id}</span>
+                            </div>
+                            <div className="flex justify-around items-center p-3 rounded-lg">
+                                <span className="text-sm">Yaratilgan:</span>
+                                <span className="font-medium flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {product?.created_at ? new Date(product?.created_at).toLocaleDateString() : 'Noma\'lum'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     );

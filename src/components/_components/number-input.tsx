@@ -1,59 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import { Input } from "../ui/input";
 
 interface NumberInputProps {
     value?: number;
     onChange?: (data: { formatted: string; raw: number }) => void;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     placeholder?: string;
     className?: string;
-    readonly?: boolean
+    readonly?: boolean;
 }
 
-const NumberInput: React.FC<NumberInputProps> = ({
-    value = 0,
-    onChange,
-    placeholder = "Raqam kiriting",
-    className = "",
-    readonly = false
-}) => {
-    const [inputValue, setInputValue] = useState("");
+const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
+    ({ value, onChange, placeholder = "Raqam kiriting", className = "", readonly = false, onKeyDown }, ref) => {
+        const [inputValue, setInputValue] = useState("");
 
-    // tashqi qiymat (prop orqali) o'zgarsa formatlab yangilaydi
-    useEffect(() => {
-        if (value !== undefined && !isNaN(value)) {
-            const formatted = value
-                .toString()
-                .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        useEffect(() => {
+            if (value !== undefined && value !== 0 && !isNaN(value)) {
+                const formatted = value
+                    .toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                setInputValue(formatted);
+            } else {
+                setInputValue("");
+            }
+        }, [value]);
+
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const raw = e.target.value.replace(/\D/g, "");
+            const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
             setInputValue(formatted);
-        }
-    }, [value]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const raw = e.target.value.replace(/\D/g, ""); // faqat raqamlar
-        const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " "); // 1 000, 10 000
+            if (onChange) {
+                onChange({
+                    formatted,
+                    raw: raw === "" ? 0 : Number(raw),
+                });
+            }
+        };
 
-        setInputValue(formatted);
+        return (
+            <Input
+                ref={ref} 
+                type="text"
+                inputMode="numeric"
+                value={inputValue}
+                readOnly={readonly}
+                onChange={handleChange}
+                onKeyDown={onKeyDown}
+                placeholder={placeholder}
+                autoComplete="off"
+                className={`border rounded-lg px-3 py-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring transition-all ${className}`}
+            />
+        );
+    }
+);
 
-        if (onChange) {
-            onChange({
-                formatted,
-                raw: raw === "" ? 0 : Number(raw), // ⚠️ bu joy muhim
-            });
-        }
-    };
-
-
-    return (
-        <Input
-            type="text"
-            inputMode="numeric"
-            defaultValue={inputValue}
-            readOnly={readonly}
-            onChange={handleChange}
-            placeholder={placeholder}
-            className={`border rounded-lg px-3 py-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring transition-all ${className}`}
-        />
-    );
-};
-
+NumberInput.displayName = "NumberInput";
 export default NumberInput;
