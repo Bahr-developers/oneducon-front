@@ -133,6 +133,7 @@ const Productstable = () => {
                                 <TableHead className="font-semibold">Nomi</TableHead>
                                 <TableHead className="font-semibold">Tan narxi (uzs)</TableHead>
                                 <TableHead className="font-semibold">Sotuv narxi (uzs)</TableHead>
+                                <TableHead className="font-semibold">USD kursi</TableHead>
                                 <TableHead className="font-semibold">Miqdori</TableHead>
                                 <TableHead className="font-semibold">O'lchov</TableHead>
                                 <TableHead className="text-center font-semibold">Amallar</TableHead>
@@ -158,6 +159,9 @@ const Productstable = () => {
                                         </TableCell>
                                         <TableCell className="font-medium">
                                             {el.sale_price?.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {el.usd_rate?.toLocaleString()}
                                         </TableCell>
                                         <TableCell>
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${el.quantity > 10

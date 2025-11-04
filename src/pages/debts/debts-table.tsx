@@ -7,18 +7,16 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Search, Send } from "lucide-react";
-import EditDepts from "./edit-dabts";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, } from "@tanstack/react-query";
 import { debtsUtils } from "@/utils/debts";
-import { debt } from "@/types";
+import { sotreDebts } from "@/types";
 import { Button } from "@/components/ui/button";
 import PaginationContyent from "@/components/_components/pagination";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/components/functions/useDebounce";
-import toast from "react-hot-toast";
-import { DeleteConfirm } from "@/components/ui/alerd-dialog";
 import DebtsTableSkeleton from "./debts-skeleton";
+import { Link } from "react-router-dom";
 
 const DebtsTable = () => {
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
@@ -30,7 +28,8 @@ const DebtsTable = () => {
         queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
-    const queryClient = useQueryClient()
+    // const queryClient = useQueryClient()
+    console.log(debts);
 
     const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
 
@@ -39,16 +38,16 @@ const DebtsTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = debts?.data || []
-    const deleteMutation = useMutation({
-        mutationFn: debtsUtils.deleteDebts,
-        onSuccess: () => {
-            toast.success("O'chirildi")
-            queryClient.invalidateQueries({ queryKey: ['debts_all'] })
-        },
-        onError: () => {
-            toast.error("Xatolik mavjud")
-        }
-    })
+    // const deleteMutation = useMutation({
+    //     mutationFn: debtsUtils.deleteDebts,
+    //     onSuccess: () => {
+    //         toast.success("O'chirildi")
+    //         queryClient.invalidateQueries({ queryKey: ['debts_all'] })
+    //     },
+    //     onError: () => {
+    //         toast.error("Xatolik mavjud")
+    //     }
+    // })
 
     return (
         <div className="mt-5">
@@ -79,33 +78,33 @@ const DebtsTable = () => {
                         <DebtsTableSkeleton />
                     ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
-                            {paginated?.map((el: debt) => (
+                            {paginated?.map((el: sotreDebts, idx: number) => (
                                 <TableRow
-                                    key={el.id}
+                                    key={idx}
                                     className="hover:bg-muted/50 transition-colors"
                                 >
                                     <TableCell className="font-medium">
-                                        #{el.order_id}
+                                        #{el.user_id}
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
-                                        {el.client.name}
+                                        <Link to={`/debts-histore/${el.user_id}`}>{el.client.name}</Link>
                                     </TableCell>
                                     <TableCell className="text-foreground">
                                         +{el.client.phone}
                                     </TableCell>
                                     <TableCell className="font-medium text-red-400">
-                                        {el?.price.toLocaleString()} so'm
+                                        {el?.total_amount?.toLocaleString()} so'm
                                     </TableCell>
                                     <TableCell className="font-medium text-center">
                                         10.11.2025
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
-                                        {el.reminder}
+                                        {/* {el.reminder} */}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex gap-x-3 justify-center items-center">
-                                            <EditDepts {...el} />
-                                            <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} />
+                                            {/* <EditDepts {...el} /> */}
+                                            {/* <DeleteConfirm onConfirm={() => deleteMutation.mutate(el.id || '1')} /> */}
                                             <Button
                                                 variant="outline"
                                                 size="sm"

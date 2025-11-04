@@ -47,6 +47,13 @@ export interface debt {
     order: order
 }
 
+export interface sotreDebts {
+    client: client,
+    user_id: number,
+    debts: debt[]
+    total_amount: number
+}
+
 export interface client {
     id: string;
     name: string;
