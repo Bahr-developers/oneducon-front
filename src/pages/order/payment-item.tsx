@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import NumberInput from "@/components/_components/number-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAppDispatch } from "@/store/hooks";
-import { updatePayment, removePayment } from "@/store/order-slice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { updatePayment, removePayment, selectTotals } from "@/store/order-slice";
 
 interface PaymentType {
     id: string;
@@ -21,7 +21,8 @@ interface PaymentItemProps {
 
 const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
     const dispatch = useAppDispatch();
-
+    const totals = useAppSelector(selectTotals);
+    const { totalItemsAmount } = totals;
     const handleSelectType = (typeId: string) => {
         dispatch(updatePayment({
             index,
@@ -71,7 +72,7 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
                 <label className="w-60">
                     <span className="my-1 block">Summasi *</span>
                     <NumberInput
-                        value={payment.price}
+                        value={totalItemsAmount}
                         onChange={handlePriceChange}
                         placeholder="0"
                         className="w-full h-12"

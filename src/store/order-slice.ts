@@ -49,7 +49,6 @@ const orderSlice = createSlice({
     name: "order",
     initialState,
     reducers: {
-        // ======== ITEMS ========
         addOrderItem: (state) => {
             state.items.push({
                 id: crypto.randomUUID(),

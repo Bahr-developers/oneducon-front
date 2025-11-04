@@ -24,6 +24,7 @@ function useNavItems(): NavItem[] {
     return [
         { labelKey: "Asosiy panel", href: "/dashboard", icon: House },
         { labelKey: "Buyurtma berish", href: "/dashboard/orders", icon: BadgePlus },
+        // { labelKey: "Buyurtma new", href: "/dashboard/order-new", icon: BadgePlus },
         { labelKey: "Sotuvlar", href: "/dashboard/selers", icon: BadgeDollarSign },
         { labelKey: "Qarzlar", href: "/dashboard/debts", icon: Kanban },
         { labelKey: "Mahsulotlar", href: "/dashboard/products", icon: PackageSearch },

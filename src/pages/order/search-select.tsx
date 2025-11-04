@@ -22,6 +22,7 @@ export default function SearchSelect({ onSelect, selectedProduct }: SearchSelect
 
 
 
+
     const filtered = products?.data?.filter((p: product) =>
         p.name.toLowerCase().includes(query.toLowerCase())
     );

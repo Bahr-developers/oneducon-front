@@ -18,6 +18,7 @@ const NotificationsPage = lazy(() => import("./pages/notifications"));
 const OrderProducts = lazy(() => import("./pages/order"));
 const DashboardMain = lazy(() => import("./pages/dashboard"));
 const StoreProfile = lazy(() => import("./pages/profile"));
+const OrderNew = lazy(() => import('./pages/order-new'))
 
 
 const LoadingSpinner = () => (
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <OrderProducts />
+              </SuspenseWrapper>
+            )
+          },
+          {
+            path: "dashboard/order-new",
+            element: (
+              <SuspenseWrapper>
+                <OrderNew />
               </SuspenseWrapper>
             )
           },
