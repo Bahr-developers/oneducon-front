@@ -1,8 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import FullPageOverlay from "@/components/ui/full-screen";
 import { Input } from "@/components/ui/input";
-import NumberInput from "@/components/_components/number-input";
 import {
     Select,
     SelectContent,
@@ -10,14 +9,44 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { productUtils } from "@/utils/products";
-import toast from "react-hot-toast";
-import { AxiosError } from "axios";
-import { categoryUtils } from "@/utils/categories";
-import { unitUtils } from "@/utils/units";
-import { categoryType } from "@/types";
-import { DollarSign, TrendingUp } from "lucide-react";
+import { DollarSign, TrendingUp, X } from "lucide-react";
+
+// Mock data for demo
+const mockCategories = [
+    { id: "1", name: "Elektronika" },
+    { id: "2", name: "Kiyim" },
+    { id: "3", name: "Oziq-ovqat" }
+];
+
+const mockUnits = [
+    { id: "1", name: "dona" },
+    { id: "2", name: "kg" },
+    { id: "3", name: "litr" }
+];
+
+// Simple NumberInput component for formatting large numbers
+const NumberInput = ({ value, onChange, placeholder, className, readonly }: any) => {
+    const formatNumber = (num: number) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = e.target.value.replace(/\s/g, "");
+        const numValue = parseFloat(rawValue) || 0;
+        onChange({ raw: numValue, formatted: formatNumber(numValue) });
+    };
+
+    return (
+        <Input
+            type="text"
+            value={value ? formatNumber(value) : ""}
+            onChange={handleChange}
+            placeholder={placeholder}
+            className={className}
+            readOnly={readonly}
+        />
+    );
+};
 
 interface ProductFormData {
     name: string;
@@ -34,97 +63,21 @@ interface ProductFormData {
 const ProductCreate = () => {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState<Partial<ProductFormData>>({});
+    const [usdRate, setUsdRate] = useState(12500);
+    const [isEditingRate, setIsEditingRate] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([]);
-    const storeId = localStorage.getItem('storeId') || '1';
-    const queryClient = useQueryClient();
-    const usdRate = Number(localStorage.getItem('usd_rate')) || 12500;
 
-    const createProducts = useMutation({
-        mutationFn: productUtils.postProduct,
-        onSuccess: (response) => {
-            toast.success(response.message || 'Mahsulot muvaffaqiyatli yaratildi');
-            queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] });
-            setOpen(false);
-            setData({});
-        },
-        onError: (err) => {
-            const error = err as AxiosError<{ message: string }>;
-            toast.error(error?.response?.data?.message || 'Xatolik yuz berdi!');
-        }
-    });
+    const handleEnter = (e: React.KeyboardEvent, idx: number) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
 
-    const { data: categories, isLoading: categoriesLoading } = useQuery({
-        queryKey: ['get_all_categories'],
-        queryFn: categoryUtils.getCategory
-    });
-
-    const { data: units, isLoading: unitsLoading } = useQuery({
-        queryKey: ['get_all_units'],
-        queryFn: unitUtils.getUnit
-    });
-
-    // Auto-convert UZS to USD when tan_narx_uzb changes
-    useEffect(() => {
-        if (data.tan_narx_uzb && usdRate) {
-            const usdValue = data.tan_narx_uzb / usdRate;
-            setData(prev => ({
-                ...prev,
-                tan_narx_dol: Math.round(usdValue * 100) / 100 // 2 decimal places
-            }));
+            const next = inputRefs.current[idx + 1];
+            if (next) {
+                next.focus();
+            }
         }
-    }, [data.tan_narx_uzb, usdRate]);
-
-    // Auto-convert UZS to USD when saler_narxi changes
-    useEffect(() => {
-        if (data.saler_narxi && usdRate) {
-            const usdValue = data.saler_narxi / usdRate;
-            setData(prev => ({
-                ...prev,
-                saler_narxi_dol: Math.round(usdValue * 100) / 100
-            }));
-        }
-    }, [data.saler_narxi, usdRate]);
-
-    const onHandleSubmit = () => {
-        // Validation
-        if (!data.name?.trim()) {
-            toast.error('Mahsulot nomini kiriting');
-            return;
-        }
-        if (!data.count || data.count <= 0) {
-            toast.error('Miqdorni kiriting');
-            return;
-        }
-        if (!data.tan_narx_uzb || data.tan_narx_uzb <= 0) {
-            toast.error('Tan narxini kiriting');
-            return;
-        }
-        if (!data.saler_narxi || data.saler_narxi <= 0) {
-            toast.error('Sotuv narxini kiriting');
-            return;
-        }
-        if (!data.unitId) {
-            toast.error('O\'lchov birligini tanlang');
-            return;
-        }
-        if (!data.categoryId) {
-            toast.error('Kategoriyani tanlang');
-            return;
-        }
-
-        createProducts.mutate({
-            category_id: +data.categoryId,
-            cost_price: data.tan_narx_uzb,
-            cost_price_usd: data.tan_narx_dol || 0,
-            name: data.name,
-            quantity: data.count,
-            reminder_quantity: data.remine_count || 0,
-            sale_price: data.saler_narxi,
-            sale_price_usd: data.saler_narxi_dol || 0,
-            unit_id: +data.unitId,
-            store_id: +storeId,
-            usd_rate: usdRate
-        });
     };
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,18 +94,103 @@ const ProductCreate = () => {
         }));
     };
 
-    const handleEnter = (e: React.KeyboardEvent, idx: number) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const next = inputRefs.current[idx + 1];
-            if (next) {
-                if (next instanceof HTMLButtonElement) {
-                    next.click();
-                } else {
-                    next.focus();
-                }
-            }
+    const handleCostPriceUZS = (value: number) => {
+        setData(prev => ({
+            ...prev,
+            tan_narx_uzb: value,
+            tan_narx_dol: usdRate > 0 ? Math.round((value / usdRate) * 100) / 100 : 0
+        }));
+    };
+
+    const handleCostPriceUSD = (value: number) => {
+        setData(prev => ({
+            ...prev,
+            tan_narx_dol: value,
+            tan_narx_uzb: Math.round(value * usdRate)
+        }));
+    };
+
+    const handleSalePriceUZS = (value: number) => {
+        setData(prev => ({
+            ...prev,
+            saler_narxi: value,
+            saler_narxi_dol: usdRate > 0 ? Math.round((value / usdRate) * 100) / 100 : 0
+        }));
+    };
+
+    const handleSalePriceUSD = (value: number) => {
+        setData(prev => ({
+            ...prev,
+            saler_narxi_dol: value,
+            saler_narxi: Math.round(value * usdRate)
+        }));
+    };
+
+    const handleUsdRateChange = (value: number) => {
+        setUsdRate(value);
+
+        setData(prev => ({
+            ...prev,
+            tan_narx_dol: prev.tan_narx_uzb && value > 0
+                ? Math.round((prev.tan_narx_uzb / value) * 100) / 100
+                : prev.tan_narx_dol || 0,
+            saler_narxi_dol: prev.saler_narxi && value > 0
+                ? Math.round((prev.saler_narxi / value) * 100) / 100
+                : prev.saler_narxi_dol || 0
+        }));
+    };
+
+    const onHandleSubmit = async () => {
+        if (!data.name?.trim()) {
+            alert('Mahsulot nomini kiriting');
+            return;
         }
+        if (!data.count || data.count <= 0) {
+            alert('Miqdorni kiriting');
+            return;
+        }
+        if (!data.tan_narx_uzb || data.tan_narx_uzb <= 0) {
+            alert('Tan narxini kiriting');
+            return;
+        }
+        if (!data.saler_narxi || data.saler_narxi <= 0) {
+            alert('Sotuv narxini kiriting');
+            return;
+        }
+        if (!data.unitId) {
+            alert("O'lchov birligini tanlang");
+            return;
+        }
+        if (!data.categoryId) {
+            alert('Kategoriyani tanlang');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Simulate API call
+        const productData = {
+            category_id: +data.categoryId,
+            cost_price: data.tan_narx_uzb,
+            cost_price_usd: data.tan_narx_dol || 0,
+            name: data.name,
+            quantity: data.count,
+            reminder_quantity: data.remine_count || 0,
+            sale_price: data.saler_narxi,
+            sale_price_usd: data.saler_narxi_dol || 0,
+            unit_id: +data.unitId,
+            store_id: 1,
+            usd_rate: usdRate
+        };
+
+        console.log('Sending to server:', productData);
+
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        alert('Mahsulot muvaffaqiyatli yaratildi!');
+        setIsSubmitting(false);
+        handleReset();
     };
 
     const handleReset = () => {
@@ -160,269 +198,294 @@ const ProductCreate = () => {
         setOpen(false);
     };
 
-    return (
-        <div>
+    if (!open) {
+        return (
             <Button
                 onClick={() => setOpen(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
                 size="lg"
             >
-                <TrendingUp size={18} />
+                <TrendingUp size={18} className="mr-2" />
                 Yangi mahsulot
             </Button>
+        );
+    }
 
-            <FullPageOverlay open={open} onOpenChange={setOpen}>
-                <FullPageOverlay.Content title="Mahsulot yaratish">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full overflow-hidden p-1">
-                        {/* Mahsulot nomi */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                Mahsulot nomi <span className="text-red-500">*</span>
-                            </span>
-                            <Input
-                                ref={el => { inputRefs.current[0] = el }}
-                                autoFocus
-                                name="name"
-                                type="text"
-                                className="h-12"
-                                placeholder="Masalan: Samsung Galaxy S24"
-                                value={data.name || ""}
-                                onChange={handleTextChange}
-                                onKeyDown={(e) => handleEnter(e, 0)}
-                            />
-                        </label>
+    return (
+        <div className="fixed inset-0 z-50 bg-white dark:bg-neutral-900">
+            <div className="min-h-screen p-6">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-semibold">Mahsulot yaratish</h2>
+                        <button
+                            onClick={() => setOpen(false)}
+                            className="p-2 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
 
-                        {/* Miqdori */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                Miqdori <span className="text-red-500">*</span>
-                            </span>
-                            <NumberInput
-                                value={data.count || 0}
-                                onChange={({ raw }) => handleNumberChange('count', raw)}
-                                placeholder="Masalan: 100"
-                                className="h-12"
-                            />
-                            <Input
-                                ref={el => { inputRefs.current[1] = el }}
-                                type="text"
-                                className="sr-only"
-                                onKeyDown={(e) => handleEnter(e, 1)}
-                            />
-                        </label>
-
-                        {/* Eslatma miqdori */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">Eslatma miqdori</span>
-                            <NumberInput
-                                value={data.remine_count || 0}
-                                onChange={({ raw }) => handleNumberChange('remine_count', raw)}
-                                placeholder="Masalan: 10"
-                                className="h-12"
-                            />
-                            <Input
-                                ref={el => { inputRefs.current[3] = el }}
-                                type="text"
-                                className="sr-only"
-                                onKeyDown={(e) => handleEnter(e, 2)}
-                            />
-                        </label>
-
-                        {/* USD Rate (readonly) */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium flex items-center gap-2">
-                                <DollarSign size={16} />
-                                USD kursi
-                            </span>
-                            <NumberInput
-                                value={usdRate}
-                                readonly
-                                className="h-12 bg-muted cursor-not-allowed"
-                            />
-                        </label>
-
-                        {/* Tan narxi UZS */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                Tan narxi (UZS) <span className="text-red-500">*</span>
-                            </span>
-                            <NumberInput
-                                value={data.tan_narx_uzb || 0}
-                                onChange={({ raw }) => handleNumberChange('tan_narx_uzb', raw)}
-                                placeholder="Masalan: 5 000 000"
-                                className="h-12"
-                            />
-                            <input
-                                ref={el => { inputRefs.current[4] = el }}
-                                type="text"
-                                className="sr-only"
-                                onKeyDown={(e) => handleEnter(e, 3)}
-                            />
-                        </label>
-
-                        {/* Tan narxi USD (auto-calculated) */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium flex items-center gap-2">
-                                Tan narxi ($)
-                                <span className="text-xs text-muted-foreground">(Avtomatik)</span>
-                            </span>
-                            <div className="relative">
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                            {/* Mahsulot nomi */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    Mahsulot nomi <span className="text-red-500">*</span>
+                                </span>
                                 <Input
+                                    ref={el => { inputRefs.current[0] = el }}
+                                    autoFocus
+                                    name="name"
                                     type="text"
-                                    className="h-12 bg-muted/50 cursor-default"
-                                    value={data.tan_narx_dol ? `$ ${data.tan_narx_dol.toFixed(2)}` : '$ 0.00'}
-                                    readOnly
+                                    className="h-12"
+                                    placeholder="Masalan: Samsung Galaxy S24"
+                                    value={data.name || ""}
+                                    onChange={handleTextChange}
+                                    onKeyDown={(e) => handleEnter(e, 0)}
                                 />
-                                <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                            </div>
-                        </label>
+                            </label>
 
-                        {/* Sotuv narxi UZS */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                Sotuv narxi (UZS) <span className="text-red-500">*</span>
-                            </span>
-                            <NumberInput
-                                value={data.saler_narxi || 0}
-                                onChange={({ raw }) => handleNumberChange('saler_narxi', raw)}
-                                placeholder="Masalan: 6 000 000"
-                                className="h-12"
-                            />
-                            <input
-                                ref={el => { inputRefs.current[5] = el }}
-                                type="text"
-                                className="sr-only"
-                                onKeyDown={(e) => handleEnter(e, 4)}
-                            />
-                        </label>
-
-                        {/* Sotuv narxi USD (auto-calculated) */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium flex items-center gap-2">
-                                Sotuv narxi ($)
-                                <span className="text-xs text-muted-foreground">(Avtomatik)</span>
-                            </span>
-                            <div className="relative">
+                            {/* Miqdori */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    Miqdori <span className="text-red-500">*</span>
+                                </span>
+                                <NumberInput
+                                    value={data.count || 0}
+                                    onChange={({ raw }: any) => handleNumberChange('count', raw)}
+                                    placeholder="Masalan: 100"
+                                    className="h-12"
+                                />
                                 <Input
+                                    ref={el => { inputRefs.current[1] = el }}
                                     type="text"
-                                    className="h-12 bg-muted/50 cursor-default"
-                                    value={data.saler_narxi_dol ? `$ ${data.saler_narxi_dol.toFixed(2)}` : '$ 0.00'}
-                                    readOnly
+                                    className="sr-only"
+                                    onKeyDown={(e) => handleEnter(e, 1)}
+                                    tabIndex={-1}
                                 />
-                                <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                            </div>
-                        </label>
+                            </label>
 
-                        {/* O'lchov birligi */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                O'lchov birligi <span className="text-red-500">*</span>
-                            </span>
-                            <Select
-                                value={data.unitId}
-                                onValueChange={(val) => {
-                                    setData(prev => ({ ...prev, unitId: val }));
-                                    // Focus next element after selection
-                                    setTimeout(() => {
-                                        const next = inputRefs.current[6];
-                                        if (next && next instanceof HTMLButtonElement) {
-                                            next.click();
-                                        }
-                                    }, 100);
-                                }}
-                            >
-                                <SelectTrigger
-                                    ref={el => { inputRefs.current[5] = el }}
-                                    className="w-full h-12"
-                                    onKeyDown={(e) => handleEnter(e, 5)}
-                                >
-                                    <SelectValue placeholder="Birlik tanlang..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {unitsLoading ? (
-                                        <div className="p-2 text-sm text-muted-foreground">Yuklanmoqda...</div>
-                                    ) : (
-                                        units?.data?.map((el: categoryType) => (
-                                            <SelectItem key={el.id} value={el.id}>
-                                                {el.name}
-                                            </SelectItem>
-                                        ))
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </label>
+                            {/* Eslatma miqdori */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">Eslatma miqdori</span>
+                                <NumberInput
+                                    value={data.remine_count || 0}
+                                    onChange={({ raw }: any) => handleNumberChange('remine_count', raw)}
+                                    placeholder="Masalan: 10"
+                                    className="h-12"
+                                />
+                                <Input
+                                    ref={el => { inputRefs.current[2] = el }}
+                                    type="text"
+                                    className="sr-only"
+                                    onKeyDown={(e) => handleEnter(e, 2)}
+                                    tabIndex={-1}
+                                />
+                            </label>
 
-                        {/* Kategoriya */}
-                        <label className="w-full flex flex-col space-y-2">
-                            <span className="text-sm font-medium">
-                                Kategoriya <span className="text-red-500">*</span>
-                            </span>
-                            <Select
-                                value={data.categoryId}
-                                onValueChange={(val) => {
-                                    setData(prev => ({ ...prev, categoryId: val }));
-                                    // Focus submit button after selection
-                                    setTimeout(() => {
-                                        const submitBtn = inputRefs.current[7];
-                                        if (submitBtn) {
-                                            submitBtn.focus();
-                                        }
-                                    }, 100);
-                                }}
-                            >
-                                <SelectTrigger
+                            {/* USD Rate */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium flex items-center gap-2">
+                                    <DollarSign size={16} />
+                                    USD kursi
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditingRate(!isEditingRate)}
+                                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                    >
+                                        {isEditingRate ? 'Saqlash' : "O'zgartirish"}
+                                    </button>
+                                </span>
+                                <NumberInput
+                                    value={usdRate}
+                                    onChange={({ raw }: any) => handleUsdRateChange(raw)}
+                                    className={`h-12 ${!isEditingRate ? 'bg-muted cursor-not-allowed' : ''}`}
+                                    readonly={!isEditingRate}
+                                />
+                                <Input
+                                    ref={el => { inputRefs.current[3] = el }}
+                                    type="text"
+                                    className="sr-only"
+                                    onKeyDown={(e) => handleEnter(e, 3)}
+                                    tabIndex={-1}
+                                />
+                            </label>
+
+                            {/* Tan narxi UZS */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    Tan narxi (UZS) <span className="text-red-500">*</span>
+                                </span>
+                                <NumberInput
+                                    value={data.tan_narx_uzb || 0}
+                                    onChange={({ raw }: any) => handleCostPriceUZS(raw)}
+                                    placeholder="Masalan: 5 000 000"
+                                    className="h-12"
+                                />
+                                <Input
+                                    ref={el => { inputRefs.current[4] = el }}
+                                    type="text"
+                                    className="sr-only"
+                                    onKeyDown={(e) => handleEnter(e, 4)}
+                                    tabIndex={-1}
+                                />
+                            </label>
+
+                            {/* Tan narxi USD */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium flex items-center gap-2">
+                                    <DollarSign size={16} />
+                                    Tan narxi ($)
+                                </span>
+                                <div className="relative">
+                                    <Input
+                                        ref={el => { inputRefs.current[5] = el }}
+                                        type="number"
+                                        step="0.01"
+                                        className="h-12 pr-10"
+                                        placeholder="Masalan: 400"
+                                        value={data.tan_narx_dol || ""}
+                                        onChange={(e) => handleCostPriceUSD(parseFloat(e.target.value) || 0)}
+                                        onKeyDown={(e) => handleEnter(e, 5)}
+                                    />
+                                    <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={18} />
+                                </div>
+                            </label>
+
+                            {/* Sotuv narxi UZS */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    Sotuv narxi (UZS) <span className="text-red-500">*</span>
+                                </span>
+                                <NumberInput
+                                    value={data.saler_narxi || 0}
+                                    onChange={({ raw }: any) => handleSalePriceUZS(raw)}
+                                    placeholder="Masalan: 6 000 000"
+                                    className="h-12"
+                                />
+                                <Input
                                     ref={el => { inputRefs.current[6] = el }}
-                                    className="w-full h-12"
+                                    type="text"
+                                    className="sr-only"
                                     onKeyDown={(e) => handleEnter(e, 6)}
+                                    tabIndex={-1}
+                                />
+                            </label>
+
+                            {/* Sotuv narxi USD */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium flex items-center gap-2">
+                                    <DollarSign size={16} />
+                                    Sotuv narxi ($)
+                                </span>
+                                <div className="relative">
+                                    <Input
+                                        ref={el => { inputRefs.current[7] = el }}
+                                        type="number"
+                                        step="0.01"
+                                        className="h-12 pr-10"
+                                        placeholder="Masalan: 480"
+                                        value={data.saler_narxi_dol || ""}
+                                        onChange={(e) => handleSalePriceUSD(parseFloat(e.target.value) || 0)}
+                                        onKeyDown={(e) => handleEnter(e, 7)}
+                                    />
+                                    <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={18} />
+                                </div>
+                            </label>
+
+                            {/* O'lchov birligi */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    O'lchov birligi <span className="text-red-500">*</span>
+                                </span>
+                                <Select
+                                    value={data.unitId}
+                                    onValueChange={(val) => {
+                                        setData(prev => ({ ...prev, unitId: val }));
+                                        setTimeout(() => inputRefs.current[9]?.focus(), 100);
+                                    }}
                                 >
-                                    <SelectValue placeholder="Kategoriya tanlang..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {categoriesLoading ? (
-                                        <div className="p-2 text-sm text-muted-foreground">Yuklanmoqda...</div>
-                                    ) : (
-                                        categories?.data?.map((el: categoryType) => (
+                                    <SelectTrigger
+                                        ref={el => { inputRefs.current[8] = el }}
+                                        className="w-full h-12"
+                                        onKeyDown={(e) => handleEnter(e, 8)}
+                                    >
+                                        <SelectValue placeholder="Birlik tanlang..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {mockUnits.map((el) => (
                                             <SelectItem key={el.id} value={el.id}>
                                                 {el.name}
                                             </SelectItem>
-                                        ))
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </label>
-                    </div>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </label>
 
-                    {/* Info Box */}
-                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <p className="text-sm text-blue-800 dark:text-blue-200">
-                            <strong>Eslatma:</strong> USD narxlari avtomatik hisoblanadi.
-                            Joriy kurs: <span className="font-mono">{usdRate.toLocaleString()} so'm</span>
-                        </p>
-                    </div>
+                            {/* Kategoriya */}
+                            <label className="w-full flex flex-col space-y-2">
+                                <span className="text-sm font-medium">
+                                    Kategoriya <span className="text-red-500">*</span>
+                                </span>
+                                <Select
+                                    value={data.categoryId}
+                                    onValueChange={(val) => {
+                                        setData(prev => ({ ...prev, categoryId: val }));
+                                        setTimeout(() => inputRefs.current[10]?.focus(), 100);
+                                    }}
+                                >
+                                    <SelectTrigger
+                                        ref={el => { inputRefs.current[9] = el }}
+                                        className="w-full h-12"
+                                        onKeyDown={(e) => handleEnter(e, 9)}
+                                    >
+                                        <SelectValue placeholder="Kategoriya tanlang..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {mockCategories.map((el) => (
+                                            <SelectItem key={el.id} value={el.id}>
+                                                {el.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </label>
+                        </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-3 mt-6">
-                        <Button
-                            ref={el => { inputRefs.current[7] = el }}
-                            onClick={onHandleSubmit}
-                            disabled={createProducts.isPending}
-                            size="lg"
-                            className="flex-1"
-                        >
-                            {createProducts.isPending ? 'Yuklanmoqda...' : 'Yaratish'}
-                        </Button>
-                        <Button
-                            onClick={handleReset}
-                            variant="outline"
-                            size="lg"
-                            className="flex-1"
-                            disabled={createProducts.isPending}
-                        >
-                            Bekor qilish
-                        </Button>
+                        {/* Info Box */}
+                        <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Eslatma:</strong> UZS va USD narxlari bir-biriga bog'langan.
+                                Qaysi birida yozsangiz ham, ikkinchisi avtomatik hisoblanadi.
+                                <br />
+                                Joriy kurs: <span className="font-mono font-semibold">{usdRate.toLocaleString()} so'm</span>
+                            </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-3">
+                            <Button
+                                ref={el => { inputRefs.current[10] = el }}
+                                onClick={onHandleSubmit}
+                                disabled={isSubmitting}
+                                size="lg"
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                {isSubmitting ? 'Yuklanmoqda...' : 'Yaratish'}
+                            </Button>
+                            <Button
+                                onClick={handleReset}
+                                variant="outline"
+                                size="lg"
+                                className="flex-1"
+                                disabled={isSubmitting}
+                            >
+                                Bekor qilish
+                            </Button>
+                        </div>
                     </div>
-                </FullPageOverlay.Content>
-            </FullPageOverlay>
+                </div>
+            </div>
         </div>
     );
 };
