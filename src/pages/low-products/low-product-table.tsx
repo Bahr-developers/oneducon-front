@@ -59,8 +59,9 @@ const LowProductTable = () => {
                     <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                         <TableHead className="w-[60px] font-semibold">№</TableHead>
                         <TableHead className="font-semibold">Nomi</TableHead>
-                        <TableHead className="font-semibold">Tan narxi</TableHead>
-                        <TableHead className="font-semibold">Sotuv narxi</TableHead>
+                        <TableHead className="font-semibold">Tan narxi (uzs)</TableHead>
+                        <TableHead className="font-semibold">Sotuv narxi (uzs)</TableHead>
+                        <TableHead className="font-semibold">USD kursi</TableHead>
                         <TableHead className="font-semibold">Miqdori</TableHead>
                         <TableHead className="font-semibold">O'lchov</TableHead>
                         <TableHead className="text-center font-semibold">Amallar</TableHead>
@@ -85,7 +86,10 @@ const LowProductTable = () => {
                                     {el.cost_price?.toLocaleString()} so'm
                                 </TableCell>
                                 <TableCell className="font-medium">
-                                    25,000 so'm
+                                    {el.sale_price.toLocaleString()}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                    {el.usd_rate?.toLocaleString()}
                                 </TableCell>
                                 <TableCell>
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${el.quantity > 10
@@ -102,7 +106,7 @@ const LowProductTable = () => {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex gap-x-4 justify-center  items-center">
-                                        <EditProsucts {...el} />
+                                        <EditProsucts product={el} />
                                         <ProductView {...el} />
                                     </div>
                                 </TableCell>

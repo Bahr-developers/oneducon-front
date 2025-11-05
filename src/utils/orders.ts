@@ -48,7 +48,7 @@ export const orderUtils = {
             ...order,
             items: order.items.map(item => ({
                 ...item,
-                discount: item.discount > 0 ? item.discount : 1, // discount musbat bo‘lsin
+                discount: item.discount > 0 ? item.discount : 0, // discount musbat bo‘lsin
             })),
             payments: order.payments.map(p => ({
                 ...p,

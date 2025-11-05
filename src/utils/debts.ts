@@ -23,6 +23,10 @@ export const debtsUtils = {
         const { data } = await customAxios.get(`debts?page=${page}&limit=${limit}&search=${search}`)
         return data
     },
+    getDebtByClientId: async (id: string) => {
+        const { data } = await customAxios.get(`debts/by-client/${id}`)
+        return data
+    },
     getDebtsAll: async () => {
         const { data } = await customAxios.get(`debts`)
         return data

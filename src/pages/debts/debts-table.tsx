@@ -22,15 +22,11 @@ const DebtsTable = () => {
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [search, setSearch] = useState('');
-
     const debouncedSearch = useDebounce(search)
     const { data: debts, isLoading } = useQuery({
         queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
         queryFn: async () => await debtsUtils.getDebts({ limit: postsPerPage, page: currentPage, search: debouncedSearch })
     })
-    // const queryClient = useQueryClient()
-    console.log(debts);
-
     const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage));
 
     useEffect(() => {
@@ -38,16 +34,7 @@ const DebtsTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = debts?.data || []
-    // const deleteMutation = useMutation({
-    //     mutationFn: debtsUtils.deleteDebts,
-    //     onSuccess: () => {
-    //         toast.success("O'chirildi")
-    //         queryClient.invalidateQueries({ queryKey: ['debts_all'] })
-    //     },
-    //     onError: () => {
-    //         toast.error("Xatolik mavjud")
-    //     }
-    // })
+
 
     return (
         <div className="mt-5">
@@ -69,9 +56,6 @@ const DebtsTable = () => {
                             <TableHead className="font-semibold">Mijoz</TableHead>
                             <TableHead className="font-semibold">Telefon raqam</TableHead>
                             <TableHead className="font-semibold">Umumiy narx</TableHead>
-                            <TableHead className="font-semibold">Qaytarish vaqti</TableHead>
-                            <TableHead className="font-semibold">Eslatma</TableHead>
-                            <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
                     </TableHeader>
                     {isLoading ? (
@@ -94,9 +78,6 @@ const DebtsTable = () => {
                                     </TableCell>
                                     <TableCell className="font-medium text-red-400">
                                         {el?.total_amount?.toLocaleString()} so'm
-                                    </TableCell>
-                                    <TableCell className="font-medium text-center">
-                                        10.11.2025
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {/* {el.reminder} */}

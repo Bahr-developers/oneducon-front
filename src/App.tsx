@@ -19,7 +19,7 @@ const OrderProducts = lazy(() => import("./pages/order"));
 const DashboardMain = lazy(() => import("./pages/dashboard"));
 const StoreProfile = lazy(() => import("./pages/profile"));
 const OrderNew = lazy(() => import('./pages/order-new'))
-const DebtsHistore = lazy(() => import('./pages/debts/debts-store'))
+const DebtsHistore = lazy(() => import('./pages/debts/debts-histore'))
 
 
 const LoadingSpinner = () => (
