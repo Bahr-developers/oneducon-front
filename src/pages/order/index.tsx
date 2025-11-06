@@ -34,6 +34,7 @@ export default function OrderProducts() {
     const debt = useAppSelector(selectDebt);
     const [returnTime, setReturnTime] = useState<Date | undefined>();
     const [selectedUser, setSelectedUser] = useState<user | null>(null);
+    const [reminder, setReminder] = useState("");
     const { data: paymentTypes } = useQuery({
         queryKey: ['get_payment'],
         queryFn: paymentUtils.getPayments,
@@ -52,6 +53,10 @@ export default function OrderProducts() {
         onSuccess: () => {
             toast.success('Order yaratildi ')
             dispatch(resetOrder());
+            setSelectedUser(null)
+            setReturnTime(undefined)
+            setReminder('')
+
         },
         onError: (err) => {
             const error = err as AxiosError<{ messages: string }>
@@ -87,6 +92,9 @@ export default function OrderProducts() {
 
     const handleReset = () => {
         dispatch(resetOrder());
+        setSelectedUser(null)
+        setReturnTime(undefined)
+        setReminder('')
     };
 
     return (
@@ -165,7 +173,10 @@ export default function OrderProducts() {
                     returnTime={returnTime}
                     setReturnTime={setReturnTime}
                     selectedUser={selectedUser}
-                    setSelectedUser={setSelectedUser} />
+                    setSelectedUser={setSelectedUser}
+                    reminder={reminder}
+                    setReminder={setReminder}
+                />
 
                 {hasDebt && (
                     <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">

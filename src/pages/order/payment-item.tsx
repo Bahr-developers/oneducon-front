@@ -43,7 +43,7 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
                 payment: { ...payment, price: remainingAmount },
             }));
         }
-    }, [payment.payment_type_id]);
+    }, [dispatch, index, payment, payment.payment_type_id, payments, totalItemsAmount]);
 
     const handleSelectType = (typeId: string) => {
         dispatch(updatePayment({
@@ -53,9 +53,20 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
     };
 
     const handlePriceChange = (val: { raw: number }) => {
+        // Boshqa to'lovlar yig'indisini hisoblash (joriy to'lovdan tashqari)
+        const otherPaymentsTotal = payments
+            .filter((_, i) => i !== index)
+            .reduce((sum, p) => sum + Number(p.price || 0), 0);
+
+        // Joriy to'lov uchun maksimal ruxsat etilgan summa
+        const maxAllowedPrice = Math.max(0, totalItemsAmount - otherPaymentsTotal);
+
+        // Kiritilgan summani cheklash
+        const newPrice = Math.min(val.raw, maxAllowedPrice);
+
         dispatch(updatePayment({
             index,
-            payment: { ...payment, price: val.raw },
+            payment: { ...payment, price: newPrice },
         }));
     };
 

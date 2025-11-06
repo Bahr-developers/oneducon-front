@@ -5,10 +5,10 @@ interface NumberInputProps {
     value?: number;
     onChange?: (data: { formatted: string; raw: number }) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
     placeholder?: string;
     className?: string;
     readonly?: boolean;
-    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
@@ -49,9 +49,9 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
                 readOnly={readonly}
                 onChange={handleChange}
                 onKeyDown={onKeyDown}
+                onFocus={onFocus}
                 placeholder={placeholder}
                 autoComplete="off"
-                onFocus={onFocus}
                 className={`border rounded-lg px-3 py-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring transition-all ${className}`}
             />
         );

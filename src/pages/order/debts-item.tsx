@@ -1,6 +1,6 @@
 import NumberInput from "@/components/_components/number-input";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectTotals, setDebt } from "@/store/order-slice";
 import { useTranslation } from "react-i18next";
@@ -18,16 +18,18 @@ interface DebtModalProps {
     setReturnTime: (date: Date | undefined) => void;
     selectedUser: user | null;
     setSelectedUser: (user: user | null) => void;
+    reminder: string
+    setReminder: (value: string) => void
 }
 
 
-const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedUser }: DebtModalProps) => {
+const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedUser, setReminder, reminder }: DebtModalProps) => {
     const dispatch = useAppDispatch();
     const totals = useAppSelector(selectTotals);
     const { i18n } = useTranslation()
     const { totalItemsAmount, totalPaidAmount, remainingDebt } = totals;
 
-    const [reminder, setReminder] = useState("");
+
     const updateDebt = useCallback(() => {
         if (open && remainingDebt > 0) {
             dispatch(setDebt({

@@ -121,8 +121,8 @@ const orderSlice = createSlice({
         },
 
         // ======== RESET ========
-        resetOrder: (state) => {
-            Object.assign(state, initialState);
+        resetOrder: () => {
+            return initialState;
         },
     },
 });
