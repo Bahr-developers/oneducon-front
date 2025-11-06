@@ -12,6 +12,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import EditCustomer from "./edit-cust";
 import toast from "react-hot-toast";
 import { DeleteConfirm } from "@/components/ui/alerd-dialog";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { useQueryParams } from "@/components/functions/query-params";
+import { useDebounce } from "@/components/functions/useDebounce";
+import PaginationContyent from "@/components/_components/pagination";
 
 const CustomerTableSkeleton = () => {
     return (
@@ -37,9 +43,30 @@ const CustomerTableSkeleton = () => {
 }
 
 const CustomeTable = () => {
+    const { updateURL, getParam } = useQueryParams();
+
+    const [postsPerPage, setPostsPerPage] = useState<number>(
+        () => parseInt(getParam('limit', '5'))
+    );
+    const [currentPage, setCurrentPage] = useState<number>(
+        () => parseInt(getParam('page', '1'))
+    );
+    const [searchQuery, setSearchQuery] = useState<string>(
+        () => getParam('search', '')
+    );
+
+    const debouncedSearch = useDebounce(searchQuery, 500);
+
+    useEffect(() => {
+        updateURL({
+            limit: postsPerPage,
+            page: currentPage,
+            search: debouncedSearch
+        });
+    }, [currentPage, debouncedSearch, postsPerPage, updateURL]);
     const { data: customers, isLoading } = useQuery({
-        queryKey: ['customers'],
-        queryFn: customerUtils.getCustomer
+        queryKey: ['customers', postsPerPage, currentPage, searchQuery],
+        queryFn: async () => await customerUtils.getCustomer({ limit: postsPerPage, page: currentPage, search: searchQuery })
     })
     const queryClient = useQueryClient()
 
@@ -57,6 +84,16 @@ const CustomeTable = () => {
 
     return (
         <div className="my-4">
+            <div className="relative w-full sm:w-[450px] mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Qidirish..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-12 pl-10 bg-background"
+                />
+            </div>
             <div className="border rounded-xl overflow-hidden bg-card">
                 <Table>
                     <TableHeader>
@@ -101,6 +138,16 @@ const CustomeTable = () => {
                     )}
                 </Table>
             </div>
+            <PaginationContyent
+                currentPage={currentPage}
+                setPostPerPage={(n) => {
+                    setPostsPerPage(n);
+                    setCurrentPage(1);
+                }}
+                postsPerPage={postsPerPage}
+                setCurrentPage={(n) => setCurrentPage(n)}
+                totalPosts={customers?.total || 0}
+            />
         </div>
     );
 };

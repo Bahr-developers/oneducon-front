@@ -71,7 +71,7 @@ const DebtsTable = () => {
                                         #{el.user_id}
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
-                                        <Link to={`/debts-histore/${el.user_id}`}>{el.client.name}</Link>
+                                        <Link to={`/debts-histore/${el.user_id}`} className="hover:text-blue-500 hover:underline transition-colors">{el.client.name}</Link>
                                     </TableCell>
                                     <TableCell className="text-foreground">
                                         +{el.client.phone}

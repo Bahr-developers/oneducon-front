@@ -6,11 +6,15 @@ export interface customerType {
     phone: string,
     store_id?: number
 }
-
+interface getParams {
+    limit: number,
+    page: number,
+    search?: string;
+}
 
 export const customerUtils = {
-    getCustomer: async () => {
-        const { data } = await customAxios.get('clients')
+    getCustomer: async ({ limit, page, search }: getParams) => {
+        const { data } = await customAxios.get(`clients?page=${page}&limit=${limit}&search=${search}`)
         return data
     },
     getCustomerById: async (id: string) => {
