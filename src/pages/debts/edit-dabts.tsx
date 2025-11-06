@@ -31,7 +31,7 @@ const EditDepts = (data: debt) => {
     const queryClient = useQueryClient()
     const { data: customers } = useQuery({
         queryKey: ['customers'],
-        queryFn: customerUtils.getCustomer
+        queryFn: customerUtils.getCustomerAll
     })
     const [returnTime, setReturnTime] = useState<Date | undefined>();
     const { i18n } = useTranslation()

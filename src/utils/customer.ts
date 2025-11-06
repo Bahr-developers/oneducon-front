@@ -17,6 +17,10 @@ export const customerUtils = {
         const { data } = await customAxios.get(`clients?page=${page}&limit=${limit}&search=${search}`)
         return data
     },
+    getCustomerAll: async () => {
+        const { data } = await customAxios.get(`clients`)
+        return data
+    },
     getCustomerById: async (id: string) => {
         const { data } = await customAxios.get(`clients/${id}`)
         return data

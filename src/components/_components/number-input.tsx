@@ -8,10 +8,11 @@ interface NumberInputProps {
     placeholder?: string;
     className?: string;
     readonly?: boolean;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
-    ({ value, onChange, placeholder = "Raqam kiriting", className = "", readonly = false, onKeyDown }, ref) => {
+    ({ value, onChange, placeholder = "Raqam kiriting", className = "", readonly = false, onKeyDown, onFocus }, ref) => {
         const [inputValue, setInputValue] = useState("");
 
         useEffect(() => {
@@ -41,7 +42,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 
         return (
             <Input
-                ref={ref} 
+                ref={ref}
                 type="text"
                 inputMode="numeric"
                 value={inputValue}
@@ -50,6 +51,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
                 onKeyDown={onKeyDown}
                 placeholder={placeholder}
                 autoComplete="off"
+                onFocus={onFocus}
                 className={`border rounded-lg px-3 py-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring transition-all ${className}`}
             />
         );

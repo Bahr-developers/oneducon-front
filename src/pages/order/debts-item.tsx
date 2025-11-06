@@ -48,7 +48,7 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
     };
     const { data: customers } = useQuery({
         queryKey: ['customers'],
-        queryFn: customerUtils.getCustomer
+        queryFn: customerUtils.getCustomerAll
     })
 
 

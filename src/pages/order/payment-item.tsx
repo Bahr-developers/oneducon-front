@@ -3,7 +3,8 @@ import { Trash2 } from "lucide-react";
 import NumberInput from "@/components/_components/number-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { updatePayment, removePayment, selectTotals } from "@/store/order-slice";
+import { updatePayment, removePayment, selectTotals, selectPayments } from "@/store/order-slice";
+import { useEffect, useRef } from "react";
 
 interface PaymentType {
     id: string;
@@ -22,7 +23,28 @@ interface PaymentItemProps {
 const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
     const dispatch = useAppDispatch();
     const totals = useAppSelector(selectTotals);
+    const payments = useAppSelector(selectPayments);
+    const inputRef = useRef<HTMLInputElement>(null);
     const { totalItemsAmount } = totals;
+
+    // To'lov turi tanlaganda automatic summa to'ldirish
+    useEffect(() => {
+        if (payment.payment_type_id && payment.price === 0) {
+            // Oldingi to'lovlar yig'indisini hisoblash
+            const previousPayments = payments
+                .slice(0, index)
+                .reduce((sum, p) => sum + Number(p.price || 0), 0);
+
+            // Qolgan summani hisoblash
+            const remainingAmount = Math.max(0, totalItemsAmount - previousPayments);
+
+            dispatch(updatePayment({
+                index,
+                payment: { ...payment, price: remainingAmount },
+            }));
+        }
+    }, [payment.payment_type_id]);
+
     const handleSelectType = (typeId: string) => {
         dispatch(updatePayment({
             index,
@@ -39,6 +61,11 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
 
     const handleRemove = () => {
         dispatch(removePayment(index));
+    };
+
+    // Focus bo'lganda barcha raqamlarni select qilish
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        e.target.select();
     };
 
     return (
@@ -72,10 +99,12 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
                 <label className="w-60">
                     <span className="my-1 block">Summasi *</span>
                     <NumberInput
-                        value={totalItemsAmount}
+                        ref={inputRef}
+                        value={payment.price}
                         onChange={handlePriceChange}
                         placeholder="0"
                         className="w-full h-12"
+                        onFocus={handleFocus}
                     />
                 </label>
             </div>

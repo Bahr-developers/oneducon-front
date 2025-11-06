@@ -4,24 +4,23 @@ import { productUtils } from "@/utils/products";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-
 interface SearchSelectProps {
     onSelect: (product: product) => void;
     selectedProduct?: product | null;
+    disabledProductIds?: number[];
 }
 
-export default function SearchSelect({ onSelect, selectedProduct }: SearchSelectProps) {
+export default function SearchSelect({
+    onSelect,
+    disabledProductIds = []
+}: SearchSelectProps) {
     const [query, setQuery] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    console.log(selectedProduct);
 
     const { data: products } = useQuery({
         queryKey: ['get_all_procusts'],
         queryFn: productUtils.getProductsAlls
-    })
-
-
-
+    });
 
     const filtered = products?.data?.filter((p: product) =>
         p.name.toLowerCase().includes(query.toLowerCase())
@@ -31,6 +30,10 @@ export default function SearchSelect({ onSelect, selectedProduct }: SearchSelect
         onSelect(product);
         setQuery(product.name);
         setIsOpen(false);
+    };
+
+    const isProductDisabled = (productId: number) => {
+        return disabledProductIds.includes(productId);
     };
 
     return (
@@ -49,18 +52,25 @@ export default function SearchSelect({ onSelect, selectedProduct }: SearchSelect
             {isOpen && query && (
                 <ul className="absolute z-10 w-full bg-white border dark:text-black transition-colors rounded-lg mt-1 max-h-40 overflow-y-auto">
                     {filtered?.length > 0 ? (
-                        filtered?.map((product: product) => (
-                            <li
-                                key={product.id}
-                                onClick={() => handleSelect(product)}
-                                className="px-3 py-2 hover:bg-[#e2e0e0c0] cursor-pointer transition-colors flex justify-between"
-                            >
-                                <span>{product.name}</span>
-                                <span className="text-gray-500 text-sm">
-                                    {product.cost_price.toLocaleString()} so‘m
-                                </span>
-                            </li>
-                        ))
+                        filtered?.map((product: product) => {
+                            const disabled = isProductDisabled(Number(product.id));
+                            return (
+                                <li
+                                    key={product.id}
+                                    onClick={() => !disabled && handleSelect(product)}
+                                    className={`px-3 py-2 cursor-pointer transition-colors flex justify-between ${disabled
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'hover:bg-[#e2e0e0c0]'
+                                        }`}
+                                >
+                                    <span>{product.name}</span>
+                                    <span className="text-gray-500 text-sm">
+                                        {product.cost_price.toLocaleString()} so'm
+                                        {disabled && ' (tanlangan)'}
+                                    </span>
+                                </li>
+                            );
+                        })
                     ) : (
                         <li className="px-3 py-2 text-gray-500">Hech narsa topilmadi</li>
                     )}

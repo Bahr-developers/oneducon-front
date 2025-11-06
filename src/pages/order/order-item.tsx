@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import SearchSelect from "./search-select";
 import NumberInput from "@/components/_components/number-input";
-import { useAppDispatch } from "@/store/hooks";
-import { updateOrderItem, removeOrderItem, setProductToItem } from "@/store/order-slice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { updateOrderItem, removeOrderItem, setProductToItem, selectOrderItems } from "@/store/order-slice";
 import { product } from "@/types";
 
 interface OrderItemProps {
@@ -19,7 +19,12 @@ interface OrderItemProps {
 
 const OrderItem = ({ item }: OrderItemProps) => {
     const dispatch = useAppDispatch();
-    console.log(item, 'aaaaaaaaa');
+    const allItems = useAppSelector(selectOrderItems);
+
+    // Tanlangan mahsulotlar ID larini olish (joriy itemdan tashqari)
+    const disabledProductIds = allItems
+        .filter(i => i.id !== item.id && i.product !== null)
+        .map(i => Number(i.product?.id));
 
     const handleSelectProduct = (product: product) => {
         dispatch(setProductToItem({ id: item.id, product }));
@@ -40,7 +45,6 @@ const OrderItem = ({ item }: OrderItemProps) => {
     };
 
     const handleDiscountChange = (val: { raw: number }) => {
-        // Yangi: To'g'ri tekshirish
         const discountValue = val?.raw ?? 0;
         const numericDiscount = Number(discountValue);
 
@@ -68,7 +72,11 @@ const OrderItem = ({ item }: OrderItemProps) => {
 
             <label>
                 <span className="my-1 block">Mahsulot *</span>
-                <SearchSelect onSelect={handleSelectProduct} selectedProduct={item.product} />
+                <SearchSelect
+                    onSelect={handleSelectProduct}
+                    selectedProduct={item.product}
+                    disabledProductIds={disabledProductIds}
+                />
             </label>
 
             <label className="w-52">
