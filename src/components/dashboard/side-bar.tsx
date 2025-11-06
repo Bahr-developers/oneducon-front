@@ -11,7 +11,8 @@ import {
     Kanban,
     ScanBarcode,
     Users,
-    Combine
+    Combine,
+    Expand
 }
     from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
@@ -26,6 +27,7 @@ function useNavItems(): NavItem[] {
         { labelKey: "Buyurtma berish", href: "/dashboard/orders", icon: BadgePlus },
         // { labelKey: "Buyurtma new", href: "/dashboard/order-new", icon: BadgePlus },
         { labelKey: "Sotuvlar", href: "/dashboard/selers", icon: BadgeDollarSign },
+        { labelKey: "Xarajatlar", href: "/dashboard/expenses", icon: Expand },
         { labelKey: "Qarzlar", href: "/dashboard/debts", icon: Kanban },
         { labelKey: "Mahsulotlar", href: "/dashboard/products", icon: PackageSearch },
         { labelKey: "Kam qolgan mahsulotlar", href: "/dashboard/low-products", icon: ScanBarcode },

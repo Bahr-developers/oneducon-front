@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import {
     Eye, Edit, Save, X, User, Phone, Calendar,
-    Package, ShoppingCart, AlertCircle, Search, Loader2
+    Package, ShoppingCart, AlertCircle, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +22,6 @@ const DebtsPage = () => {
     const { id: userId } = useParams();
     const [editingDebt, setEditingDebt] = useState<string | null>(null);
     const [editedDebts, setEditedDebts] = useState<Record<string, any>>({});
-    const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
     const { data: debtsClient, isLoading } = useQuery({
@@ -109,12 +108,12 @@ const DebtsPage = () => {
     }
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
+        <div className="mx-auto p-6 space-y-6 w-full">
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Qarzlar Boshqaruvi</h1>
-                    <p className="text-gray-600 mt-2">
+                    <h1 className="text-3xl font-bold">Qarzlar Boshqaruvi</h1>
+                    <p className="mt-2">
                         {filteredDebts?.length || 0} ta qarz
                     </p>
                 </div>
@@ -125,38 +124,20 @@ const DebtsPage = () => {
                     <div className="text-sm text-gray-600">Umumiy qarz summasi</div>
                 </div>
             </div>
+            <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="p-2 border  rounded-md dark:bg-[#373636] ml-auto"
+            >
+                <option value="ALL">Barcha holatlar</option>
+                <option value="UNPAID">To'lanmagan</option>
+                <option value="PAID">To'langan</option>
+                <option value="PARTIAL">Qisman to'langan</option>
+            </select>
 
-            {/* Filtrlar */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                                placeholder="Mijoz nomi bo'yicha qidirish..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="p-2 border rounded-md"
-                        >
-                            <option value="ALL">Barcha holatlar</option>
-                            <option value="UNPAID">To'lanmagan</option>
-                            <option value="PAID">To'langan</option>
-                            <option value="PARTIAL">Qisman to'langan</option>
-                        </select>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Mijoz ma'lumotlari */}
             {clientData && (
                 <Card className="border-l-4 border-l-blue-500 shadow-sm">
-                    <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+                    <CardHeader className="bg-gradient-to-r  border-b">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="p-2 bg-blue-100 rounded-lg">
