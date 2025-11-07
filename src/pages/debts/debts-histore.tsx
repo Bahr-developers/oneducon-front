@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { debtsUtils } from "@/utils/debts";
 
+
 import {
-    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
-} from "@/components/ui/dialog";
-import {
-    Eye, Edit, Save, X, User, Phone, Calendar,
+    Edit, Save, X, User, Phone, Calendar,
     Package, ShoppingCart, AlertCircle, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -18,13 +16,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import NumberInput from "@/components/_components/number-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import OrderDetailsDialog from "./view-debts";
+import toast from "react-hot-toast";
 
 const DebtsPage = () => {
     const { id: userId } = useParams();
     const [editingDebt, setEditingDebt] = useState<string | null>(null);
     const [editedDebts, setEditedDebts] = useState<Record<string, any>>({});
     const [statusFilter, setStatusFilter] = useState("ALL");
-
+    const queryClient = useQueryClient()
     const { data: debtsClient, isLoading } = useQuery({
         queryKey: ["get_all_client_debts", userId],
         queryFn: () => debtsUtils.getDebtByClientId(userId as string),
@@ -50,6 +50,19 @@ const DebtsPage = () => {
 
     console.log(debtsData);
 
+    const updateDebts = useMutation({
+        mutationFn: debtsUtils.editDebts,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['get_all_client_debts'] })
+            toast.success('Qarz yangilandi ')
+            setEditingDebt(null);
+        },
+        onError: (err) => {
+            toast.error('Something went wrong!')
+            console.log(err);
+        }
+    })
+
     const handleEdit = (debtId: string) => {
         setEditingDebt(debtId);
         if (!editedDebts[debtId]) {
@@ -69,8 +82,13 @@ const DebtsPage = () => {
 
     const handleSave = (debtId: string) => {
         console.log("Saqlanmoqda:", debtId, editedDebts[debtId]);
-        setEditingDebt(null);
-        alert("Qarz ma'lumotlari muvaffaqiyatli yangilandi!");
+        updateDebts.mutate({
+            client_id: 1,
+            id: debtId,
+            price: editedDebts.price,
+            reminder: editedDebts.reminder,
+            return_time: ''
+        })
     };
 
     const handleCancel = (debtId: string) => {
@@ -124,7 +142,7 @@ const DebtsPage = () => {
                 </div>
             </div>
             <Select onValueChange={(value) => setStatusFilter(value)}>
-                <SelectTrigger className="max-w-[180px]" >
+                <SelectTrigger className="max-w-[180px]">
                     <SelectValue placeholder={statusFilter} />
                 </SelectTrigger>
                 <SelectContent>
@@ -312,75 +330,6 @@ const DebtsPage = () => {
     );
 };
 
-/* 🔹 Buyurtma tafsilotlari dialogi */
-const OrderDetailsDialog = ({
-    debt,
-    formatCurrency,
-}: {
-    debt: any;
-    formatCurrency: (n: number) => string;
-}) => {
-    const [open, setOpen] = useState(false);
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button size="sm" variant="outline">
-                    <Eye className="h-4 w-4" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh]">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        Buyurtma #{debt?.order?.order_number}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Mijoz: {debt?.client?.name} | Telefon: {debt?.client?.phone}
-                    </DialogDescription>
-                </DialogHeader>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Buyurtma summasi</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {formatCurrency(debt?.order?.total_price || 0)}
-                    </CardContent>
-                </Card>
-
-                {/* Buyurtma mahsulotlari */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Buyurtma mahsulotlari</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Mahsulot</TableHead>
-                                    <TableHead>Soni</TableHead>
-                                    <TableHead>Narxi</TableHead>
-                                    <TableHead>Chegirma</TableHead>
-                                    <TableHead>Jami</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {debt?.order?.order_items?.map((item: any) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>{item.product?.name}</TableCell>
-                                        <TableCell>{item.count}</TableCell>
-                                        <TableCell>{formatCurrency(item.price)}</TableCell>
-                                        <TableCell>{item.discount}</TableCell>
-                                        <TableCell>{formatCurrency(item.count * item.price)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </DialogContent>
-        </Dialog>
-    );
-};
 
 export default DebtsPage;
