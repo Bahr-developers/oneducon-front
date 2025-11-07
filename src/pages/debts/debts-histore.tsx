@@ -13,16 +13,17 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import NumberInput from "@/components/_components/number-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DebtsPage = () => {
     const { id: userId } = useParams();
     const [editingDebt, setEditingDebt] = useState<string | null>(null);
     const [editedDebts, setEditedDebts] = useState<Record<string, any>>({});
-    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [statusFilter, setStatusFilter] = useState("ALL");
 
     const { data: debtsClient, isLoading } = useQuery({
         queryKey: ["get_all_client_debts", userId],
@@ -30,7 +31,6 @@ const DebtsPage = () => {
         enabled: !!userId,
     });
 
-    // Ma'lumotlarni to'g'ri olish
     const debtsData = debtsClient?.data;
     const clientData = debtsData?.client;
     const debtsArray = debtsData?.debts ?? [];
@@ -89,7 +89,6 @@ const DebtsPage = () => {
         }));
     };
 
-    // 🔍 Filtrlash - endi faqat bitta mijoz bo'lgani uchun soddalashtirildi
     const filteredDebts = debtsArray?.filter((debt: any) =>
         statusFilter === "ALL" || debt?.status === statusFilter
     ) ?? [];
@@ -124,16 +123,17 @@ const DebtsPage = () => {
                     <div className="text-sm text-gray-600">Umumiy qarz summasi</div>
                 </div>
             </div>
-            <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="p-2 border  rounded-md dark:bg-[#373636] ml-auto"
-            >
-                <option value="ALL">Barcha holatlar</option>
-                <option value="UNPAID">To'lanmagan</option>
-                <option value="PAID">To'langan</option>
-                <option value="PARTIAL">Qisman to'langan</option>
-            </select>
+            <Select onValueChange={(value) => setStatusFilter(value)}>
+                <SelectTrigger className="max-w-[180px]" >
+                    <SelectValue placeholder={statusFilter} />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="ALL">Barcha holatlar</SelectItem>
+                    <SelectItem value="UNPAID">To'lanmagan</SelectItem>
+                    <SelectItem value="PAID">To'langan</SelectItem>
+                    <SelectItem value="PARTIAL">Qisman to'langan</SelectItem>
+                </SelectContent>
+            </Select>
 
             {clientData && (
                 <Card className="border-l-4 border-l-blue-500 shadow-sm">
@@ -207,11 +207,11 @@ const DebtsPage = () => {
                                                 <TableCell>{formatCurrency(debt?.order?.total_price || 0)}</TableCell>
                                                 <TableCell>
                                                     {editingDebt === debt?.id ? (
-                                                        <Input
-                                                            type="number"
+                                                        <NumberInput
+                                                            // type="number"
                                                             value={editedDebts[debt?.id]?.price ?? debt?.price ?? ""}
                                                             onChange={(e) =>
-                                                                handleChange(debt?.id, "price", Number(e.target.value))
+                                                                handleChange(debt?.id, "price", Number(e.raw))
                                                             }
                                                             className="w-32"
                                                         />
@@ -246,17 +246,18 @@ const DebtsPage = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     {editingDebt === debt?.id ? (
-                                                        <select
-                                                            value={editedDebts[debt?.id]?.status ?? debt?.status ?? "UNPAID"}
-                                                            onChange={(e) =>
-                                                                handleChange(debt?.id, "status", e.target.value)
-                                                            }
-                                                            className="p-2 border rounded-md text-sm"
-                                                        >
-                                                            <option value="UNPAID">To'lanmagan</option>
-                                                            <option value="PAID">To'langan</option>
-                                                            <option value="PARTIAL">Qisman to'langan</option>
-                                                        </select>
+                                                        <Select onValueChange={(e) =>
+                                                            handleChange(debt?.id, "status", e)
+                                                        } >
+                                                            <SelectTrigger className="w-[180px]">
+                                                                <SelectValue placeholder={editedDebts[debt?.id]?.status ?? debt?.status ?? "UNPAID"} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="UNPAID">To'lanmagan</SelectItem>
+                                                                <SelectItem value="PAID">To'langan</SelectItem>
+                                                                <SelectItem value="PARTIAL">Qisman to'langan</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
                                                     ) : (
                                                         getStatusBadge(debt?.status)
                                                     )}
