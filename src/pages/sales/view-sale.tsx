@@ -30,6 +30,10 @@ const ViewSale = (props: order) => {
     const totalItems = props.order_items?.reduce((sum, item) => sum + (item.count || item.quantity || 0), 0) || 0;
     const remainingDebt = props.total_price - totalPayments;
 
+
+    console.log(props);
+
+
     return (
         <Dialog>
             <DialogTrigger className="flex items-center gap-x-2 cursor-pointer hover:text-primary transition-colors p-2 rounded-md hover:bg-accent">
