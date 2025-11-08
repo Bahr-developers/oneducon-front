@@ -25,6 +25,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { user } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function OrderProducts() {
     const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ export default function OrderProducts() {
     const debt = useAppSelector(selectDebt);
     const [returnTime, setReturnTime] = useState<Date | undefined>();
     const [selectedUser, setSelectedUser] = useState<user | null>(null);
+    const [isChecked, setIsChecked] = useState(false)
     const [reminder, setReminder] = useState("");
     const { data: paymentTypes } = useQuery({
         queryKey: ['get_payment'],
@@ -111,7 +113,7 @@ export default function OrderProducts() {
                 type="single"
                 collapsible
                 defaultValue="products"
-                className="w-full px-5 my-5 rounded-lg border"
+                className="w-full px-5 my-5 rounded-lg border p-3 "
             >
                 <AccordionItem className="w-full" value="products">
                     <AccordionTrigger className="text-xl">
@@ -124,7 +126,7 @@ export default function OrderProducts() {
                             </p>
                         ) : (
                             items.map((item) => (
-                                <OrderItem key={item.id} item={item} />
+                                <OrderItem key={item.id} item={item} constPrice={isChecked} />
                             ))
                         )}
                         <Button
@@ -136,6 +138,16 @@ export default function OrderProducts() {
                         </Button>
                     </AccordionContent>
                 </AccordionItem>
+
+                {items?.length ? <label
+                    className="text-sm font-medium leading-none flex items-center gap-x-2 justify-end"
+                >
+                    <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={(checked) => setIsChecked(checked === true)}
+                    />
+                    <span> Tan narxi</span>
+                </label> : ''}
             </Accordion>
 
             {/* PAYMENTS SECTION */}

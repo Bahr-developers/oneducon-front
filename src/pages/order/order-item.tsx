@@ -15,11 +15,13 @@ interface OrderItemProps {
         discount: number;
         price: number;
     };
+    constPrice: boolean,
 }
 
-const OrderItem = ({ item }: OrderItemProps) => {
+const OrderItem = ({ item, constPrice }: OrderItemProps) => {
     const dispatch = useAppDispatch();
     const allItems = useAppSelector(selectOrderItems);
+    console.log(item, 'product selected');
 
     // Tanlangan mahsulotlar ID larini olish (joriy itemdan tashqari)
     const disabledProductIds = allItems
@@ -78,6 +80,26 @@ const OrderItem = ({ item }: OrderItemProps) => {
                     disabledProductIds={disabledProductIds}
                 />
             </label>
+            {constPrice && <>
+                <label className="w-52">
+                    <span className="my-1 block">Tan narxi(UZS)</span>
+                    <NumberInput
+                        className="w-full h-12"
+                        placeholder="0"
+                        value={item.product?.cost_price || 0}
+                        readonly={true}
+                    />
+                </label>
+                <label className="w-52">
+                    <span className="my-1 block">Tan narxi($)</span>
+                    <Input
+                        className="w-full h-12"
+                        placeholder="0"
+                        value={item.product?.cost_price_usd || 0}
+                        readOnly
+                    />
+                </label>
+            </>}
 
             <label className="w-52">
                 <span className="my-1 block">Sotuv narxi</span>
