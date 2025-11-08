@@ -87,7 +87,7 @@ const DebtsPage = () => {
             id: debtId,
             price: editedDebts.price,
             reminder: editedDebts.reminder,
-            return_time: ''
+            return_time: editedDebts?.return_time
         })
     };
 
@@ -282,7 +282,7 @@ const DebtsPage = () => {
                                                 </TableCell>
                                                 <TableCell className="text-sm text-gray-600">
                                                     <Calendar className="h-4 w-4 inline mr-1" />
-                                                    {new Date().toLocaleDateString("uz-UZ")}
+                                                    {debt?.return_time?.slice(0, 10)}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
