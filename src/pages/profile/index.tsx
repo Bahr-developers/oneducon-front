@@ -53,7 +53,6 @@ const StoreProfile = () => {
         enabled: !!storeId,
     });
 
-    console.log(storeData);
 
 
     // Ma'lumotlarni formga yuklash

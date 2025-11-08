@@ -57,7 +57,6 @@ const SalesTable = () => {
     })
 
 
-    console.log(sales);
 
 
     const totalPages = Math.max(1, Math.ceil((sales?.total || 1) / postsPerPage));

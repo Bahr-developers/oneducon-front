@@ -87,7 +87,6 @@ export default function OrderProducts() {
             debts: debt ? [debt] : [],
         };
 
-        console.log("Yuborilayotgan ma'lumotlar:", orderData);
 
         createOrder.mutate(orderData);
     };

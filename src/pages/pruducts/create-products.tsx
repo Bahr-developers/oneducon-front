@@ -78,7 +78,6 @@ const ProductCreate = () => {
         queryFn: unitUtils.getUnit
     })
     const products = productData?.data || []
-    console.log(products);
 
 
     const [isDuplicate, setIsDuplicate] = useState(false);
@@ -204,7 +203,6 @@ const ProductCreate = () => {
             usd_rate: usdRate
         };
 
-        console.log('Sending to server:', productData);
 
         createProduct.mutate(productData)
 

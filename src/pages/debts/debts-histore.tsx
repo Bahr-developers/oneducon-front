@@ -48,7 +48,6 @@ const DebtsPage = () => {
         return <Badge variant={config?.variant as any}>{config?.label}</Badge>;
     };
 
-    console.log(debtsData);
 
     const updateDebts = useMutation({
         mutationFn: debtsUtils.editDebts,
@@ -81,7 +80,6 @@ const DebtsPage = () => {
     };
 
     const handleSave = (debtId: string) => {
-        console.log("Saqlanmoqda:", debtId, editedDebts[debtId]);
         updateDebts.mutate({
             client_id: 1,
             id: debtId,

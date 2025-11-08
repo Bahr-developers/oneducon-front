@@ -59,8 +59,6 @@ export const orderUtils = {
                 return_time: d.return_time,
             })),
         }
-        console.log(order);
-
         const { data } = await customAxios.post('orders', formattedOrder)
         return data
     },

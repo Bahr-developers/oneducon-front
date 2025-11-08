@@ -93,3 +93,9 @@ export interface order {
     total_price: number;       // misolda 109
     created_at?: string;
 }
+
+export interface expensesType {
+    id: string,
+    name: string,
+    created_at: string
+}

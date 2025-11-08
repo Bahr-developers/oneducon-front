@@ -20,12 +20,17 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Plus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ExpensesTypeUtils } from '@/utils/expenses-type';
+import { expensesType } from '@/types';
+import NumberInput from '@/components/_components/number-input';
+import { expensesUtils } from '@/utils/expenses';
+import toast from 'react-hot-toast';
 
 interface ExpenseFormData {
     definition: string;
     price: number;
     expense_type_id: number;
-    store_id: number;
 }
 
 const ExpenseForm: React.FC = () => {
@@ -33,25 +38,48 @@ const ExpenseForm: React.FC = () => {
         definition: '',
         price: 0,
         expense_type_id: 0,
-        store_id: 0,
     });
 
-    const [open, setOpen] = useState(false)
+    const storeId = localStorage.getItem('storeId') || 1
 
-    const expenseTypes = [
-        { id: 1, name: 'Oziq-ovqat' },
-        { id: 2, name: 'Transport' },
-        { id: 3, name: 'Kommunal' },
-        { id: 4, name: 'Kiyim-kechak' },
-        { id: 5, name: "Sog'liqni saqlash" },
-        { id: 6, name: "O'yin-kulgi" },
-        { id: 7, name: 'Boshqa' },
-    ];
+    const [open, setOpen] = useState(false)
+    const queryClient = useQueryClient()
+    const { data: expenseTypeData } = useQuery({
+        queryKey: ['get_expensestype_data'],
+        queryFn: ExpensesTypeUtils.getExpensesType
+    })
+    const expenseTypes = expenseTypeData?.data
+
+    const { data: expensesData } = useQuery({
+        queryKey: ['get_expenses_data'],
+        queryFn: () => expensesUtils.getExpenses()
+    })
+
+
+    console.log(expensesData);
+
+    const createExpenses = useMutation({
+        mutationFn: expensesUtils.postExpenses,
+        onSuccess: () => {
+            setOpen(false)
+            queryClient.invalidateQueries({ queryKey: ['get_expenses_data'] })
+            toast.success("Xarajat qo'shildi")
+            setFormData({
+                definition: '',
+                price: 0,
+                expense_type_id: 0,
+            })
+        }
+    })
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Yangi xarajat:', formData);
-        // Bu yerda API ga so'rov yuboriladi
+        createExpenses.mutate({
+            definition: formData.definition,
+            expense_type_id: formData.expense_type_id,
+            price: formData.price,
+            store_id: +storeId
+        })
     };
 
     const handleInputChange = (field: keyof ExpenseFormData, value: string | number) => {
@@ -89,15 +117,10 @@ const ExpenseForm: React.FC = () => {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="price">Summa (UZS)</Label>
-                        <Input
-                            id="price"
-                            type="number"
+                        <NumberInput
                             placeholder="0"
-                            value={formData.price || ''}
-                            onChange={(e) => handleInputChange('price', Number(e.target.value))}
-                            min="0"
-                            step="1000"
-                            required
+                            value={formData.price}
+                            onChange={(e) => handleInputChange('price', Number(e.raw))}
                             className='h-12'
                         />
                     </div>
@@ -106,14 +129,13 @@ const ExpenseForm: React.FC = () => {
                     <div className="space-y-2">
                         <Label htmlFor="expense_type">Xarajat turi</Label>
                         <Select
-                            value={formData.expense_type_id.toString()}
                             onValueChange={(value) => handleInputChange('expense_type_id', Number(value))}
                         >
                             <SelectTrigger className='w-full'>
-                                <SelectValue placeholder="Xarajat turini tanlang" defaultValue={'Xarajat turini tanlang'} />
+                                <SelectValue placeholder="Xarajat turini tanlang" />
                             </SelectTrigger>
                             <SelectContent>
-                                {expenseTypes.map((type) => (
+                                {expenseTypes?.map((type: expensesType) => (
                                     <SelectItem key={type.id} value={type.id.toString()}>
                                         {type.name}
                                     </SelectItem>

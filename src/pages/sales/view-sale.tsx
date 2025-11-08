@@ -31,7 +31,6 @@ const ViewSale = (props: order) => {
     const remainingDebt = props.total_price - totalPayments;
 
 
-    console.log(props);
 
 
     return (
@@ -161,7 +160,6 @@ const ViewSale = (props: order) => {
                                     const price = item.price || 0;
                                     const discount = item.discount || 0;
                                     const itemTotal = quantity * price * (1 - discount / 100);
-                                    console.log(discount);
 
                                     return (
                                         <div
