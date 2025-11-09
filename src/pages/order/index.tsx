@@ -87,7 +87,6 @@ export default function OrderProducts() {
             debts: debt ? [debt] : [],
         };
 
-
         createOrder.mutate(orderData);
     };
 
