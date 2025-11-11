@@ -50,7 +50,6 @@ const chartConfig = {
         color: "var(--chart-5)",
     },
 } satisfies ChartConfig
-
 export function ChartPieLabelList() {
     return (
         <Card className="flex flex-col">
