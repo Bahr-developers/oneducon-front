@@ -29,12 +29,13 @@ interface OrderData {
 }
 interface getParams {
     limit: number,
-    page: number
+    page: number,
+    search?: string
 }
 
 export const orderUtils = {
-    getOrders: async ({ limit, page }: getParams) => {
-        const { data } = await customAxios.get(`orders?page=${page}&limit=${limit}`)
+    getOrders: async ({ limit, page, search }: getParams) => {
+        const { data } = await customAxios.get(`orders?page=${page}&limit=${limit}&search=${search}`)
         return data
     },
 

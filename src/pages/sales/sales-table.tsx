@@ -17,6 +17,8 @@ import { order } from "@/types";
 import PaginationContyent from "@/components/_components/pagination";
 import { useEffect, useState } from "react";
 import ViewSale from "./view-sale";
+import { useQueryParams } from "@/components/functions/query-params";
+import { useDebounce } from "@/components/functions/useDebounce";
 
 
 const SalesTableSkeleton = () => {
@@ -49,12 +51,30 @@ const SalesTableSkeleton = () => {
 }
 
 const SalesTable = () => {
-    const [postsPerPage, setPostsPerPage] = useState<number>(5);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const { updateURL, getParam } = useQueryParams();
+    const [postsPerPage, setPostsPerPage] = useState<number>(
+        () => parseInt(getParam('limit', '5'))
+    );
+    const [currentPage, setCurrentPage] = useState<number>(
+        () => parseInt(getParam('page', '1'))
+    );
+    const [searchQuery, setSearchQuery] = useState<string>(
+        () => getParam('search', '')
+    );
     const { data: sales, isLoading } = useQuery<{ data: order[], total: number }>({
-        queryKey: ['get_all_orders', currentPage, postsPerPage],
-        queryFn: async () => await orderUtils.getOrders({ limit: postsPerPage, page: currentPage })
+        queryKey: ['get_all_orders', currentPage, postsPerPage, searchQuery],
+        queryFn: async () => await orderUtils.getOrders({ limit: postsPerPage, page: currentPage, search: searchQuery })
     })
+
+    const debouncedSearch = useDebounce(searchQuery, 500);
+
+    useEffect(() => {
+        updateURL({
+            search: debouncedSearch,
+            page: currentPage.toString(),
+            limit: postsPerPage.toString(),
+        });
+    }, [debouncedSearch, currentPage, postsPerPage, updateURL]);
 
 
 
@@ -78,6 +98,8 @@ const SalesTable = () => {
                         type="search"
                         placeholder="Qidirish..."
                         className="pl-10 h-11 bg-background"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <FilterData />

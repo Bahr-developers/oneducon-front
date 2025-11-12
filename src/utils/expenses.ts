@@ -6,12 +6,23 @@ interface expensesType {
     price: number,
     expense_type_id: number,
     store_id: number
-    id?: string
+}
+
+interface editExpenses {
+    id: string
+    definition: string,
+    price: number,
+    expense_type_id: number,
+}
+
+interface propsRequest {
+    page: number,
+    limit: number
 }
 
 export const expensesUtils = {
-    getExpenses: async () => {
-        const { data } = await customAxios.get('expenses')
+    getExpenses: async ({ limit, page }: propsRequest) => {
+        const { data } = await customAxios.get(`expenses?page=${page}&limit=${limit}`)
         return data
     },
     getExpensesById: async (id: string) => {
@@ -22,8 +33,8 @@ export const expensesUtils = {
         const { data } = await customAxios.post('expenses', expensesData)
         return data
     },
-    editExpenses: async (expensesData: expensesType, id: string) => {
-        const { data } = await customAxios.patch(`expenses/${id}`, expensesData)
+    editExpenses: async ({ definition, expense_type_id, id, price }: editExpenses) => {
+        const { data } = await customAxios.patch(`expenses/${id}`, { definition, expense_type_id, price })
         return data
     },
     deleteExpenses: async (id: string) => {

@@ -99,3 +99,22 @@ export interface expensesType {
     name: string,
     created_at: string
 }
+
+// types/expense.ts
+export interface expenseType {
+    id: string;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface expense {
+    id: string;
+    definition: string;
+    price: number;
+    store_id: string;
+    expense_type_id: string;
+    created_at: string;
+    updated_at: string;
+    expense_type: expenseType;
+}

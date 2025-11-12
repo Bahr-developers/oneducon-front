@@ -12,12 +12,20 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2 } from "lucide-react"
 
-export function DeleteConfirm({ onConfirm }: { onConfirm: () => void }) {
-    
+
+interface deleteConfirmType {
+    onConfirm: () => void
+    title?: string,
+    variant?: 'outline' | 'ghost' | 'default'
+}
+
+export function DeleteConfirm({ onConfirm, title, variant = 'ghost' }: deleteConfirmType) {
+
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant={variant} size="sm" >
+                    {title}
                     <Trash2 className="h-5 w-5" />
                 </Button>
             </AlertDialogTrigger>

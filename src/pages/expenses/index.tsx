@@ -1,4 +1,5 @@
 import ExpenseForm from "./create-expenses";
+import ExpensesTable from "./expenses-table";
 
 const Expenses = () => {
     return (
@@ -7,7 +8,7 @@ const Expenses = () => {
                 <h2 className="text-xl font-medium">Xarajatlar</h2>
                 <ExpenseForm />
             </div>
-
+            <ExpensesTable />
         </div>
     );
 };

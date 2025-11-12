@@ -50,13 +50,7 @@ const ExpenseForm: React.FC = () => {
     })
     const expenseTypes = expenseTypeData?.data
 
-    const { data: expensesData } = useQuery({
-        queryKey: ['get_expenses_data'],
-        queryFn: () => expensesUtils.getExpenses()
-    })
 
-
-    console.log(expensesData);
 
     const createExpenses = useMutation({
         mutationFn: expensesUtils.postExpenses,
