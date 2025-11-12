@@ -31,16 +31,16 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
         }
     })
     return (
-        <Card className="w-full max-w-2xl mx-auto hover:shadow-lg transition-all duration-300 border-l-4 py-5 border-l-blue-500">
+        <Card className="w-full max-w-2xl mx-auto hover:shadow-lg transition-all duration-300 border-l-4 py-5">
             <CardHeader className="">
                 <div className="flex justify-between items-start gap-2">
                     <div className="flex items-center gap-2">
-                        <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+                        <div className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
                             <Tag className="w-4 h-4" />
                             <span className='line-clamp-1 cursor-pointer' title={expense.expense_type.name}> {expense.expense_type.name}</span>
                         </div>
                     </div>
-                    <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-2xl font-bold">
                         {formatPrice(expense.price)}
                     </div>
                 </div>
@@ -48,14 +48,14 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
 
             <CardContent className="space-y-1 py-0">
                 <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Ta'rif:</h3>
-                    <p className="text-gray-600 bg-gray-50 p-3 rounded-lg border">
+                    <h3 className="font-semibold  mb-2">Ta'rif:</h3>
+                    <p className="p-3 rounded-lg border">
                         {expense.definition}
                     </p>
                 </div>
 
                 <div className="flex flex-col justify-between items-start gap-4">
-                    <div className="space-y-2 text-xs text-gray-500">
+                    <div className="space-y-2 text-xs">
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
                             <span>Yaratilgan: {formatDate(expense.created_at)}</span>

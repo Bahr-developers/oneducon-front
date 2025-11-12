@@ -73,10 +73,10 @@ const ExpensesTable = () => {
         <div className="w-full">
             <div className="w-full grid grid-cols-3 gap-2">
                 {isLoading ? <>
-                    <Skeleton className="w-[350px] h-[250px]" />
-                    <Skeleton className="h-[250px] w-[350px]" />
-                    <Skeleton className="h-[250px] w-[350px]" />
-                    <Skeleton className="h-[250px] w-[350px]" />
+                    <Skeleton className="w-[350px] h-[250px] rounded-lg" />
+                    <Skeleton className="h-[250px] w-[350px] rounded-lg" />
+                    <Skeleton className="h-[250px] w-[350px] rounded-lg" />
+                    <Skeleton className="h-[250px] w-[350px] rounded-lg" />
                 </> :
                     expenses?.map((expense) => (
                         <ExpenseCard
