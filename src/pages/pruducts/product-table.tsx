@@ -16,7 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import EditProsucts from "./edit-products";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productUtils } from "@/utils/products";
 import { categoryType, product } from "@/types";
 import { categoryUtils } from "@/utils/categories";
@@ -27,12 +27,14 @@ import PaginationContyent from "@/components/_components/pagination";
 import { useDebounce } from "@/components/functions/useDebounce";
 import { useQueryParams } from "@/components/functions/query-params";
 import ProductsTableSkeleton from "./product-skeleton";
+import toast from "react-hot-toast";
+import { DeleteConfirm } from "@/components/ui/alerd-dialog";
 
 
 
 const Productstable = () => {
     const { updateURL, getParam } = useQueryParams();
-
+    const queryClient = useQueryClient()
     // URL dan qiymatlarni olish
     const [postsPerPage, setPostsPerPage] = useState<number>(
         () => parseInt(getParam('limit', '5'))
@@ -76,11 +78,6 @@ const Productstable = () => {
         queryFn: categoryUtils.getCategory
     })
 
-
-
-
-
-
     const totalPages = Math.max(1, Math.ceil((procusts?.total || 1) / postsPerPage));
 
     useEffect(() => {
@@ -88,6 +85,18 @@ const Productstable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = procusts?.data
+
+    const deleteProduct = useMutation({
+        mutationFn: productUtils.deleteProduct,
+        onSuccess: () => {
+            toast.success("Mahsulot o'chirildi.")
+            queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] })
+        },
+        onError: (err) => {
+            console.log(err);
+        }
+    })
+
 
     return (
         <div className="mt-4">
@@ -180,6 +189,7 @@ const Productstable = () => {
                                             <div className="flex gap-x-4 justify-center  items-center">
                                                 <EditProsucts product={el} />
                                                 <ProductView {...el} />
+                                                <DeleteConfirm onConfirm={() => deleteProduct.mutate(el.id)} />
                                             </div>
                                         </TableCell>
                                     </TableRow>

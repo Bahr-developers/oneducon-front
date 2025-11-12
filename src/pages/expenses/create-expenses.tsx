@@ -51,7 +51,6 @@ const ExpenseForm: React.FC = () => {
     const expenseTypes = expenseTypeData?.data
 
 
-
     const createExpenses = useMutation({
         mutationFn: expensesUtils.postExpenses,
         onSuccess: () => {
@@ -74,6 +73,7 @@ const ExpenseForm: React.FC = () => {
             price: formData.price,
             store_id: +storeId
         })
+
     };
 
     const handleInputChange = (field: keyof ExpenseFormData, value: string | number) => {
@@ -82,6 +82,8 @@ const ExpenseForm: React.FC = () => {
             [field]: value,
         }));
     };
+
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -143,8 +145,8 @@ const ExpenseForm: React.FC = () => {
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Bekor qilish
                         </Button>
-                        <Button type="submit">
-                            Xarajatni qo'shish
+                        <Button disabled={createExpenses.isPending} type="submit">
+                            {createExpenses.isPending ? "Xarajatni ..." : "Xarajatni qo'shish"}
                         </Button>
                     </div>
                 </form>

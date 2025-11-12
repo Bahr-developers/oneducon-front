@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { DollarSign, TrendingUp, X } from "lucide-react";
 import NumberInput from "@/components/_components/number-input";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productUtils } from "@/utils/products";
 import { categoryType, product } from "@/types";
 import { categoryUtils } from "@/utils/categories";
@@ -38,6 +38,7 @@ const ProductCreate = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([]);
     // Validate form - all required fields filled
+    const queryClient = useQueryClient()
     const isFormValid = useMemo(() => {
         return !!(
             data.name?.trim() &&
@@ -176,6 +177,7 @@ const ProductCreate = () => {
         onSuccess: () => {
             toast.success('Mahsulot muvaffaqiyatli yaratildi');
             setIsSubmitting(false);
+            queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] })
             handleReset();
         },
         onError: (err) => {
