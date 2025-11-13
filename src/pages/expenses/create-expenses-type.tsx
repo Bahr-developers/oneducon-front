@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 const CreateExpensesType = () => {
     const [open, setOpen] = useState(false)
     const [text, setText] = useState('')
-    const storeId = localStorage.getItem('storeId') || 1
     const queryClient = useQueryClient()
     const createExpensesType = useMutation({
         mutationFn: ExpensesTypeUtils.posetExpensesType,
@@ -32,10 +31,7 @@ const CreateExpensesType = () => {
     })
 
     const handleSubmit = () => {
-        createExpensesType.mutate({
-            name: text,
-            store_id: Number(storeId)
-        })
+        createExpensesType.mutate(text)
     }
 
     return (
