@@ -38,8 +38,6 @@ export function formatTimeOnly(dateString: string): string {
     minute: '2-digit'
   });
 }
-
-// Birlashtirilgan funksiya
 export function formatDate(dateString: string): string {
   return `${formatDateOnly(dateString)} - ${formatTimeOnly(dateString)}`;
 }
