@@ -29,6 +29,8 @@ import { useQueryParams } from "@/components/functions/query-params";
 import ProductsTableSkeleton from "./product-skeleton";
 import toast from "react-hot-toast";
 import { DeleteConfirm } from "@/components/ui/alerd-dialog";
+import { Button } from "@/components/ui/button";
+import { AxiosError } from "axios";
 
 
 
@@ -97,6 +99,28 @@ const Productstable = () => {
         }
     })
 
+    const downloadMutation = useMutation({
+        mutationFn: () => productUtils.getProductExport({ categoryId: selectedCategory == '' ? null : selectedCategory, search: searchQuery }),
+        onSuccess: (response) => {
+            const blob = new Blob([response], { type: "application/vnd.ms-excel" });
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "low-products.xlsx";
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        },
+        onError: (err) => {
+            const error = err as AxiosError<{ message: string }>
+            toast(error.response?.data.message || 'Something went wrong')
+            console.log(error);
+        }
+    });
+
+
+
 
     return (
         <div className="mt-4">
@@ -112,26 +136,32 @@ const Productstable = () => {
                             className="h-12 pl-10 bg-background"
                         />
                     </div>
-                    <Select
-                        value={selectedCategory}
-                        onValueChange={(value) => setSelectedCategory(value)}>
-                        <SelectTrigger className="w-full sm:w-[280px] h-11">
-                            <SelectValue placeholder="Kategoriya" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categoriesLoading ? (
-                                <div className="p-2">
-                                    <Skeleton className="h-8 w-full" />
-                                </div>
-                            ) : (
-                                categories?.data?.map((el: categoryType) => (
-                                    <SelectItem value={el.id} key={el.id}>
-                                        {el.name}
-                                    </SelectItem>
-                                ))
-                            )}
-                        </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-x-2">
+                        <Button className="cursor-pointer h-12" onClick={() => downloadMutation.mutate()} disabled={downloadMutation.isPending}>
+                            {downloadMutation.isPending ? "Yuklanmoqda..." : "Excel yuklab olish"}
+                        </Button>
+                        <Select
+                            value={selectedCategory}
+                            onValueChange={(value) => setSelectedCategory(value)}>
+                            <SelectTrigger className="w-full sm:w-[280px] h-11">
+                                <SelectValue placeholder="Kategoriya" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {categoriesLoading ? (
+                                    <div className="p-2">
+                                        <Skeleton className="h-8 w-full" />
+                                    </div>
+                                ) : (
+                                    categories?.data?.map((el: categoryType) => (
+                                        <SelectItem value={el.id} key={el.id}>
+                                            {el.name}
+                                        </SelectItem>
+                                    ))
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                 </div>
 
                 <div className="rounded-lg border overflow-hidden">

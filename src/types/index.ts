@@ -57,8 +57,8 @@ export interface sotreDebts {
 export interface client {
     id: string;
     name: string;
-    phone?: string;      // ba'zan bo'lmasligi mumkin
-    store_id?: string;
+    phone: string;
+    store_id: string;
 }
 export interface orderItem {
     id?: string;

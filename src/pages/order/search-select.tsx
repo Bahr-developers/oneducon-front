@@ -32,8 +32,24 @@ export default function SearchSelect({
         setIsOpen(false);
     };
 
-    const isProductDisabled = (productId: number) => {
-        return disabledProductIds.includes(productId);
+    const isProductDisabled = (product: product) => {
+        if (disabledProductIds.includes(Number(product.id))) {
+            return true;
+        }
+        if (product.quantity === 0) {
+            return true;
+        }
+        return false;
+    };
+
+    const getDisabledReason = (product: product) => {
+        if (disabledProductIds.includes(Number(product.id))) {
+            return "(tanlangan)";
+        }
+        if (product.quantity === 0) {
+            return "(mahsulot tugagan)";
+        }
+        return "";
     };
 
     return (
@@ -53,7 +69,8 @@ export default function SearchSelect({
                 <ul className="absolute z-10 w-full bg-white border dark:text-black transition-colors rounded-lg mt-1 max-h-40 overflow-y-auto">
                     {filtered?.length > 0 ? (
                         filtered?.map((product: product) => {
-                            const disabled = isProductDisabled(Number(product.id));
+                            const disabled = isProductDisabled(product);
+                            const disabledReason = getDisabledReason(product);
                             return (
                                 <li
                                     key={product.id}
@@ -66,7 +83,7 @@ export default function SearchSelect({
                                     <span>{product.name}</span>
                                     <span className="text-gray-500 text-sm">
                                         {product.sale_price.toLocaleString()} so'm
-                                        {disabled && ' (tanlangan)'}
+                                        {disabledReason && ` ${disabledReason}`}
                                     </span>
                                 </li>
                             );

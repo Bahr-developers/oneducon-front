@@ -22,7 +22,7 @@ interface DebtItem {
 interface OrderData {
     id?: string
     store_id: number
-    client_id?: number | undefined
+    client_id?: number | null
     items: OrderItem[]
     payments: PaymentItem[]
     debts: DebtItem[]
@@ -30,13 +30,28 @@ interface OrderData {
 interface getParams {
     limit: number,
     page: number,
-    search?: string
+    search?: string,
+    client?: string,
+    payment_type?: string,
+    from?: string,
+    to?: string
 }
 
 export const orderUtils = {
-    getOrders: async ({ limit, page, search }: getParams) => {
-        const { data } = await customAxios.get(`orders?page=${page}&limit=${limit}&search=${search}`)
-        return data
+    getOrders: async ({ limit, page, search, client, payment_type, from, to }: getParams) => {
+        const params = new URLSearchParams();
+
+        params.append("limit", String(limit));
+        params.append("page", String(page));
+
+        if (search) params.append("search", search);
+        if (client) params.append("client", client);
+        if (payment_type) params.append("payment_type", payment_type);
+        if (from) params.append("from", from);
+        if (to) params.append("to", to);
+
+        const { data } = await customAxios.get(`orders?${params.toString()}`);
+        return data;
     },
 
     getOrderByID: async (id: string) => {

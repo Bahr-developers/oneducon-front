@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 
 interface UniversalSearchSelectProps<T> {
     data: T[];
-    searchKey: keyof T;
+    searchKey: keyof T | (keyof T)[]; // Bitta yoki bir nechta key
     displayKey: keyof T;
     secondaryKey?: keyof T;
     value?: T | null;
@@ -62,10 +62,21 @@ function UniversalSearchSelect<T extends Record<string, any>>({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Filtrlangan natijalar
+    // Filtrlangan natijalar - bir nechta key bo'yicha qidirish
     const filteredData = data?.filter((item) => {
+        const searchQuery = query.toLowerCase();
+
+        // Agar searchKey array bo'lsa
+        if (Array.isArray(searchKey)) {
+            return searchKey.some(key => {
+                const searchValue = String(item[key]).toLowerCase();
+                return searchValue.includes(searchQuery);
+            });
+        }
+
+        // Agar searchKey bitta key bo'lsa
         const searchValue = String(item[searchKey]).toLowerCase();
-        return searchValue.includes(query.toLowerCase());
+        return searchValue.includes(searchQuery);
     });
 
     // Element tanlash
@@ -118,7 +129,7 @@ function UniversalSearchSelect<T extends Record<string, any>>({
     };
 
     return (
-        <div ref={wrapperRef} className={`relative w-full    ${className}`}>
+        <div ref={wrapperRef} className={`relative w-full ${className}`}>
             <div className="relative">
                 <Input
                     type="text"

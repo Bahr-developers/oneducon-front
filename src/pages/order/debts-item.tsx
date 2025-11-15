@@ -8,7 +8,7 @@ import { DatePicker } from "@/components/functions/date-picer";
 import { useQuery } from "@tanstack/react-query";
 import { customerUtils } from "@/utils/customer";
 import UniversalSearchSelect from "@/components/_components/search-select";
-import { user } from "@/types";
+import { client } from "@/types";
 import CreateCustomer from "../customers/create-cus";
 
 // DebtsItem.tsx
@@ -16,8 +16,8 @@ interface DebtModalProps {
     open: boolean;
     returnTime: Date | undefined;
     setReturnTime: (date: Date | undefined) => void;
-    selectedUser: user | null;
-    setSelectedUser: (user: user | null) => void;
+    selectedUser: client | null;
+    setSelectedUser: (user: client | null) => void;
     reminder: string
     setReminder: (value: string) => void
 }
@@ -47,10 +47,11 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
         setReminder(value);
     };
 
-    const { data: customers } = useQuery({
+    const { data: customers } = useQuery<{ data: client[] }>({
         queryKey: ['customers'],
         queryFn: customerUtils.getCustomerAll
     })
+    console.log(customers?.data);
 
     return (
         <div className="flex flex-col space-y-4 w-full">
@@ -101,15 +102,16 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
                         {/* Customer Selection */}
                         <div className="flex justify-between items-center gap-x-3">
                             <UniversalSearchSelect
-                                data={customers?.data}
-                                searchKey="name"
+                                data={customers?.data || []}
+                                searchKey={["name", "phone"]}
                                 displayKey="name"
+                                secondaryKey='phone'
                                 value={selectedUser}
                                 onSelect={setSelectedUser}
                                 placeholder="User nomini kiriting..."
                                 className="w-[80%]"
                             />
-                            <CreateCustomer title="" />
+                            <CreateCustomer />
                         </div>
 
                         {/* Date Picker */}

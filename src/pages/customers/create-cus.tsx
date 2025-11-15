@@ -17,7 +17,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 interface cusCreate {
-    title: string,
+    title?: string,
     width?: string
 }
 

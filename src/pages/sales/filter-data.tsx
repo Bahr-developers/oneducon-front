@@ -15,6 +15,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { client, paymentType } from "@/types";
+import { customerUtils } from "@/utils/customer";
+import { paymentUtils } from "@/utils/payment-type";
+import { useQuery } from "@tanstack/react-query";
 import { ListFilter } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +28,14 @@ const FilterData = () => {
     const { i18n } = useTranslation()
     const [from, setFrom] = useState<Date | undefined>()
     const [to, setTo] = useState<Date | undefined>()
+    const { data: customers } = useQuery<{ data: client[] }>({
+        queryKey: ['customers'],
+        queryFn: customerUtils.getCustomerAll
+    })
+    const { data: paymentTypes } = useQuery<{ data: paymentType[] }>({
+        queryKey: ['get_payment'],
+        queryFn: paymentUtils.getPayments,
+    });
 
     return (
         <Dialog>
@@ -34,7 +46,7 @@ const FilterData = () => {
                 <DialogHeader>
                     <DialogTitle>Filter</DialogTitle>
                     <DialogDescription>
-                        Filter data by usernamde, category and date
+                        Ma'lumotlarni filterlar xaridor,to'lov turi va vaqt bo'yicha
                     </DialogDescription>
                     <div className="w-full flex flex-col items-end">
                         <div className="flex items-center w-full justify-between gap-x-2">
@@ -42,12 +54,12 @@ const FilterData = () => {
                                 <span>Xaridor</span>
                                 <Select>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Theme" />
+                                        <SelectValue placeholder="Xaridor" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="light">Light</SelectItem>
-                                        <SelectItem value="dark">Dark</SelectItem>
-                                        <SelectItem value="system">System</SelectItem>
+                                        {customers?.data?.map((client => (
+                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                        )))}
                                     </SelectContent>
                                 </Select>
                             </label>
@@ -55,12 +67,12 @@ const FilterData = () => {
                                 <span>To'lov turi</span>
                                 <Select>
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Theme" />
+                                        <SelectValue placeholder="To'lov turi" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="light">Light</SelectItem>
-                                        <SelectItem value="dark">Dark</SelectItem>
-                                        <SelectItem value="system">System</SelectItem>
+                                        {paymentTypes?.data?.map((client => (
+                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                                        )))}
                                     </SelectContent>
                                 </Select>
                             </label>

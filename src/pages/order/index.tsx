@@ -24,8 +24,11 @@ import { orderUtils } from '@/utils/orders';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
-import { user } from '@/types';
+import { client } from '@/types';
 import { Checkbox } from '@/components/ui/checkbox';
+import UniversalSearchSelect from '@/components/_components/search-select';
+import CreateCustomer from '../customers/create-cus';
+import { customerUtils } from '@/utils/customer';
 
 export default function OrderProducts() {
     const dispatch = useAppDispatch();
@@ -34,7 +37,7 @@ export default function OrderProducts() {
     const { hasDebt, remainingDebt } = useAppSelector(selectTotals);
     const debt = useAppSelector(selectDebt);
     const [returnTime, setReturnTime] = useState<Date | undefined>();
-    const [selectedUser, setSelectedUser] = useState<user | null>(null);
+    const [selectedUser, setSelectedUser] = useState<client | null>(null);
     const [isChecked, setIsChecked] = useState(false)
     const storeId = localStorage.getItem('storeId') || 1
     const [reminder, setReminder] = useState("");
@@ -72,7 +75,7 @@ export default function OrderProducts() {
     const handleSubmit = () => {
         const orderData = {
             store_id: +storeId,
-            client_id: debt?.client_id,
+            client_id: debt?.client_id || Number(selectedUser?.id) || null,
             items: items
                 .filter((item) => item.product !== null)
                 .map((item) => ({
@@ -92,6 +95,11 @@ export default function OrderProducts() {
 
         createOrder.mutate(orderData);
     };
+
+    const { data: customers } = useQuery({
+        queryKey: ['customers'],
+        queryFn: customerUtils.getCustomerAll
+    })
 
     const handleReset = () => {
         dispatch(resetOrder());
@@ -190,6 +198,25 @@ export default function OrderProducts() {
                     reminder={reminder}
                     setReminder={setReminder}
                 />
+
+                {!hasDebt && (
+                    <div className='flex flex-col space-y-1 items-start mt-2 w-full'>
+                        <h3>Mijozni belgilash(ixtiyoriy)</h3>
+                        <div className="flex justify-between items-center gap-x-3 w-full">
+                            <UniversalSearchSelect
+                                data={customers?.data}
+                                searchKey={['name', 'phone']}
+                                displayKey="name"
+                                secondaryKey='phone'
+                                value={selectedUser}
+                                onSelect={setSelectedUser}
+                                placeholder="User nomini kiriting..."
+                                className="w-[80%]"
+                            />
+                            <CreateCustomer />
+                        </div>
+                    </div>
+                )}
 
                 {hasDebt && (
                     <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">

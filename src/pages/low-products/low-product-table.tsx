@@ -6,15 +6,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { productUtils } from "@/utils/products";
 import { useEffect, useState } from "react";
 import PaginationContyent from "@/components/_components/pagination";
@@ -22,11 +14,13 @@ import ProductsTableSkeleton from "../pruducts/product-skeleton";
 import { product } from "@/types";
 import EditProsucts from "../pruducts/edit-products";
 import ProductView from "../pruducts/product-view";
+import { Button } from "@/components/ui/button";
 
 
 const LowProductTable = () => {
     const [postsPerPage, setPostsPerPage] = useState<number>(5);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const storeId = localStorage.getItem('storeId') || '1'
     const { data: lowProducts, isLoading } = useQuery({
         queryKey: ['get_all_procusts'],
         queryFn: async () => await productUtils.getProductsLows({ limit: postsPerPage, page: currentPage })
@@ -38,21 +32,30 @@ const LowProductTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = lowProducts?.data
+    const downloadMutation = useMutation({
+        mutationFn: () => productUtils.getLowProductExport(storeId),
+        onSuccess: (response) => {
+            const blob = new Blob([response], { type: "application/vnd.ms-excel" });
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "low-products.xlsx";
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        },
+    });
+
 
     return (
         <div className="p-2 mt-4">
-            <div className="flex my-4 justify-between">
-                <Input type="search" placeholder="Qidirish..." className="h-12 w-[450px]" />
-                <Select>
-                    <SelectTrigger className="w-[280px]">
-                        <SelectValue placeholder="Kategoriya" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                </Select>
+            <div className="flex my-4 justify-end">
+                {/* <Input type="search" placeholder="Qidirish..." className="h-12 w-[450px]" /> */}
+                <Button className="cursor-pointer h-12" onClick={() => downloadMutation.mutate()} disabled={downloadMutation.isPending}>
+                    {downloadMutation.isPending ? "Yuklanmoqda..." : "Excel yuklab olish"}
+                </Button>
+
             </div>
             <Table className="overflow-hidden rounded-xl">
                 <TableHeader className="bg-muted/50">

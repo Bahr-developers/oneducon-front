@@ -21,7 +21,10 @@ interface getParams {
     search?: string;
     category?: string
 }
-
+interface exportFile {
+    categoryId?: string | null,
+    search?: string
+}
 
 export const productUtils = {
     getProducts: async ({ limit, page, search }: getParams) => {
@@ -30,6 +33,23 @@ export const productUtils = {
     },
     getProductsAlls: async () => {
         const { data } = await customAxios.get(`products`)
+        return data
+    },
+    getProductExport: async ({ categoryId, search }: exportFile) => {
+        const params = new URLSearchParams();
+
+        if (categoryId) params.append("category_id", String(categoryId));
+        if (search) params.append("search", search);
+
+        const { data } = await customAxios.get(`products/export?${params.toString()}`, {
+            responseType: "blob"
+        });
+        return data
+    },
+    getLowProductExport: async (store_id: string) => {
+        const { data } = await customAxios.get(`products/low-stock/export?store_id=${store_id}`, {
+            responseType: 'blob'
+        })
         return data
     },
     getProductsLows: async ({ limit, page }: getParams) => {
