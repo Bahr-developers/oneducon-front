@@ -264,12 +264,12 @@ const ProductCreate = () => {
                                     autoComplete="off"
                                 />
                                 {showSuggestions && filteredProducts.length > 0 && (
-                                    <ul className="absolute z-10 bg-white border rounded-md mt-20 shadow-lg w-full max-h-40">
+                                    <ul className="absolute z-10 bg-[#514e4e] text-white  border rounded-md mt-20 shadow-lg w-full max-h-40">
                                         {filteredProducts.map((p) => (
                                             <li
                                                 key={p.id}
                                                 onClick={() => handleSelect(p.name)}
-                                                className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                                className="px-3 py-1 cursor-pointer"
                                             >
                                                 {p.name}
                                             </li>

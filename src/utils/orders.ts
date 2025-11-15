@@ -22,7 +22,7 @@ interface DebtItem {
 interface OrderData {
     id?: string
     store_id: number
-    client_id: number
+    client_id?: number | undefined
     items: OrderItem[]
     payments: PaymentItem[]
     debts: DebtItem[]

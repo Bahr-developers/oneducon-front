@@ -63,7 +63,7 @@ function UniversalSearchSelect<T extends Record<string, any>>({
     }, []);
 
     // Filtrlangan natijalar
-    const filteredData = data.filter((item) => {
+    const filteredData = data?.filter((item) => {
         const searchValue = String(item[searchKey]).toLowerCase();
         return searchValue.includes(query.toLowerCase());
     });

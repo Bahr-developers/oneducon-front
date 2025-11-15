@@ -36,6 +36,7 @@ export default function OrderProducts() {
     const [returnTime, setReturnTime] = useState<Date | undefined>();
     const [selectedUser, setSelectedUser] = useState<user | null>(null);
     const [isChecked, setIsChecked] = useState(false)
+    const storeId = localStorage.getItem('storeId') || 1
     const [reminder, setReminder] = useState("");
     const { data: paymentTypes } = useQuery({
         queryKey: ['get_payment'],
@@ -61,15 +62,17 @@ export default function OrderProducts() {
 
         },
         onError: (err) => {
-            const error = err as AxiosError<{ messages: string }>
-            toast.error(error.response?.data.messages || 'Something went wrong')
+            const error = err as AxiosError<{ message: string }>
+            toast(error?.response?.data?.message || 'Something went wrong')
+            console.log(err);
+
         }
     })
 
     const handleSubmit = () => {
         const orderData = {
-            store_id: 1,
-            client_id: 1,
+            store_id: +storeId,
+            client_id: debt?.client_id,
             items: items
                 .filter((item) => item.product !== null)
                 .map((item) => ({

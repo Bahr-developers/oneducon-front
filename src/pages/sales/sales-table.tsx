@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import ViewSale from "./view-sale";
 import { useQueryParams } from "@/components/functions/query-params";
 import { useDebounce } from "@/components/functions/useDebounce";
+import { Badge } from "@/components/ui/badge";
 
 
 const SalesTableSkeleton = () => {
@@ -76,9 +77,6 @@ const SalesTable = () => {
         });
     }, [debouncedSearch, currentPage, postsPerPage, updateURL]);
 
-
-
-
     const totalPages = Math.max(1, Math.ceil((sales?.total || 1) / postsPerPage));
 
     useEffect(() => {
@@ -86,8 +84,6 @@ const SalesTable = () => {
     }, [currentPage, totalPages]);
 
     const paginated = sales?.data
-
-
 
     return (
         <div className="mt-10">
@@ -111,49 +107,76 @@ const SalesTable = () => {
                         <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                             <TableHead className="w-[100px] font-semibold">№</TableHead>
                             <TableHead className="font-semibold">Xaridor</TableHead>
-                            <TableHead className="font-semibold">Narxi</TableHead>
-                            <TableHead className="font-semibold">Sana</TableHead>
-                            <TableHead className="text-right font-semibold">Amallar</TableHead>
+                            <TableHead className="font-semibold">Umumiy narxi</TableHead>
+                            <TableHead className="font-semibold">To'langan narxi</TableHead>
+                            <TableHead className="font-semibold">Qarzdorlik narxi</TableHead>
+                            <TableHead className="font-semibold">Mahsulotlar(3)</TableHead>
+                            <TableHead className="font-semibold">Yaratilgan sana</TableHead>
+                            <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
                     </TableHeader>
                     {isLoading ? (
                         <SalesTableSkeleton />
                     ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
-                            {paginated?.map((el) => (
-                                <TableRow
-                                    key={el.id}
-                                    className="hover:bg-muted/50 transition-colors"
-                                >
-                                    <TableCell className="font-medium">
-                                        #{el.id}
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                        {el.client?.name || 'Noma\'lum'}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="font-semibold text-green-600 dark:text-green-400">
-                                            {el.total_price?.toLocaleString()} so'm
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {el.created_at ? new Date(el.created_at).toLocaleDateString('uz-UZ') : '-'}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex gap-x-2 justify-center items-center">
-                                            <ViewSale {...el} />
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="gap-2"
-                                            >
-                                                Sotish
-                                                <HandCoins className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {paginated?.map((el) => {
+                                const totalPayments = el.payments?.reduce((sum, p) => sum + (p.price || p.amount || 0), 0) || 0;
+                                const remainingDebt = el.total_price - totalPayments;
+                                return (
+                                    <TableRow
+                                        key={el.id}
+                                        className="hover:bg-muted/50 transition-colors"
+                                    >
+                                        <TableCell className="font-medium">
+                                            #{el.order_number}
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {el.client?.name || 'Noma\'lum'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-green-600 dark:text-green-400">
+                                                {el.total_price?.toLocaleString()} so'm
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="font-semibold text-green-600 dark:text-green-400">
+                                                {totalPayments.toLocaleString()} so'm
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-semibold text-green-600 dark:text-green-400 relative">
+                                                {remainingDebt > 0 && remainingDebt.toLocaleString()} {remainingDebt > 0 && "so'm"}
+                                                <Badge variant={remainingDebt > 0 ? "destructive" : "default"} className={`${remainingDebt > 0 ? 'text-[9px] absolute -top-2' : 'text-sm'} `}>
+                                                    {remainingDebt > 0 ? "Qarzli" : "To'liq to'langan"}
+                                                </Badge>
+                                            </div>
+
+                                        </TableCell>
+                                        <TableCell>
+                                            {el.order_items.slice(0, 3)?.map(item => (
+                                                <span className="block" key={item.product.id}>{item.product.name}</span>
+                                            ))}
+                                        </TableCell>
+
+                                        <TableCell className="text-muted-foreground">
+                                            {el.created_at ? new Date(el.created_at).toLocaleDateString('uz-UZ') : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex gap-x-2 justify-center items-center">
+                                                <ViewSale {...el} />
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="gap-2"
+                                                >
+                                                    Sotish
+                                                    <HandCoins className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </TableBody>
                     ) : (
                         <TableBody>
