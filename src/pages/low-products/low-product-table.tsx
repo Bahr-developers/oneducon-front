@@ -89,7 +89,7 @@ const LowProductTable = () => {
                                     {el.cost_price?.toLocaleString()} so'm
                                 </TableCell>
                                 <TableCell className="font-medium">
-                                    {el.sale_price.toLocaleString()}
+                                    {el.sale_price?.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="font-medium">
                                     {el.usd_rate?.toLocaleString()}

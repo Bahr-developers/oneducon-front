@@ -56,7 +56,7 @@ const ViewSale = (props: order) => {
                     {props.created_at && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar size={16} />
-                            <span>{new Date(props.created_at).toLocaleString('uz-UZ', {
+                            <span>{new Date(props.created_at)?.toLocaleString('uz-UZ', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
@@ -110,7 +110,7 @@ const ViewSale = (props: order) => {
                                 </p>
                             </div>
                             <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                                {props.total_price.toLocaleString()} so'm
+                                {props.total_price?.toLocaleString()} so'm
                             </p>
                         </div>
 
@@ -122,7 +122,7 @@ const ViewSale = (props: order) => {
                                 </p>
                             </div>
                             <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                                {totalPayments.toLocaleString()} so'm
+                                {totalPayments?.toLocaleString()} so'm
                             </p>
                         </div>
 
@@ -134,7 +134,7 @@ const ViewSale = (props: order) => {
                                 </p>
                             </div>
                             <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                                {remainingDebt.toLocaleString()} so'm
+                                {remainingDebt?.toLocaleString()} so'm
                             </p>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ const ViewSale = (props: order) => {
                                                         </div>
                                                         <div className="flex flex-col">
                                                             <span className="text-muted-foreground text-xs">Narxi</span>
-                                                            <span className="font-medium">{price.toLocaleString()} so'm</span>
+                                                            <span className="font-medium">{price?.toLocaleString()} so'm</span>
                                                         </div>
                                                         {discount > 0 && (
                                                             <div className="flex flex-col">
@@ -198,7 +198,7 @@ const ViewSale = (props: order) => {
                                                 <div className="text-right">
                                                     <p className="text-xs text-muted-foreground mb-1">Jami</p>
                                                     <p className="text-xl font-bold text-primary">
-                                                        {itemTotal.toLocaleString()} so'm
+                                                        {itemTotal?.toLocaleString()} so'm
                                                     </p>
                                                 </div>
                                             </div>
@@ -250,14 +250,14 @@ const ViewSale = (props: order) => {
                                                     {payment.paid_at && (
                                                         <p className="text-xs text-muted-foreground ml-6 flex items-center gap-1">
                                                             <Calendar size={12} />
-                                                            {new Date(payment.paid_at).toLocaleString('uz-UZ')}
+                                                            {new Date(payment.paid_at)?.toLocaleString('uz-UZ')}
                                                         </p>
                                                     )}
                                                 </div>
 
                                                 <div className="text-right">
                                                     <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                                                        {amount.toLocaleString()} so'm
+                                                        {amount?.toLocaleString()} so'm
                                                     </p>
                                                 </div>
                                             </div>
@@ -319,7 +319,7 @@ const ViewSale = (props: order) => {
 
                                             <div className="text-right">
                                                 <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
-                                                    {debt.price.toLocaleString()} so'm
+                                                    {debt.price?.toLocaleString()} so'm
                                                 </p>
                                             </div>
                                         </div>
@@ -335,11 +335,11 @@ const ViewSale = (props: order) => {
                             <span className="text-lg font-semibold">Yakuniy hisob:</span>
                             <div className="text-right">
                                 <p className="text-sm text-muted-foreground">
-                                    {totalPayments.toLocaleString()} / {props.total_price.toLocaleString()} so'm
+                                    {totalPayments?.toLocaleString()} / {props.total_price?.toLocaleString()} so'm
                                 </p>
                                 <p className="text-2xl font-bold text-primary">
                                     {remainingDebt > 0
-                                        ? `Qoldi: ${remainingDebt.toLocaleString()} so'm`
+                                        ? `Qoldi: ${remainingDebt?.toLocaleString()} so'm`
                                         : 'To\'liq to\'langan ✓'
                                     }
                                 </p>

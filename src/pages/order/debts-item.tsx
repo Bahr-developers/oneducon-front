@@ -95,7 +95,7 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
             {open && remainingDebt > 0 && (
                 <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5 dark:bg-destructive/10">
                     <h3 className="text-lg font-semibold mb-3 text-destructive dark:text-destructive-foreground">
-                        Qarz: {remainingDebt.toLocaleString()} UZS
+                        Qarz: {remainingDebt?.toLocaleString()} UZS
                     </h3>
 
                     <div className="space-y-4">

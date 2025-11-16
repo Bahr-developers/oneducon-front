@@ -24,7 +24,11 @@ const DebtsPage = () => {
     const [editingDebt, setEditingDebt] = useState<string | null>(null);
     const [editedDebts, setEditedDebts] = useState<Record<string, any>>({});
     const [statusFilter, setStatusFilter] = useState("ALL");
+
+
     const queryClient = useQueryClient()
+    const { id } = useParams()
+
     const { data: debtsClient, isLoading } = useQuery({
         queryKey: ["get_all_client_debts", userId],
         queryFn: () => debtsUtils.getDebtByClientId(userId as string),
@@ -42,7 +46,6 @@ const DebtsPage = () => {
         const config = {
             UNPAID: { variant: "destructive", label: "To'lanmagan" },
             PAID: { variant: "default", label: "To'langan" },
-            PARTIAL: { variant: "secondary", label: "Qisman to'langan" },
         }[status || "UNPAID"];
 
         return <Badge variant={config?.variant as any}>{config?.label}</Badge>;
@@ -64,30 +67,35 @@ const DebtsPage = () => {
 
     const handleEdit = (debtId: string) => {
         setEditingDebt(debtId);
-        if (!editedDebts[debtId]) {
-            const debt = debtsArray?.find((d: any) => d.id === debtId);
-            if (debt) {
-                setEditedDebts((prev) => ({
-                    ...prev,
-                    [debtId]: {
-                        price: debt.price,
-                        reminder: debt.reminder,
-                        status: debt.status,
-                    },
-                }));
-            }
+
+        const debt = debtsArray?.find((d: any) => d.id === debtId);
+        if (debt) {
+            setEditedDebts((prev) => ({
+                ...prev,
+                [debtId]: {
+                    price: debt.price,
+                    reminder: debt.reminder,
+                    status: debt.status,
+                    return_time: debt.return_time,
+                },
+            }));
         }
     };
 
     const handleSave = (debtId: string) => {
+        const debt = editedDebts[debtId];
+
         updateDebts.mutate({
-            client_id: 1,
+            client_id: Number(id),
             id: debtId,
-            price: editedDebts.price,
-            reminder: editedDebts.reminder,
-            return_time: editedDebts?.return_time
-        })
+            price: debt.price,
+            reminder: debt.reminder,
+            return_time: debt.return_time,
+            status: debt.status,
+        });
     };
+    console.log(editedDebts, editedDebts?.data?.status);
+
 
     const handleCancel = (debtId: string) => {
         setEditingDebt(null);
@@ -104,7 +112,6 @@ const DebtsPage = () => {
             [debtId]: { ...prev[debtId], [field]: value },
         }));
     };
-
     const filteredDebts = debtsArray?.filter((debt: any) =>
         statusFilter === "ALL" || debt?.status === statusFilter
     ) ?? [];
@@ -230,6 +237,7 @@ const DebtsPage = () => {
                                                                 handleChange(debt?.id, "price", Number(e.raw))
                                                             }
                                                             className="w-32"
+                                                            readonly={true}
                                                         />
                                                     ) : (
                                                         <div className="font-bold text-red-600">
@@ -262,16 +270,19 @@ const DebtsPage = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     {editingDebt === debt?.id ? (
-                                                        <Select onValueChange={(e) =>
-                                                            handleChange(debt?.id, "status", e)
+                                                        <Select onValueChange={(value) =>
+                                                            handleChange(debt?.id, 'status', value)
                                                         } >
                                                             <SelectTrigger className="w-[180px]">
-                                                                <SelectValue placeholder={editedDebts[debt?.id]?.status ?? debt?.status ?? "UNPAID"} />
+                                                                <SelectValue
+                                                                    placeholder={
+                                                                        editedDebts[debt.id]?.status ?? debt.status ?? "To'lanmagan"
+                                                                    }
+                                                                />
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 <SelectItem value="UNPAID">To'lanmagan</SelectItem>
                                                                 <SelectItem value="PAID">To'langan</SelectItem>
-                                                                <SelectItem value="PARTIAL">Qisman to'langan</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                     ) : (

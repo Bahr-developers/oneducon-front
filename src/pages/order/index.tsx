@@ -221,7 +221,7 @@ export default function OrderProducts() {
                 {hasDebt && (
                     <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
                         <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                            ⚠️ Diqqat: {remainingDebt.toLocaleString()} UZS qarz qolmoqda.
+                            ⚠️ Diqqat: {remainingDebt?.toLocaleString()} UZS qarz qolmoqda.
                             Qaytarish vaqtini belgilashni unutmang!
                         </p>
                     </div>

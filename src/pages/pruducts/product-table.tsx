@@ -122,6 +122,8 @@ const Productstable = () => {
 
 
 
+
+
     return (
         <div className="mt-4">
             <div className="border rounded-xl p-4 bg-card">

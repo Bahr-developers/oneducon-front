@@ -82,7 +82,7 @@ export default function SearchSelect({
                                 >
                                     <span>{product.name}</span>
                                     <span className="text-gray-500 text-sm">
-                                        {product.sale_price.toLocaleString()} so'm
+                                        {product.sale_price?.toLocaleString()} so'm
                                         {disabledReason && ` ${disabledReason}`}
                                     </span>
                                 </li>

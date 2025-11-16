@@ -58,7 +58,10 @@ export const orderUtils = {
         const { data } = await customAxios.get(`orders/${id}`)
         return data
     },
-
+    getOrderStats: async () => {
+        const { data } = await customAxios.get(`orders/stats`)
+        return data
+    },
     postOrder: async (order: OrderData) => {
         const formattedOrder = {
             ...order,

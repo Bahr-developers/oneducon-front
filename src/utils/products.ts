@@ -64,6 +64,11 @@ export const productUtils = {
         const { data } = await customAxios.post('products', product)
         return data
     },
+    postProductImport: async (file: FormData) => {
+
+        const { data } = await customAxios.post(`products/import`, file)
+        return data
+    },
     patchProduct: async (product: productData) => {
         const { id, ...rest } = product
         const { data } = await customAxios.patch(`products/${id}`, rest)

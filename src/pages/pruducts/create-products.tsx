@@ -228,8 +228,6 @@ const ProductCreate = () => {
         );
     }
 
-
-
     return (
         <div className="fixed inset-0 z-50 bg-white dark:bg-neutral-900 overflow-y-auto">
             <div className="min-h-screen p-6">

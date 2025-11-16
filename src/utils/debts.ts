@@ -15,7 +15,8 @@ interface debtsInfo {
     price: number,
     reminder: string,
     return_time: Date | undefined,
-    client_id: number
+    client_id: number,
+    status: 'PAID' | 'UNPAID' | ''
 }
 
 export const debtsUtils = {
@@ -31,9 +32,9 @@ export const debtsUtils = {
         const { data } = await customAxios.get(`debts`)
         return data
     },
-    editDebts: async ({ client_id, id, price, reminder, return_time }: debtsInfo) => {
+    editDebts: async ({ client_id, id, price, reminder, return_time, status }: debtsInfo) => {
         const { data } = await customAxios.patch(`debts/${id}`, {
-            client_id, price, reminder, return_time
+            client_id, price, reminder, return_time, status
         })
         return data
     },

@@ -25,11 +25,13 @@ import {
 import NumberInput from "@/components/_components/number-input";
 import { storeUtils } from "@/utils/store";
 import toast from "react-hot-toast";
+import { useQueryParams } from "@/components/functions/query-params";
 
 const StoreProfile = () => {
     const queryClient = useQueryClient();
     const storeId = localStorage.getItem('storeId') || '';
 
+    const { updateURL, getParam } = useQueryParams();
 
 
     // Form states
@@ -44,7 +46,19 @@ const StoreProfile = () => {
     // UI states
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [activeTab, setActiveTab] = useState("general");
+
+    const [activeTab, setActiveTab] = useState<string>(
+        () => (getParam('activeTab', 'general'))
+    );
+
+    useEffect(() => {
+        updateURL({
+            activeTab: activeTab,
+        });
+    }, [activeTab, updateURL]);
+
+    console.log(activeTab);
+
 
     // Store ma'lumotlarini olish
     const { data: storeData, isLoading } = useQuery({
@@ -463,7 +477,7 @@ const StoreProfile = () => {
                                 {usdRate > 0 && (
                                     <p className="text-sm text-green-600 flex items-center gap-1">
                                         <CheckCircle2 className="w-4 h-4" />
-                                        1 USD = {usdRate.toLocaleString()} UZS
+                                        1 USD = {usdRate?.toLocaleString()} UZS
                                     </p>
                                 )}
                                 {usdRate === 0 && (

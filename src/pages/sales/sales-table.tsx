@@ -112,12 +112,12 @@ const SalesTable = () => {
                                         </TableCell>
                                         <TableCell>
                                             <span className="font-semibold text-green-600 dark:text-green-400">
-                                                {totalPayments.toLocaleString()} so'm
+                                                {totalPayments?.toLocaleString()} so'm
                                             </span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-semibold text-green-600 dark:text-green-400 relative">
-                                                {remainingDebt > 0 && remainingDebt.toLocaleString()} {remainingDebt > 0 && "so'm"}
+                                                {remainingDebt > 0 && remainingDebt?.toLocaleString()} {remainingDebt > 0 && "so'm"}
                                                 <Badge variant={remainingDebt > 0 ? "destructive" : "default"} className={`${remainingDebt > 0 ? 'text-[9px] absolute -top-2' : 'text-sm'} `}>
                                                     {remainingDebt > 0 ? "Qarzli" : "To'liq to'langan"}
                                                 </Badge>
@@ -153,7 +153,7 @@ const SalesTable = () => {
                     ) : (
                         <TableBody>
                             <TableRow>
-                                <TableCell colSpan={5} className="h-32 text-center">
+                                <TableCell colSpan={8} className="h-32 text-center">
                                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                                         <HandCoins className="h-12 w-12 mb-2 opacity-50" />
                                         <p className="text-sm">Savdolar topilmadi</p>
