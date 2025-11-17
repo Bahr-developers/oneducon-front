@@ -25,7 +25,6 @@ const chartData = [
     { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
     { browser: "other", visitors: 90, fill: "var(--color-other)" },
 ]
-
 const chartConfig = {
     visitors: {
         label: "Zapchas",
