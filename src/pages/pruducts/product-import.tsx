@@ -43,6 +43,7 @@ export function ProductImportButton({ onUpload, loading }: Props) {
                 variant="default"
                 disabled={loading}
                 onClick={() => fileRef.current?.click()}
+                className="h-10 bg-green-500 hover:bg-green-700 cursor-pointer"
             >
                 {loading ? "Yuklanmoqda..." : "Excel Import"}
             </Button>

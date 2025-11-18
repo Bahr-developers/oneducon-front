@@ -23,16 +23,18 @@ const Products = () => {
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Mahsulotlar</h2>
 
-                <ProductCreate />
-                <ProductImportButton
-                    loading={importFile.isPending}
-                    onUpload={(file) => {
-                        const formData = new FormData();
-                        formData.append("file", file);
+                <div className="flex items-center gap-x-4">
+                    <ProductCreate />
+                    <ProductImportButton
+                        loading={importFile.isPending}
+                        onUpload={(file) => {
+                            const formData = new FormData();
+                            formData.append("file", file);
 
-                        importFile.mutate(formData);
-                    }}
-                />
+                            importFile.mutate(formData);
+                        }}
+                    />
+                </div>
             </div>
             <Productstable />
         </div>

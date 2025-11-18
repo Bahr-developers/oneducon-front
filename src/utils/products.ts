@@ -27,8 +27,12 @@ interface exportFile {
 }
 
 export const productUtils = {
-    getProducts: async ({ limit, page, search }: getParams) => {
-        const { data } = await customAxios.get(`products?page=${page}&limit=${limit}&search=${search}`)
+    getProducts: async ({ limit, page, search, category }: getParams) => {
+        const params = new URLSearchParams();
+
+        if (category) params.append("category_id", String(category));
+        if (search) params.append("search", search);
+        const { data } = await customAxios.get(`products?page=${page}&limit=${limit}&${params.toString()}`)
         return data
     },
     getProductsAlls: async () => {

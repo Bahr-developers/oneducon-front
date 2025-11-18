@@ -50,21 +50,7 @@ const Productstable = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>(
         () => getParam('category', '')
     );
-
-    // Debounced search
     const debouncedSearch = useDebounce(searchQuery, 500);
-
-    // URL ni yangilash
-    useEffect(() => {
-        updateURL({
-            search: debouncedSearch,
-            category: selectedCategory,
-            page: currentPage.toString(),
-            limit: postsPerPage.toString(),
-        });
-    }, [debouncedSearch, selectedCategory, currentPage, postsPerPage, updateURL]);
-
-    // API query
     const { data: procusts, isLoading } = useQuery<{ data: product[], total: number }>({
         queryKey: ['get_all_procusts', debouncedSearch, selectedCategory, postsPerPage, currentPage],
         queryFn: async () => await productUtils.getProducts({
@@ -75,16 +61,19 @@ const Productstable = () => {
         })
     })
 
+    useEffect(() => {
+        updateURL({
+            search: debouncedSearch,
+            category: selectedCategory,
+            page: currentPage.toString(),
+            limit: postsPerPage.toString(),
+        });
+    }, [debouncedSearch, selectedCategory, currentPage, postsPerPage, updateURL]);
+
     const { data: categories, isLoading: categoriesLoading } = useQuery({
         queryKey: ['get_all_categories'],
         queryFn: categoryUtils.getCategory
     })
-
-    const totalPages = Math.max(1, Math.ceil((procusts?.total || 1) / postsPerPage));
-
-    useEffect(() => {
-        if (currentPage > totalPages) setCurrentPage(1);
-    }, [currentPage, totalPages]);
 
     const paginated = procusts?.data
 

@@ -158,9 +158,8 @@ const ViewSale = (props: order) => {
                                 {props.order_items.map((item, index) => {
                                     const quantity = item.count || item.quantity || 0;
                                     const price = item.price || 0;
-                                    const discount = item.discount || 0;
-                                    const itemTotal = quantity * price * (1 - discount / 100);
-
+                                    const discount = item?.discount * quantity;
+                                    const itemTotal = quantity * price - discount;
                                     return (
                                         <div
                                             key={item.id || index}
@@ -188,7 +187,7 @@ const ViewSale = (props: order) => {
                                                             <div className="flex flex-col">
                                                                 <span className="text-muted-foreground text-xs">Chegirma</span>
                                                                 <span className="font-medium text-red-600 dark:text-red-400">
-                                                                    {discount}%
+                                                                    {discount.toLocaleString()} so'm
                                                                 </span>
                                                             </div>
                                                         )}

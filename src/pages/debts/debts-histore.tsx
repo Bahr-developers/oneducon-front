@@ -141,7 +141,7 @@ const DebtsPage = () => {
                 </div>
                 <div className="text-right">
                     <div className="text-2xl font-bold text-red-600">
-                        {formatCurrency(totalOverallDebt)}
+                        {formatCurrency(debtsData?.total_amount || 0)}
                     </div>
                     <div className="text-sm text-gray-600">Umumiy qarz summasi</div>
                 </div>
@@ -183,7 +183,7 @@ const DebtsPage = () => {
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-bold text-red-600">
-                                    {formatCurrency(debtsData?.total_amount || 0)}
+                                    {formatCurrency(totalOverallDebt)}
                                 </div>
                                 <div className="text-sm text-gray-600">Jami qarz summasi</div>
                             </div>
