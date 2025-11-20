@@ -89,7 +89,7 @@ export interface order {
     store_id?: string;
     order_items: orderItem[];
     payments: payment[];
-    debts?: debt[];            // hozir bo'sh array ko'rinadi — lekin type qo'yildi
+    debts?: debt[];            
     total_price: number;      
     created_at?: string;
 }
