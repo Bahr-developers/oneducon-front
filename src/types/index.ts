@@ -100,7 +100,7 @@ export interface expensesType {
     created_at: string
 }
 
-// types/expense.ts
+
 export interface expenseType {
     id: string;
     name: string;
