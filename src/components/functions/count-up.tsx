@@ -13,7 +13,6 @@ interface CountUpProps {
     onStart?: () => void;
     onEnd?: () => void;
 }
-
 export default function CountUp({
     to,
     from = 0,
@@ -36,7 +35,6 @@ export default function CountUp({
         damping,
         stiffness
     });
-
     const isInView = useInView(ref, { once: true, margin: '0px' });
 
     const getDecimalPlaces = (num: number): number => {
