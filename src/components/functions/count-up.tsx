@@ -92,7 +92,6 @@ export default function CountUp({
                     minimumFractionDigits: hasDecimals ? maxDecimals : 0,
                     maximumFractionDigits: hasDecimals ? maxDecimals : 0
                 };
-
                 const formattedNumber = Intl.NumberFormat('en-US', options).format(latest);
 
                 ref.current.textContent = separator ? formattedNumber.replace(/,/g, separator) : formattedNumber;
