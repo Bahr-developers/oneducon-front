@@ -26,9 +26,9 @@ import {
 
 const ViewSale = (props: order) => {
     // Calculate totals
-    const totalPayments = props.payments?.reduce((sum, p) => sum + (p.price || p.amount || 0), 0) || 0;
-    const totalItems = props.order_items?.reduce((sum, item) => sum + (item.count || item.quantity || 0), 0) || 0;
-    const remainingDebt = props.total_price - totalPayments;
+    const totalPayments = props?.payments?.reduce((sum, p) => sum + (p.price || p.amount || 0), 0) || 0;
+    const totalItems = props?.order_items?.reduce((sum, item) => sum + (item.count || item.quantity || 0), 0) || 0;
+    const remainingDebt = props?.total_price - totalPayments;
 
 
 
@@ -334,7 +334,7 @@ const ViewSale = (props: order) => {
                             <span className="text-lg font-semibold">Yakuniy hisob:</span>
                             <div className="text-right">
                                 <p className="text-sm text-muted-foreground">
-                                    {totalPayments?.toLocaleString()} / {props.total_price?.toLocaleString()} so'm
+                                    {totalPayments?.toLocaleString()} / {props?.total_price?.toLocaleString()} so'm
                                 </p>
                                 <p className="text-2xl font-bold text-primary">
                                     {remainingDebt > 0

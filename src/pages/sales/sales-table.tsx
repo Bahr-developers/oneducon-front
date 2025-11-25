@@ -92,8 +92,8 @@ const SalesTable = () => {
                     ) : (paginated?.length ?? 0) > 0 ? (
                         <TableBody>
                             {paginated?.map((el) => {
-                                const totalPayments = el.payments?.reduce((sum, p) => sum + (p.price || p.amount || 0), 0) || 0;
-                                const remainingDebt = el.total_price - totalPayments;
+                                const totalPayments = el?.payments?.reduce((sum, p) => sum + (p.price || p.amount || 0), 0) || 0;
+                                const remainingDebt = el?.total_price - totalPayments;
                                 return (
                                     <TableRow
                                         key={el.id}
