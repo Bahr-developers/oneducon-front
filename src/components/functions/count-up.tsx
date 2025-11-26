@@ -93,11 +93,9 @@ export default function CountUp({
                     maximumFractionDigits: hasDecimals ? maxDecimals : 0
                 };
                 const formattedNumber = Intl.NumberFormat('en-US', options).format(latest);
-
                 ref.current.textContent = separator ? formattedNumber.replace(/,/g, separator) : formattedNumber;
             }
         });
-
         return () => unsubscribe();
     }, [springValue, separator, maxDecimals]);
 
