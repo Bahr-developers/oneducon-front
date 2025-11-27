@@ -27,15 +27,15 @@ const EditProduct = ({ product }: EditProductProps) => {
     const [open, setOpen] = useState(false);
     const [data, setData] = useState({
         name: product?.name,
-        count: product?.quantity,
-        remine_count: product?.reminder_quantity,
+        count: product?.quantity ?? 0,
+        remine_count: product?.reminder_quantity ?? 0,
         tan_narx_uzb: product?.cost_price,
         tan_narx_dol: product?.cost_price_usd,
         saler_narxi: product?.sale_price,
         saler_narxi_dol: product?.sale_price_usd,
         usd_rate: product?.usd_rate,
-        unitId: product?.unit.id,
-        categoryId: product?.category.id,
+        unitId: product?.unit?.id ?? "",
+        categoryId: product?.category?.id ?? "",
     });
 
     const queryClient = useQueryClient();
@@ -67,16 +67,16 @@ const EditProduct = ({ product }: EditProductProps) => {
     const handleSubmit = () => {
         editProduct.mutate({
             id: product.id,
-            category_id: Number(data.categoryId),
-            unit_id: Number(data.unitId),
+            category_id: data.categoryId ? Number(data.categoryId) : null,
+            unit_id: data.unitId ? Number(data.unitId) : null,
             name: String(data?.name),
-            quantity: Number(data.count),
-            reminder_quantity: Number(data.remine_count),
-            cost_price: Number(data.tan_narx_uzb),
-            cost_price_usd: Number(data.tan_narx_dol),
-            sale_price: Number(data.saler_narxi),
-            sale_price_usd: Number(data.saler_narxi_dol),
-            usd_rate: Number(data.usd_rate),
+            quantity: Number(data?.count),
+            reminder_quantity: Number(data?.remine_count),
+            cost_price: Number(data?.tan_narx_uzb),
+            cost_price_usd: Number(data?.tan_narx_dol),
+            sale_price: Number(data?.saler_narxi),
+            sale_price_usd: Number(data?.saler_narxi_dol),
+            usd_rate: Number(data?.usd_rate),
         });
     };
 
@@ -205,7 +205,7 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>O‘lchov birligi</span>
                             <Select
-                                defaultValue={data.unitId}
+                                defaultValue={data.unitId ? String(data.unitId) : undefined}
                                 onValueChange={(val) => setData((prev) => ({ ...prev, unitId: val }))}
                             >
                                 <SelectTrigger className="h-12 w-full">
@@ -224,14 +224,14 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>Kategoriya</span>
                             <Select
-                                defaultValue={data.categoryId}
+                                defaultValue={data?.categoryId ? String(data?.categoryId) : undefined}
                                 onValueChange={(val) => setData((prev) => ({ ...prev, categoryId: val }))}
                             >
                                 <SelectTrigger className="h-12 w-full">
                                     <SelectValue placeholder="Kategoriya tanlang..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories?.data?.map((el: categoryType) => (
+                                    {categories?.data?.length && categories?.data?.map((el: categoryType) => (
                                         <SelectItem key={el.id} value={el.id}>
                                             {el.name}
                                         </SelectItem>

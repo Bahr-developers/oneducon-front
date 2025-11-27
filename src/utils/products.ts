@@ -10,8 +10,8 @@ interface productData {
     cost_price_usd: number
     sale_price: number
     sale_price_usd: number
-    unit_id: number
-    category_id: number
+    unit_id: number | null
+    category_id: number | null
     store_id?: number
 }
 

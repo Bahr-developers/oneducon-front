@@ -75,10 +75,12 @@ const Productstable = () => {
         queryFn: categoryUtils.getCategory
     })
 
+
+
     const paginated = procusts?.data
 
     const deleteProduct = useMutation({
-        mutationFn: productUtils.deleteProduct,
+        mutationFn: productUtils?.deleteProduct,
         onSuccess: () => {
             toast.success("Mahsulot o'chirildi.")
             queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] })
@@ -128,8 +130,8 @@ const Productstable = () => {
                         />
                     </div>
                     <div className="flex items-center gap-x-2">
-                        <Button className="cursor-pointer h-12" onClick={() => downloadMutation.mutate()} disabled={downloadMutation.isPending}>
-                            {downloadMutation.isPending ? "Yuklanmoqda..." : "Excel yuklab olish"}
+                        <Button className="cursor-pointer h-12" onClick={() => downloadMutation?.mutate()} disabled={downloadMutation?.isPending}>
+                            {downloadMutation?.isPending ? "Yuklanmoqda..." : "Excel yuklab olish"}
                         </Button>
                         <Select
                             value={selectedCategory}
@@ -144,8 +146,8 @@ const Productstable = () => {
                                     </div>
                                 ) : (
                                     categories?.data?.map((el: categoryType) => (
-                                        <SelectItem value={el.id} key={el.id}>
-                                            {el.name}
+                                        <SelectItem value={el?.id} key={el?.id}>
+                                            {el?.name}
                                         </SelectItem>
                                     ))
                                 )}
@@ -175,42 +177,42 @@ const Productstable = () => {
                             <TableBody>
                                 {paginated?.map((el: product, index: number) => (
                                     <TableRow
-                                        key={el.id}
+                                        key={el?.id}
                                         className="hover:bg-muted/50 transition-colors"
                                     >
                                         <TableCell className="font-medium text-muted-foreground">
                                             #{index + 1}
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {el.name}
+                                            {el?.name}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {el.cost_price?.toLocaleString()}
+                                            {el?.cost_price?.toLocaleString()}
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {el.sale_price?.toLocaleString()}
+                                            {el?.sale_price?.toLocaleString()}
                                         </TableCell>
                                         <TableCell className="font-medium">
-                                            {el.usd_rate?.toLocaleString()}
+                                            {el?.usd_rate?.toLocaleString()}
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${el.quantity > 10
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${el?.quantity > 10
                                                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                                : el.quantity > 0
+                                                : el?.quantity > 0
                                                     ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                                                     : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                                 }`}>
-                                                {el.quantity}
+                                                {el?.quantity}
                                             </span>
                                         </TableCell>
                                         <TableCell className="capitalize text-muted-foreground">
-                                            {el.unit.name}
+                                            {el?.unit?.name}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex gap-x-4 justify-center  items-center">
                                                 <EditProsucts product={el} />
                                                 <ProductView {...el} />
-                                                <DeleteConfirm onConfirm={() => deleteProduct.mutate(el.id)} />
+                                                <DeleteConfirm onConfirm={() => deleteProduct.mutate(el?.id)} />
                                             </div>
                                         </TableCell>
                                     </TableRow>

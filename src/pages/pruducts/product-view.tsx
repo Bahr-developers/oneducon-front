@@ -60,11 +60,11 @@ const ProductView = (product: product) => {
                     <div className="rounded-lg p-4 border shadow">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-semibold ">{product.name}</h3>
-                                <p className="text-sm">ID: {product.id}</p>
+                                <h3 className="text-lg font-semibold ">{product?.name}</h3>
+                                <p className="text-sm">ID: {product?.id}</p>
                             </div>
-                            <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(product.quantity)}`}>
-                                {getStatusText(product.quantity)}
+                            <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(product?.quantity)}`}>
+                                {getStatusText(product?.quantity)}
                             </div>
                         </div>
                     </div>
@@ -80,14 +80,14 @@ const ProductView = (product: product) => {
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center p-3 rounded-lg border">
                                     <span className="text-sm">Jami miqdor:</span>
-                                    <span className={`font-semibold ${product.quantity < 0 ? 'text-red-600' : ''}`}>
-                                        {formatNumber(product.quantity)}
+                                    <span className={`font-semibold ${product?.quantity < 0 ? 'text-red-600' : ''}`}>
+                                        {formatNumber(product?.quantity)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center p-3 rounded-lg border">
                                     <span className="text-sm">Eslatma miqdori:</span>
                                     <span className="font-semibold ">
-                                        {formatNumber(product.reminder_quantity)}
+                                        {formatNumber(product?.reminder_quantity)}
                                     </span>
                                 </div>
                             </div>
@@ -102,13 +102,13 @@ const ProductView = (product: product) => {
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center p-3 rounded-lg border">
                                     <span className="text-sm">Kategoriya:</span>
-                                    <span className="font-semibold ">{product.category.name}</span>
+                                    <span className={`font-semibold ${!product?.category?.id && 'text-sm text-amber-300'}`}>{product?.category?.id ? product?.category?.name : 'Mavjud emas'}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-3 rounded-lg border">
                                     <span className="text-sm">O'lchov birligi:</span>
                                     <span className="font-semibold  flex items-center gap-1">
                                         <Scale className="h-3 w-3" />
-                                        {product.unit.name}
+                                        {product?.unit?.name ? product?.unit?.name : ''}
                                     </span>
                                 </div>
                             </div>
@@ -125,25 +125,25 @@ const ProductView = (product: product) => {
                             <div className="p-3 rounded-lg border border-blue-100">
                                 <div className="text-sm text-blue-600">Tan narxi (UZS)</div>
                                 <div className="text-lg font-bold text-blue-900">
-                                    {formatCurrency(product.cost_price, 'UZS')}
+                                    {formatCurrency(product?.cost_price, 'UZS')}
                                 </div>
                             </div>
                             <div className="p-3 rounded-lg border border-green-100">
                                 <div className="text-sm text-green-600">Tan narxi ($)</div>
                                 <div className="text-lg font-bold text-green-900">
-                                    {formatCurrency(product.cost_price_usd, 'USD')}
+                                    {formatCurrency(product?.cost_price_usd, 'USD')}
                                 </div>
                             </div>
                             <div className="p-3 rounded-lg border border-purple-100">
                                 <div className="text-sm text-purple-600">Sotuv narxi ($)</div>
                                 <div className="text-lg font-bold text-purple-900">
-                                    {formatCurrency(product.sale_price, 'USD')}
+                                    {formatCurrency(product?.sale_price, 'USD')}
                                 </div>
                             </div>
                             <div className="p-3 rounded-lg border border-orange-100">
                                 <div className="text-sm text-orange-600">USD kursi</div>
                                 <div className="text-lg font-bold text-orange-900">
-                                    {formatNumber(product.usd_rate)} so'm
+                                    {formatNumber(product?.usd_rate)} so'm
                                 </div>
                             </div>
                         </div>
@@ -158,7 +158,7 @@ const ProductView = (product: product) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div className="flex gap-x-6 items-center p-3 rounded-lg">
                                 <span className="text-sm">Do'kon ID:</span>
-                                <span className="font-medium ">#{product.store_id}</span>
+                                <span className="font-medium ">#{product?.store_id}</span>
                             </div>
                             <div className="flex justify-around items-center p-3 rounded-lg">
                                 <span className="text-sm">Yaratilgan:</span>
