@@ -1,12 +1,10 @@
-import ExpenseForm from "./create-expenses";
 import ExpensesTable from "./expenses-table";
 
 const Expenses = () => {
     return (
         <div className="w-full">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-medium">Xarajatlar</h2>
-                <ExpenseForm />
+            <div className="flex justify-between items-center mb-1">
+                <h2 className="font-medium text-2xl">Xarajatlar</h2>
             </div>
             <ExpensesTable />
         </div>

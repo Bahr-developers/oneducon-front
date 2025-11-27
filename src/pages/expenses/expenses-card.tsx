@@ -66,7 +66,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-end w-full">
                         <Button
                             variant="outline"
                             size="sm"

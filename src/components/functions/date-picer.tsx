@@ -1,5 +1,6 @@
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import { useState } from "react" // useState import qo'shildi
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -19,8 +20,15 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ date, setDate, title, startTitle, className }: DatePickerProps) {
+    const [open, setOpen] = useState(false) // Popover ochiq/yopiq holati
+
+    const handleDateSelect = (selectedDate: Date | undefined) => {
+        setDate(selectedDate)
+        setOpen(false) // Sana tanlanganda popover yopiladi
+    }
+
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <div className="flex flex-col w-full">
                 <p className={`block w-full text-end ${className}`}>{title}</p>
                 <PopoverTrigger asChild className="h-12">
@@ -28,7 +36,7 @@ export function DatePicker({ date, setDate, title, startTitle, className }: Date
                         variant={"outline"}
                         className={cn(
                             "w-full justify-start text-left font-normal",
-                            !date && "text-muted-foreground  bg-transparent"
+                            !date && "text-muted-foreground bg-transparent"
                         )}
                     >
                         <CalendarIcon />
@@ -40,7 +48,7 @@ export function DatePicker({ date, setDate, title, startTitle, className }: Date
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={handleDateSelect} // Yangi funksiya ishlatildi
                         initialFocus
                     />
                 </PopoverContent>

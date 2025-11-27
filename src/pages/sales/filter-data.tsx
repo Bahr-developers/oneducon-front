@@ -41,7 +41,6 @@ const FilterData = () => {
         <Dialog>
             <DialogTrigger className="flex items-center gap-x-2 cursor-pointer">  Filter
                 <ListFilter size={20} /></DialogTrigger>
-
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Filter</DialogTitle>

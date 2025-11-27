@@ -19,6 +19,11 @@ interface propsRequest {
     page: number,
     limit: number
 }
+interface getStats {
+    from?: string,
+    to?: string,
+    storeId: string
+}
 
 export const expensesUtils = {
     getExpenses: async ({ limit, page }: propsRequest) => {
@@ -27,6 +32,10 @@ export const expensesUtils = {
     },
     getExpensesById: async (id: string) => {
         const { data } = await customAxios.get(`expenses/${id}`)
+        return data
+    },
+    getExpensesByStats: async ({ from, storeId, to }: getStats) => {
+        const { data } = await customAxios.get(`expenses/${storeId}/stats?from=${from}&to=${to}`)
         return data
     },
     postExpenses: async (expensesData: expensesType) => {

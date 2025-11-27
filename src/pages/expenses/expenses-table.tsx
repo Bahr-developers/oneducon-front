@@ -8,10 +8,14 @@ import { expensesUtils } from "@/utils/expenses";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryParams } from "@/components/functions/query-params";
 import PaginationContyent from "@/components/_components/pagination";
+import FilterExpenses from "./filter-expenses";
+import ExpenseForm from "./create-expenses";
+import { formatPrice } from "@/lib/utils";
 
 const ExpensesTable = () => {
     const { updateURL, getParam } = useQueryParams();
-
+    const [from, setFrom] = useState<Date | undefined>()
+    const [to, setTo] = useState<Date | undefined>()
     // URL dan qiymatlarni olish
     const [postsPerPage, setPostsPerPage] = useState<number>(
         () => parseInt(getParam('limit', '6'))
@@ -71,6 +75,13 @@ const ExpensesTable = () => {
     }, [currentPage, postsPerPage, updateURL]);
     return (
         <div className="w-full">
+            <div className="w-full flex justify-between items-center my-2">
+                <h3 className="text-2xl font-bold">{formatPrice(647158)} </h3>
+                <div className="flex items-center gap-x-2 justify-end">
+                    <FilterExpenses from={from} setFrom={setFrom} setTo={setTo} to={to} />
+                    <ExpenseForm />
+                </div>
+            </div>
             <div className="w-full grid grid-cols-3 gap-2">
                 {isLoading ? <>
                     <Skeleton className="w-[350px] h-[250px] rounded-lg" />
