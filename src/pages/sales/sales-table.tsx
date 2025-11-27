@@ -78,11 +78,11 @@ const SalesTable = () => {
                     <TableHeader>
                         <TableRow className="bg-muted/50 hover:bg-muted/50 border-b">
                             <TableHead className="w-[100px] font-semibold">№</TableHead>
+                            <TableHead className="font-semibold">Mahsulotlar(3)</TableHead>
                             <TableHead className="font-semibold">Xaridor</TableHead>
                             <TableHead className="font-semibold">Umumiy narxi</TableHead>
                             <TableHead className="font-semibold">To'langan narxi</TableHead>
                             <TableHead className="font-semibold">Qarzdorlik narxi</TableHead>
-                            <TableHead className="font-semibold">Mahsulotlar(3)</TableHead>
                             <TableHead className="font-semibold">Yaratilgan sana</TableHead>
                             <TableHead className="text-center font-semibold">Amallar</TableHead>
                         </TableRow>
@@ -101,6 +101,16 @@ const SalesTable = () => {
                                     >
                                         <TableCell className="font-medium">
                                             #{el.order_number}
+                                        </TableCell>
+                                        <TableCell>
+                                            <ul className="list-decimal pl-5 space-y-0.5">
+                                                {el.order_items.slice(0, 3).map((item, index, arr) => (
+                                                    <li key={item.product.id}>
+                                                        {item.product.name}
+                                                        <span title="Mahsulotlar yana mavjud" className="">{index === arr.length - 1 && el.order_items.length > 3 ? " ..." : ""}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         </TableCell>
                                         <TableCell className="font-medium">
                                             {el.client?.name || 'Noma\'lum'}
@@ -123,11 +133,6 @@ const SalesTable = () => {
                                                 </Badge>
                                             </div>
 
-                                        </TableCell>
-                                        <TableCell>
-                                            {el.order_items.slice(0, 3)?.map(item => (
-                                                <span className="block" key={item.product.id}>{item.product.name}</span>
-                                            ))}
                                         </TableCell>
 
                                         <TableCell className="text-muted-foreground">

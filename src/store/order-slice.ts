@@ -36,7 +36,16 @@ interface OrderState {
 }
 
 const initialState: OrderState = {
-    items: [],
+    items: [
+        {
+            id: crypto.randomUUID(),
+            product: null,
+            product_id: 0,
+            count: 1,
+            discount: 0,
+            price: 0,
+        }
+    ],
     payments: [],
     debt: null,
     totalItemsAmount: 0,

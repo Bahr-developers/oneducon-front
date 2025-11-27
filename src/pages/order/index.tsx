@@ -88,7 +88,7 @@ export default function OrderProducts() {
                 .filter((p) => p?.payment_type_id && p?.price > 0)
                 .map((p) => ({
                     ...p,
-                    payment_type_id: Number(p.payment_type_id),
+                    payment_type_id: Number(p?.payment_type_id),
                 })),
             debts: debt ? [debt] : [],
         };

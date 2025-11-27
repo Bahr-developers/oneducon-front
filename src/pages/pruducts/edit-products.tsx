@@ -70,8 +70,8 @@ const EditProduct = ({ product }: EditProductProps) => {
             category_id: data.categoryId ? Number(data.categoryId) : null,
             unit_id: data.unitId ? Number(data.unitId) : null,
             name: String(data?.name),
-            quantity: Number(data?.count),
-            reminder_quantity: Number(data?.remine_count),
+            quantity: data?.count ? Number(data?.count) : 0,
+            reminder_quantity: data?.remine_count ? Number(data?.remine_count) : 0,
             cost_price: Number(data?.tan_narx_uzb),
             cost_price_usd: Number(data?.tan_narx_dol),
             sale_price: Number(data?.saler_narxi),
@@ -144,7 +144,7 @@ const EditProduct = ({ product }: EditProductProps) => {
                             <span>Nomi</span>
                             <Input
                                 autoFocus
-                                defaultValue={data.name}
+                                defaultValue={data?.name}
                                 name="name"
                                 placeholder="Mahsulot nomi"
                                 onChange={handleChange}
@@ -155,7 +155,7 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>Miqdori</span>
                             <NumberInput
-                                value={data.count}
+                                value={data?.count}
                                 className="h-12"
                                 onChange={({ raw }) => setData((prev) => ({ ...prev, count: raw }))}
                             />
@@ -164,14 +164,14 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>Eslatma miqdori</span>
                             <NumberInput
-                                value={data.remine_count}
+                                value={data?.remine_count}
                                 className="h-12"
                                 onChange={({ raw }) => setData((prev) => ({ ...prev, remine_count: raw }))}
                             />
                         </label>
                         <label className="flex flex-col space-y-1">
                             <span>USD kursi $</span>
-                            <NumberInput value={data.usd_rate} onChange={({ raw }) => handleUsdRate(raw)}
+                            <NumberInput value={data?.usd_rate} onChange={({ raw }) => handleUsdRate(raw)}
                                 className="h-12"
                             />
                         </label>
@@ -179,25 +179,25 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>Tan narxi (UZS)</span>
                             <NumberInput className="h-12"
-                                value={data.tan_narx_uzb} onChange={({ raw }) => handleTanUzs(raw)} />
+                                value={data?.tan_narx_uzb} onChange={({ raw }) => handleTanUzs(raw)} />
                         </label>
 
                         <label className="flex flex-col space-y-1">
                             <span>Tan narxi ($)</span>
                             <NumberInput className="h-12"
-                                value={data.tan_narx_dol} onChange={({ raw }) => handleTanUsd(raw)} />
+                                value={data?.tan_narx_dol} onChange={({ raw }) => handleTanUsd(raw)} />
                         </label>
 
                         <label className="flex flex-col space-y-1">
                             <span>Sotuv narxi (UZS)</span>
                             <NumberInput
                                 className="h-12"
-                                value={data.saler_narxi} onChange={({ raw }) => handleSaleUzs(raw)} />
+                                value={data?.saler_narxi} onChange={({ raw }) => handleSaleUzs(raw)} />
                         </label>
 
                         <label className="flex flex-col space-y-1">
                             <span>Sotuv narxi ($)</span>
-                            <NumberInput value={data.saler_narxi_dol}
+                            <NumberInput value={data?.saler_narxi_dol}
                                 className="h-12"
                                 onChange={({ raw }) => handleSaleUsd(raw)} />
                         </label>
@@ -205,7 +205,7 @@ const EditProduct = ({ product }: EditProductProps) => {
                         <label className="flex flex-col space-y-1">
                             <span>O‘lchov birligi</span>
                             <Select
-                                defaultValue={data.unitId ? String(data.unitId) : undefined}
+                                defaultValue={data?.unitId ? String(data?.unitId) : undefined}
                                 onValueChange={(val) => setData((prev) => ({ ...prev, unitId: val }))}
                             >
                                 <SelectTrigger className="h-12 w-full">
