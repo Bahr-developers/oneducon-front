@@ -47,9 +47,7 @@ export default function CountUp({
         }
         return 0;
     };
-
     const maxDecimals = Math.max(getDecimalPlaces(from), getDecimalPlaces(to));
-
     useEffect(() => {
         if (ref.current) {
             ref.current.textContent = String(direction === 'down' ? to : from);
