@@ -10,12 +10,16 @@ import { useQueryParams } from "@/components/functions/query-params";
 import PaginationContyent from "@/components/_components/pagination";
 import FilterExpenses from "./filter-expenses";
 import ExpenseForm from "./create-expenses";
-import { formatPrice } from "@/lib/utils";
+import { formatDateServer, formatPrice } from "@/lib/utils";
+
 
 const ExpensesTable = () => {
     const { updateURL, getParam } = useQueryParams();
     const [from, setFrom] = useState<Date | undefined>()
     const [to, setTo] = useState<Date | undefined>()
+    const storeId = JSON.parse(localStorage.getItem('sotreId') || '1')
+    console.log(from, to);
+
     // URL dan qiymatlarni olish
     const [postsPerPage, setPostsPerPage] = useState<number>(
         () => parseInt(getParam('limit', '6'))
@@ -24,9 +28,18 @@ const ExpensesTable = () => {
         () => parseInt(getParam('page', '1'))
     );
     const { data: expensesData, isLoading } = useQuery<{ data: expense[], total: number }>({
-        queryKey: ['get_expenses_data', postsPerPage, currentPage],
-        queryFn: () => expensesUtils.getExpenses({ limit: postsPerPage, page: currentPage })
+        queryKey: ['get_expenses_data', postsPerPage, currentPage, from, to],
+        queryFn: () => expensesUtils.getExpenses({ limit: postsPerPage, page: currentPage, from: formatDateServer(from), to: formatDateServer(to) })
     });
+    const { data: dataStats } = useQuery<{ totalExpenses: number }>({
+        queryKey: ['get_stats', from, to],
+        queryFn: () => expensesUtils.getExpensesByStats({ storeId: storeId, from: formatDateServer(from), to: formatDateServer(to) })
+    })
+    console.log(dataStats?.totalExpenses);
+
+
+
+
     const expenses = expensesData?.data
 
     const totalPages = Math.max(1, Math.ceil((expensesData?.total || 1) / postsPerPage));
@@ -76,7 +89,7 @@ const ExpensesTable = () => {
     return (
         <div className="w-full">
             <div className="w-full flex justify-between items-center my-2">
-                <h3 className="text-2xl font-bold">{formatPrice(647158)} </h3>
+                <h3 className="text-2xl font-bold">{formatPrice(dataStats?.totalExpenses || 0)} </h3>
                 <div className="flex items-center gap-x-2 justify-end">
                     <FilterExpenses from={from} setFrom={setFrom} setTo={setTo} to={to} />
                     <ExpenseForm />

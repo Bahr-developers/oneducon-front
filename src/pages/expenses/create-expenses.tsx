@@ -56,6 +56,7 @@ const ExpenseForm: React.FC = () => {
         onSuccess: () => {
             setOpen(false)
             queryClient.invalidateQueries({ queryKey: ['get_expenses_data'] })
+            queryClient.invalidateQueries({ queryKey: ['get_stats'] })
             toast.success("Xarajat qo'shildi")
             setFormData({
                 definition: '',

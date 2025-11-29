@@ -21,6 +21,16 @@ export function formatDateOnly(dateString: string): string {
   });
 }
 
+
+export const formatDateServer = (date: Date | undefined): string => {
+  if (!date) return '';
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-');
+};
+
 export function formatTimeOnly(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleTimeString('uz-UZ', {

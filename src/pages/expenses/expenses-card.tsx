@@ -24,6 +24,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
         mutationFn: expensesUtils.deleteExpenses,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['get_expenses_data'] })
+            queryClient.invalidateQueries({ queryKey: ['get_stats'] })
             toast.success("Xajajat o'chirildi")
         },
         onError: (err) => {

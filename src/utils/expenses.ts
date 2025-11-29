@@ -17,17 +17,22 @@ interface editExpenses {
 
 interface propsRequest {
     page: number,
-    limit: number
+    limit: number,
+    from?: string,
+    to?: string,
 }
 interface getStats {
     from?: string,
     to?: string,
-    storeId: string
+    storeId: number
 }
 
 export const expensesUtils = {
-    getExpenses: async ({ limit, page }: propsRequest) => {
-        const { data } = await customAxios.get(`expenses?page=${page}&limit=${limit}`)
+    getExpenses: async ({ limit, page, from, to }: propsRequest) => {
+        const params = new URLSearchParams();
+        if (from) params.append("from", String(from));
+        if (to) params.append("to", String(to));
+        const { data } = await customAxios.get(`expenses?page=${page}&limit=${limit}&${params.toString()}`)
         return data
     },
     getExpensesById: async (id: string) => {
@@ -35,7 +40,10 @@ export const expensesUtils = {
         return data
     },
     getExpensesByStats: async ({ from, storeId, to }: getStats) => {
-        const { data } = await customAxios.get(`expenses/${storeId}/stats?from=${from}&to=${to}`)
+        const params = new URLSearchParams();
+        if (from) params.append("from", String(from));
+        if (to) params.append("to", String(to));
+        const { data } = await customAxios.get(`expenses/${storeId}/stats?${params.toString()}`)
         return data
     },
     postExpenses: async (expensesData: expensesType) => {
