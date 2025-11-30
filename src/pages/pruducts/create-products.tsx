@@ -37,6 +37,7 @@ const ProductCreate = () => {
     const [isEditingRate, setIsEditingRate] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([]);
+    const storeId = localStorage.getItem('storeId') || 1
     // Validate form - all required fields filled
     const queryClient = useQueryClient()
     const isFormValid = useMemo(() => {
@@ -201,7 +202,7 @@ const ProductCreate = () => {
             sale_price: data.saler_narxi!,
             sale_price_usd: data.saler_narxi_dol || 0,
             unit_id: +data.unitId!,
-            store_id: 1,
+            store_id: +storeId,
             usd_rate: usdRate
         };
 
