@@ -17,8 +17,7 @@ const ExpensesTable = () => {
     const { updateURL, getParam } = useQueryParams();
     const [from, setFrom] = useState<Date | undefined>()
     const [to, setTo] = useState<Date | undefined>()
-    const storeId = JSON.parse(localStorage.getItem('sotreId') || '1')
-    console.log(from, to);
+    const storeId = localStorage.getItem('storeId') || 1
 
     // URL dan qiymatlarni olish
     const [postsPerPage, setPostsPerPage] = useState<number>(
@@ -33,9 +32,8 @@ const ExpensesTable = () => {
     });
     const { data: dataStats } = useQuery<{ totalExpenses: number }>({
         queryKey: ['get_stats', from, to],
-        queryFn: () => expensesUtils.getExpensesByStats({ storeId: storeId, from: formatDateServer(from), to: formatDateServer(to) })
+        queryFn: () => expensesUtils.getExpensesByStats({ storeId: +storeId, from: formatDateServer(from), to: formatDateServer(to) })
     })
-    console.log(dataStats?.totalExpenses);
 
 
 
