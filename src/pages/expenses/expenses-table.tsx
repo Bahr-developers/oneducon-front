@@ -35,9 +35,6 @@ const ExpensesTable = () => {
         queryFn: () => expensesUtils.getExpensesByStats({ storeId: +storeId, from: formatDateServer(from), to: formatDateServer(to) })
     })
 
-
-
-
     const expenses = expensesData?.data
 
     const totalPages = Math.max(1, Math.ceil((expensesData?.total || 1) / postsPerPage));
