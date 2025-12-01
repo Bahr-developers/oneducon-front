@@ -57,6 +57,12 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
         }));
     };
 
+    // Tanlangan payment typelarni olish (joriy paymentdan tashqari)
+    const selectedPaymentTypes = payments
+        .filter((_, i) => i !== index)
+        .map(p => p.payment_type_id)
+        .filter(Boolean);
+
     const handlePriceChange = (val: { raw: number }) => {
         // Boshqa to'lovlar yig'indisini hisoblash (joriy to'lovdan tashqari)
         const otherPaymentsTotal = payments
@@ -103,11 +109,18 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
                             <SelectValue placeholder="To'lov turini tanlang" />
                         </SelectTrigger>
                         <SelectContent>
-                            {paymentTypes?.map((type) => (
-                                <SelectItem key={type.id} value={type.id}>
-                                    {type.name}
-                                </SelectItem>
-                            ))}
+                            {paymentTypes?.map((type) => {
+                                const isDisabled = selectedPaymentTypes.includes(type.id);
+                                return (
+                                    <SelectItem
+                                        key={type.id}
+                                        value={type.id}
+                                        disabled={isDisabled}
+                                    >
+                                        {type.name} {isDisabled ? '(tanlangan)' : ''}
+                                    </SelectItem>
+                                );
+                            })}
                         </SelectContent>
                     </Select>
                 </label>

@@ -50,6 +50,13 @@ export default function OrderProducts() {
         dispatch(addOrderItem());
     };
 
+    const newPayments = payments?.map(el => {
+        return {
+            payment_type_id: el.payment_type_id,
+            price: el.price
+        }
+    })
+
     const handleAddPayment = () => {
         dispatch(addPayment());
     };
@@ -84,13 +91,14 @@ export default function OrderProducts() {
                     discount: Number(item.discount),
                     price: item.price,
                 })),
-            payments: payments
-                .filter((p) => p?.payment_type_id && p?.price > 0)
-                .map((p) => ({
-                    ...p,
+            payments: newPayments
+                ?.filter((p) => p?.payment_type_id && p?.price > 0)
+                ?.map((p) => ({
                     payment_type_id: Number(p?.payment_type_id),
+                    price: p.price,
                 })),
-            debts: debt ? [debt] : [],
+            // Faqat haqiqatan qarz bo'lsa va summa 0 dan katta bo'lsa yuborish
+            debts: (debt && debt.price > 0 && remainingDebt > 0) ? [debt] : [],
         };
 
         createOrder.mutate(orderData);
@@ -107,6 +115,9 @@ export default function OrderProducts() {
         setReturnTime(undefined)
         setReminder('')
     };
+
+    // Barcha paymentlar to'liq to'ldirilganmi tekshirish
+    const allPaymentsValid = payments.length > 0 && payments.every(p => p.payment_type_id && p.price > 0);
 
     return (
         <div className="w-full">
@@ -235,10 +246,19 @@ export default function OrderProducts() {
                 disabled={
                     items?.length === 0 ||
                     items.every(i => !i.product) ||
-                    (hasDebt && (!selectedUser || !returnTime))
+                    !allPaymentsValid ||
+                    (hasDebt && (!selectedUser || !returnTime)) ||
+                    createOrder.isPending
                 }
             >
-                Buyurtmani saqlash
+                {createOrder.isPending ? (
+                    <span className="flex items-center gap-2">
+                        <span className="animate-spin">⏳</span>
+                        Saqlanmoqda...
+                    </span>
+                ) : (
+                    'Buyurtmani saqlash'
+                )}
             </Button>
         </div>
     );

@@ -170,30 +170,27 @@ const orderSlice = createSlice({
 
 // Helper function - hisoblashlar
 function recalculateTotals(state: OrderState) {
-    // 1. Items umumiy summasi
+    // 1. Items umumiy summasi (barcha mahsulotlar)
     state.totalItemsAmount = state.items.reduce((sum, item) => {
-        if (item.product) {
+        if (item.product && item.product_id) {
             return sum + (item.price - item.discount) * item.count;
         }
         return sum;
     }, 0);
 
-    // 2. To'langan summa
+    // 2. To'langan summa (barcha paymentlar)
     state.totalPaidAmount = state.payments.reduce((sum, payment) => {
         return sum + Number(payment.price || 0);
     }, 0);
 
-    // 3. Qarz summasi
-    state.remainingDebt = Math.max(
-        0,
-        state.totalItemsAmount - state.totalPaidAmount
-    );
+    // 3. Qarz summasi - faqat agar to'langan summa kamroq bo'lsa
+    state.remainingDebt = Math.max(0, state.totalItemsAmount - state.totalPaidAmount);
 
-    // 4. Qarz bormi?
+    // 4. Qarz bormi? - Faqat agar haqiqatan qarz bo'lsa
     state.hasDebt = state.remainingDebt > 0 && state.totalItemsAmount > 0;
 
-    // 5. Agar qarz bo'lmasa, debt objectni tozalash
-    if (!state.hasDebt) {
+    // 5. Agar qarz bo'lmasa (to'liq to'langan), debt objectni tozalash
+    if (!state.hasDebt || state.remainingDebt === 0) {
         state.debt = null;
     } else if (state.debt) {
         // Agar qarz bor va debt object mavjud bo'lsa, price ni yangilash
