@@ -95,6 +95,15 @@ const orderSlice = createSlice({
                 item.product_id = Number(action.payload.product.id);
                 item.price = action.payload.product.sale_price;
                 recalculateTotals(state);
+                
+                // Agar birinchi mahsulot tanlansa va payment yo'q bo'lsa, payment qo'shish
+                const hasAnyProduct = state.items.some(i => i.product !== null);
+                if (hasAnyProduct && state.payments.length === 0) {
+                    state.payments.push({
+                        payment_type_id: "",
+                        price: 0,
+                    });
+                }
             }
         },
 
@@ -111,6 +120,13 @@ const orderSlice = createSlice({
             action: PayloadAction<{ index: number; payment: Payment }>
         ) => {
             state.payments[action.payload.index] = action.payload.payment;
+            
+            // Agar payment_type_id bo'sh bo'lsa va bu birinchi payment bo'lsa,
+            // "naqt" (ID: "1") ni avtomatik tanlash
+            if (action.payload.index === 0 && !action.payload.payment.payment_type_id) {
+                state.payments[action.payload.index].payment_type_id = "1";
+            }
+            
             recalculateTotals(state);
         },
 
@@ -131,7 +147,20 @@ const orderSlice = createSlice({
 
         // ======== RESET ========
         resetOrder: () => {
-            return initialState;
+            // Yangi order uchun bitta bo'sh item bilan qaytarish
+            return {
+                ...initialState,
+                items: [
+                    {
+                        id: crypto.randomUUID(),
+                        product: null,
+                        product_id: 0,
+                        count: 1,
+                        discount: 0,
+                        price: 0,
+                    }
+                ]
+            };
         },
     },
 });
