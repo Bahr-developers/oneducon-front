@@ -16,6 +16,8 @@ export interface OrderItem {
 export interface Payment {
     payment_type_id: string;
     price: number;
+    isNew?: boolean;
+    userModified?: boolean; // User o'zi o'zgartirganini belgilash
 }
 
 export interface Debt {
@@ -94,15 +96,22 @@ const orderSlice = createSlice({
                 item.product = action.payload.product;
                 item.product_id = Number(action.payload.product.id);
                 item.price = action.payload.product.sale_price;
+
+                // Avval totallarni hisoblash
                 recalculateTotals(state);
-                
+
                 // Agar birinchi mahsulot tanlansa va payment yo'q bo'lsa, payment qo'shish
                 const hasAnyProduct = state.items.some(i => i.product !== null);
                 if (hasAnyProduct && state.payments.length === 0) {
+                    // "Naqd" (ID: "1") bilan payment qo'shish
                     state.payments.push({
-                        payment_type_id: "",
-                        price: 0,
+                        payment_type_id: "1",
+                        price: state.totalItemsAmount,
+                        isNew: true,
                     });
+
+                    // Paymentdan keyin yana totalni hisoblash
+                    recalculateTotals(state);
                 }
             }
         },
@@ -112,6 +121,7 @@ const orderSlice = createSlice({
             state.payments.push({
                 payment_type_id: "",
                 price: 0,
+                isNew: true, // Yangi payment deb belgilash
             });
         },
 
@@ -120,13 +130,6 @@ const orderSlice = createSlice({
             action: PayloadAction<{ index: number; payment: Payment }>
         ) => {
             state.payments[action.payload.index] = action.payload.payment;
-            
-            // Agar payment_type_id bo'sh bo'lsa va bu birinchi payment bo'lsa,
-            // "naqt" (ID: "1") ni avtomatik tanlash
-            if (action.payload.index === 0 && !action.payload.payment.payment_type_id) {
-                state.payments[action.payload.index].payment_type_id = "1";
-            }
-            
             recalculateTotals(state);
         },
 

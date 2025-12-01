@@ -16,6 +16,8 @@ interface PaymentItemProps {
     payment: {
         payment_type_id: string;
         price: number;
+        isNew?: boolean;
+        userModified?: boolean;
     };
     paymentTypes?: PaymentType[];
 }
@@ -27,28 +29,31 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const { totalItemsAmount } = totals;
 
-    // To'lov turi tanlaganda automatic summa to'ldirish
+    // Umumiy summa o'zgarganda qolgan summani hisoblash va yangilash
     useEffect(() => {
-        if (payment.payment_type_id && payment.price === 0) {
-            // Oldingi to'lovlar yig'indisini hisoblash
-            const previousPayments = payments
-                .slice(0, index)
-                .reduce((sum, p) => sum + Number(p.price || 0), 0);
+        // Oldingi to'lovlar yig'indisini hisoblash
+        const previousPayments = payments
+            .slice(0, index)
+            .reduce((sum, p) => sum + Number(p.price || 0), 0);
 
-            // Qolgan summani hisoblash
-            const remainingAmount = Math.max(0, totalItemsAmount - previousPayments);
+        // Qolgan summani hisoblash
+        const remainingAmount = Math.max(0, totalItemsAmount - previousPayments);
 
-            dispatch(updatePayment({
-                index,
-                payment: { ...payment, price: remainingAmount },
-            }));
+        // Agar payment yangi bo'lsa yoki user o'zgartirmagan bo'lsa, avtomatik yangilash
+        if (payment.isNew || !payment.userModified) {
+            if (payment.price !== remainingAmount) {
+                dispatch(updatePayment({
+                    index,
+                    payment: { ...payment, price: remainingAmount, isNew: false },
+                }));
+            }
         }
-    }, [dispatch, index, payment, payment.payment_type_id, payments, totalItemsAmount]);
+    }, [totalItemsAmount, payments, index, payment, dispatch]);
 
     const handleSelectType = (typeId: string) => {
         dispatch(updatePayment({
             index,
-            payment: { ...payment, payment_type_id: typeId },
+            payment: { ...payment, payment_type_id: typeId, isNew: false },
         }));
     };
 
@@ -66,7 +71,7 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
 
         dispatch(updatePayment({
             index,
-            payment: { ...payment, price: newPrice },
+            payment: { ...payment, price: newPrice, isNew: false, userModified: true },
         }));
     };
 

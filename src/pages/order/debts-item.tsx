@@ -39,9 +39,10 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
         }
     }, [dispatch, open, remainingDebt, returnTime, reminder, selectedUser]);
 
+    // totalItemsAmount, totalPaidAmount, remainingDebt o'zgarganda qarzni yangilash
     useEffect(() => {
         updateDebt();
-    }, [updateDebt]);
+    }, [updateDebt, totalItemsAmount, totalPaidAmount, remainingDebt]);
 
     const handleReminderChange = (value: string) => {
         setReminder(value);
@@ -51,7 +52,6 @@ const DebtsItem = ({ open, returnTime, setReturnTime, selectedUser, setSelectedU
         queryKey: ['customers'],
         queryFn: customerUtils.getCustomerAll
     })
-    console.log(customers?.data);
 
     return (
         <div className="flex flex-col space-y-4 w-full">
