@@ -29,6 +29,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import UniversalSearchSelect from '@/components/_components/search-select';
 import CreateCustomer from '../customers/create-cus';
 import { customerUtils } from '@/utils/customer';
+import UseSceen from '@/components/sceen/test';
 
 export default function OrderProducts() {
     const dispatch = useAppDispatch();
@@ -260,6 +261,8 @@ export default function OrderProducts() {
                     'Buyurtmani saqlash'
                 )}
             </Button>
+
+            <UseSceen />
         </div>
     );
 }
