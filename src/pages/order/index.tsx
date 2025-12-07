@@ -56,6 +56,7 @@ export default function OrderProducts() {
             price: el.price
         }
     })
+    
     const handleAddPayment = () => {
         dispatch(addPayment());
     };
