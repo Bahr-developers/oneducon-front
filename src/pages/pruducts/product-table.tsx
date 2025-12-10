@@ -50,6 +50,12 @@ const Productstable = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>(
         () => getParam('category', '')
     );
+
+    const removeParam = (key: string) => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete(key);
+        window.history.replaceState({}, "", url.toString());
+    };
     const debouncedSearch = useDebounce(searchQuery, 500);
     const { data: procusts, isLoading } = useQuery<{ data: product[], total: number }>({
         queryKey: ['get_all_procusts', debouncedSearch, selectedCategory, postsPerPage, currentPage],
@@ -135,9 +141,17 @@ const Productstable = () => {
                         </Button>
                         <Select
                             value={selectedCategory}
-                            onValueChange={(value) => setSelectedCategory(value)}>
+                            onValueChange={(value) => {
+                                if (value === "all") {
+                                    removeParam("category");
+                                    setSelectedCategory("");
+                                } else {
+                                    setSelectedCategory(value);
+                                }
+                            }}
+                        >
                             <SelectTrigger className="w-full sm:w-[280px] h-11">
-                                <SelectValue placeholder="Kategoriya" />
+                                <SelectValue placeholder="Barchasi" />
                             </SelectTrigger>
                             <SelectContent>
                                 {categoriesLoading ? (
@@ -145,11 +159,16 @@ const Productstable = () => {
                                         <Skeleton className="h-8 w-full" />
                                     </div>
                                 ) : (
-                                    categories?.data?.map((el: categoryType) => (
-                                        <SelectItem value={el?.id} key={el?.id}>
-                                            {el?.name}
+                                    <>
+                                        <SelectItem value={'all'}>
+                                            {"Barchasi"}
                                         </SelectItem>
-                                    ))
+                                        {categories?.data?.map((el: categoryType) => (
+                                            <SelectItem value={el?.id} key={el?.id}>
+                                                {el?.name}
+                                            </SelectItem>
+                                        ))}
+                                    </>
                                 )}
                             </SelectContent>
                         </Select>

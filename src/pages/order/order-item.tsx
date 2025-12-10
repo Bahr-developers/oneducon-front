@@ -93,7 +93,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
                     <span className="my-1 block">Tan narxi($)</span>
                     <Input
                         className="w-full h-12"
-                        value={item.product?.cost_price_usd}
+                        value={item?.product?.usd_rate ? (item?.product?.cost_price / item?.product?.usd_rate).toFixed(2) : 0}
                         readOnly
                     />
                 </label>

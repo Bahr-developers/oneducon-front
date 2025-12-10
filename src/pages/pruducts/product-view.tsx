@@ -17,13 +17,14 @@ const ProductView = (product: product) => {
     const formatNumber = (num: number) => {
         return new Intl.NumberFormat().format(num);
     };
+    const formatCurrency = (amount: number | string, currency: string = 'UZS') => {
+        const num = Number(amount);
 
-    const formatCurrency = (amount: number, currency: string = 'UZS') => {
         if (currency === 'UZS') {
-            return `${formatNumber(amount)} so'm`;
+            return `${formatNumber(num)} so'm`;
         }
-        return `$${formatNumber(amount)}`;
-    };
+        return `$${formatNumber(num)}`;
+    }
 
     const getStatusColor = (quantity: number) => {
         if (quantity > 0) return "text-green-600 bg-green-50 border-green-200";
@@ -131,13 +132,15 @@ const ProductView = (product: product) => {
                             <div className="p-3 rounded-lg border border-green-100">
                                 <div className="text-sm text-green-600">Tan narxi ($)</div>
                                 <div className="text-lg font-bold text-green-900">
-                                    {formatCurrency(product?.cost_price_usd, 'USD')}
+                                    {/* {formatCurrency(product?.cost_price_usd, 'USD')} */}
+                                    {formatCurrency((product?.cost_price / product?.usd_rate).toFixed(2), 'USD')}
+
                                 </div>
                             </div>
                             <div className="p-3 rounded-lg border border-purple-100">
-                                <div className="text-sm text-purple-600">Sotuv narxi ($)</div>
+                                <div className="text-sm text-purple-600">Sotuv narxi (UZS)</div>
                                 <div className="text-lg font-bold text-purple-900">
-                                    {formatCurrency(product?.sale_price, 'USD')}
+                                    {formatCurrency(product?.sale_price, 'UZS')}
                                 </div>
                             </div>
                             <div className="p-3 rounded-lg border border-orange-100">
