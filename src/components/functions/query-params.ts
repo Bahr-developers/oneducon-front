@@ -5,11 +5,11 @@ export function useQueryParams() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const updateURL = useCallback((params: Record<string, string | number>) => {
-        const current = new URLSearchParams(searchParams.toString());
+        const current = new URLSearchParams(searchParams?.toString());
 
         Object.entries(params).forEach(([key, value]) => {
-            if (value) current.set(key, value.toString());
-            else current.delete(key);
+            if (value) current.set(key, value?.toString());
+            else current?.delete(key);
         });
 
         setSearchParams(current, { replace: true });
