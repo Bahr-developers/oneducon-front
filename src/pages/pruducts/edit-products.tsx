@@ -31,6 +31,7 @@ interface EditProductProps {
 
 const EditProduct = ({ product }: EditProductProps) => {
 	const [open, setOpen] = useState(false)
+	const [barcode, setBarcode] = useState(product?.barcode || '')
 	const [data, setData] = useState({
 		name: product?.name,
 		count: product?.quantity ?? 0,
@@ -60,7 +61,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 		mutationFn: productUtils.patchProduct,
 		onSuccess: data => {
 			toast.success(data?.message)
-			queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] })
+			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 			setOpen(false)
 		},
 		onError: err => {
@@ -83,6 +84,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 			sale_price: Number(data?.saler_narxi),
 			sale_price_usd: Number(data?.saler_narxi_dol),
 			usd_rate: Number(data?.usd_rate),
+			barcode,
 		})
 	}
 
@@ -147,8 +149,6 @@ const EditProduct = ({ product }: EditProductProps) => {
 				: 0,
 		}))
 	}
-
-	console.log(data?.tan_narx_dol, 'bu shuuuu')
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -236,6 +236,22 @@ const EditProduct = ({ product }: EditProductProps) => {
 								className='h-12'
 								onChange={({ raw }) => handleSaleUsd(raw)}
 							/>
+						</label>
+
+						<label className='w-full flex col-span-2 flex-col space-y-2'>
+							<span className='text-sm font-medium flex items-center gap-2'>
+								Barcode
+							</span>
+							<div className='relative'>
+								<Input
+									type='text'
+									step='0.01'
+									className='h-12 pr-10'
+									placeholder='Misol: 4780087820048'
+									value={barcode}
+									onChange={e => setBarcode(e.target.value)}
+								/>
+							</div>
 						</label>
 
 						<label className='flex flex-col space-y-1'>

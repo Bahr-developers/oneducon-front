@@ -22,6 +22,7 @@ export interface product {
     usd_rate: number
     count: number
     created_at: string
+    barcode?:string
 }
 
 export interface user {

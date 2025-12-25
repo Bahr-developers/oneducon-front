@@ -60,7 +60,7 @@ const Productstable = () => {
 		total: number
 	}>({
 		queryKey: [
-			'get_all_procusts',
+			'get_all_products',
 			debouncedSearch,
 			selectedCategory,
 			postsPerPage,
@@ -95,7 +95,7 @@ const Productstable = () => {
 		mutationFn: productUtils?.deleteProduct,
 		onSuccess: () => {
 			toast.success("Mahsulot o'chirildi.")
-			queryClient.invalidateQueries({ queryKey: ['get_all_procusts'] })
+			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 		},
 		onError: err => {
 			console.log(err)

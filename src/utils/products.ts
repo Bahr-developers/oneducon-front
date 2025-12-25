@@ -13,11 +13,12 @@ interface productData {
     unit_id: number | null
     category_id: number | null
     store_id?: number
+    barcode: string
 }
 
 interface getParams {
-    limit: number,
-    page: number,
+    limit?: number,
+    page?: number,
     search?: string;
     category?: string
 }
@@ -32,7 +33,9 @@ export const productUtils = {
 
         if (category) params.append("category_id", String(category));
         if (search) params.append("search", search);
-        const { data } = await customAxios.get(`products?page=${page}&limit=${limit}&${params.toString()}`)
+        if (page) params.append("page", page.toString());
+        if (limit) params.append("limit", limit.toString());
+        const { data } = await customAxios.get(`products?&${params.toString()}`)
         return data
     },
     getProductsAlls: async () => {
@@ -69,7 +72,6 @@ export const productUtils = {
         return data
     },
     postProductImport: async (file: FormData) => {
-
         const { data } = await customAxios.post(`products/import`, file)
         return data
     },
