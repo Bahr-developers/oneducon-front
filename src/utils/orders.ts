@@ -33,11 +33,11 @@ interface getParams {
     search?: string,
     client?: string,
     payment_type?: string,
-    from?: string,
-    to?: string
+    from?: Date | undefined,
+    to?: Date | undefined
 }
 
-export const orderUtils = {
+export const    orderUtils = {
     getOrders: async ({ limit, page, search, client, payment_type, from, to }: getParams) => {
         const params = new URLSearchParams();
 
@@ -47,8 +47,8 @@ export const orderUtils = {
         if (search) params.append("search", search);
         if (client) params.append("client", client);
         if (payment_type) params.append("payment_type", payment_type);
-        if (from) params.append("from", from);
-        if (to) params.append("to", to);
+        if (from) params.append("from", from.toISOString());
+        if (to) params.append("to", to.toISOString());
 
         const { data } = await customAxios.get(`orders?${params.toString()}`);
         return data;

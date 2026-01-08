@@ -23,6 +23,17 @@ import SelesTableSkeleton from './seles-table-skeleton'
 
 const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
+	const [from, setFrom] = useState<Date | undefined>()
+	const [to, setTo] = useState<Date | undefined>()
+	const [client, setClient] = useState('')
+	const [paymentType, setPaymentType] = useState('')
+	const [appliedFilters, setAppliedFilters] = useState<{
+		from?: Date
+		to?: Date
+		client?: string
+		paymentType?: string
+	}>({})
+
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
 		parseInt(getParam('limit', '5'))
 	)
@@ -34,12 +45,22 @@ const SalesTable = () => {
 	)
 	const { data: sales, isLoading } = useQuery<{ data: order[]; total: number }>(
 		{
-			queryKey: ['get_all_orders', currentPage, postsPerPage, searchQuery],
+			queryKey: [
+				'get_all_orders',
+				currentPage,
+				postsPerPage,
+				searchQuery,
+				appliedFilters,
+			],
 			queryFn: async () =>
 				await orderUtils.getOrders({
 					limit: postsPerPage,
 					page: currentPage,
 					search: searchQuery,
+					client: client,
+					from: from,
+					payment_type: paymentType,
+					to: to,
 				}),
 		}
 	)
@@ -75,7 +96,23 @@ const SalesTable = () => {
 						onChange={e => setSearchQuery(e.target.value)}
 					/>
 				</div>
-				<FilterData />
+				<FilterData
+					from={from}
+					setFrom={setFrom}
+					setTo={setTo}
+					to={to}
+					setClient={setClient}
+					setPaymentType={setPaymentType}
+					onApply={() => {
+						setAppliedFilters({
+							from,
+							to,
+							client,
+							paymentType,
+						})
+						setCurrentPage(1) // pagination reset
+					}}
+				/>
 			</div>
 
 			<div className='border rounded-xl overflow-hidden bg-card'>
