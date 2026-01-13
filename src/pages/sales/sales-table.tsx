@@ -65,6 +65,15 @@ const SalesTable = () => {
 		}
 	)
 
+	const resetFilter = () => {
+		setFrom(undefined)
+		setTo(undefined)
+		setClient('')
+		setPaymentType('')
+		setAppliedFilters({})
+		setCurrentPage(1)
+	}
+
 	const debouncedSearch = useDebounce(searchQuery, 500)
 
 	useEffect(() => {
@@ -96,23 +105,28 @@ const SalesTable = () => {
 						onChange={e => setSearchQuery(e.target.value)}
 					/>
 				</div>
-				<FilterData
-					from={from}
-					setFrom={setFrom}
-					setTo={setTo}
-					to={to}
-					setClient={setClient}
-					setPaymentType={setPaymentType}
-					onApply={() => {
-						setAppliedFilters({
-							from,
-							to,
-							client,
-							paymentType,
-						})
-						setCurrentPage(1) // pagination reset
-					}}
-				/>
+				<div className='flex justify-center gap-2.5'>
+					<FilterData
+						from={from}
+						setFrom={setFrom}
+						setTo={setTo}
+						to={to}
+						setClient={setClient}
+						setPaymentType={setPaymentType}
+						onApply={() => {
+							setAppliedFilters({
+								from,
+								to,
+								client,
+								paymentType,
+							})
+							setCurrentPage(1) // pagination reset
+						}}
+					/>
+					<div>
+						<Button variant={'outline'} onClick={resetFilter}>Filterni tozalash</Button>
+					</div>
+				</div>
 			</div>
 
 			<div className='border rounded-xl overflow-hidden bg-card'>
@@ -157,7 +171,7 @@ const SalesTable = () => {
 														{item.product.name}
 														<span title='Mahsulotlar yana mavjud' className=''>
 															{index === arr.length - 1 &&
-															el.order_items.length > 3
+																el.order_items.length > 3
 																? ' ...'
 																: ''}
 														</span>
@@ -186,11 +200,10 @@ const SalesTable = () => {
 													variant={
 														remainingDebt > 0 ? 'destructive' : 'default'
 													}
-													className={`${
-														remainingDebt > 0
-															? 'text-[9px] absolute -top-2'
-															: 'text-sm'
-													} `}
+													className={`${remainingDebt > 0
+														? 'text-[9px] absolute -top-2'
+														: 'text-sm'
+														} `}
 												>
 													{remainingDebt > 0 ? 'Qarzli' : "To'liq to'langan"}
 												</Badge>
