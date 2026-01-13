@@ -141,12 +141,8 @@ const EditProduct = ({ product }: EditProductProps) => {
 		setData(prev => ({
 			...prev,
 			usd_rate: value,
-			tan_narx_dol: prev?.tan_narx_uzb
-				? Math.round((prev.tan_narx_uzb / value) * 100) / 100
-				: 0,
-			saler_narxi_dol: prev.saler_narxi
-				? Math.round((prev.saler_narxi / value) * 100) / 100
-				: 0,
+			tan_narx_uzb: Math.round(prev.tan_narx_dol * value),
+			saler_narxi: Math.round(prev.saler_narxi_dol * value),
 		}))
 	}
 
