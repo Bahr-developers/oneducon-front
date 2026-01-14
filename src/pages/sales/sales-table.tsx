@@ -34,6 +34,14 @@ const SalesTable = () => {
 		paymentType?: string
 	}>({})
 
+	useEffect(() => {
+		updateURL({
+			from: from ? from.toISOString().split('T')[0] : '',
+			to: to ? to.toISOString().split('T')[0] : ''
+		})
+	}, [from, to, updateURL])
+
+
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
 		parseInt(getParam('limit', '5'))
 	)
@@ -72,6 +80,13 @@ const SalesTable = () => {
 		setPaymentType('')
 		setAppliedFilters({})
 		setCurrentPage(1)
+
+		updateURL({
+			client: '',
+			paymentType: '',
+			from: '',
+			to: '',
+		})
 	}
 
 	const debouncedSearch = useDebounce(searchQuery, 500)
@@ -91,6 +106,8 @@ const SalesTable = () => {
 	}, [currentPage, totalPages])
 
 	const paginated = sales?.data
+
+	const isHidden = !from && !to && !client && !paymentType
 
 	return (
 		<div className='mt-10'>
@@ -124,7 +141,7 @@ const SalesTable = () => {
 						}}
 					/>
 					<div>
-						<Button variant={'outline'} onClick={resetFilter}>Filterni tozalash</Button>
+						<Button variant={'outline'} className={isHidden ? 'hidden' : ''} onClick={resetFilter}>Filterni tozalash</Button>
 					</div>
 				</div>
 			</div>
