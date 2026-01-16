@@ -45,6 +45,8 @@ const EditProduct = ({ product }: EditProductProps) => {
 		categoryId: product?.category?.id ?? '',
 	})
 
+	console.log(data)
+
 	const queryClient = useQueryClient()
 
 	const { data: categories } = useQuery({
