@@ -46,6 +46,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 	})
 
 	console.log(data)
+	console.log(product, product.name)
 
 	const queryClient = useQueryClient()
 
@@ -91,7 +92,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 	}
 
 	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
 	) => {
 		const { name, value } = e.target
 		setData(prev => ({
