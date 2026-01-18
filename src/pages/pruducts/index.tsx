@@ -16,7 +16,7 @@ const Products = () => {
 			return result
 		},
 		onSuccess: () => {
-			console.log('Success callback') // Debug
+			console.log('Success callback')
 			toast.success('Fayl yuklandi')
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 		},
