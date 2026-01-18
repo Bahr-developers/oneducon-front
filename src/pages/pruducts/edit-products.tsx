@@ -15,7 +15,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 import { Pencil } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { product, categoryType } from '@/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -148,6 +148,25 @@ const EditProduct = ({ product }: EditProductProps) => {
 			saler_narxi: Math.round(prev.saler_narxi_dol * value),
 		}))
 	}
+
+	// Modal ochilganda yoki mahsulot o'zgarganda state-ni yangilash
+	useEffect(() => {
+		if (open) {
+			setData({
+				name: product?.name,
+				count: product?.quantity ?? 0,
+				remine_count: product?.reminder_quantity ?? 0,
+				tan_narx_uzb: product?.cost_price,
+				tan_narx_dol: product?.cost_price_usd,
+				saler_narxi: product?.sale_price,
+				saler_narxi_dol: product?.sale_price_usd,
+				usd_rate: product?.usd_rate,
+				unitId: product?.unit?.id ?? '',
+				categoryId: product?.category?.id ?? '',
+			})
+			setBarcode(product?.barcode || '')
+		}
+	}, [open, product])
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
