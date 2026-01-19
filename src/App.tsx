@@ -4,7 +4,6 @@ import Root from './layout/Root'
 import Auth from './pages/login'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
-import ErrorPage from './pages/error-page'
 
 const ProtectedRoute = lazy(() => import('./layout/protected-router'))
 const DashboardLayout = lazy(() => import('./layout/dashbord-layout'))
@@ -21,6 +20,7 @@ const StoreProfile = lazy(() => import('./pages/profile'))
 const OrderNew = lazy(() => import('./pages/order-new'))
 const DebtsHistore = lazy(() => import('./pages/debts/debts-histore'))
 const Expenses = lazy(() => import('./pages/expenses'))
+const ErrorPage = lazy(() => import('./pages/error-page'))
 
 const LoadingSpinner = () => (
 	<div className='flex items-center justify-center min-h-screen'>
@@ -53,7 +53,7 @@ const router = createBrowserRouter([
 						path: 'dashboard',
 						element: (
 							<SuspenseWrapper>
-								<ErrorPage />
+								<DashboardMain />
 							</SuspenseWrapper>
 						),
 						errorElement: <ErrorPage />,
