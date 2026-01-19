@@ -33,7 +33,6 @@ const ErrorPage = () => {
 					)}
 				</div>
 
-				{/* Matnlar qismi */}
 				<div className='space-y-2'>
 					<h1 className='text-3xl font-semibold tracking-tight text-foreground'>
 						{isChunkError ? 'Yangi versiya mavjud!' : 'Xatolik yuz berdi'}
