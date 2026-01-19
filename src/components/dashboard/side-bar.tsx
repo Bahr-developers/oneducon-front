@@ -18,15 +18,49 @@ import { ScrollArea } from '../ui/scroll-area'
 import { useTranslation } from 'react-i18next'
 import { CustomTooltip } from '../functions/hover-text'
 import imagelogo from '@/assets/images/logo.png'
-type NavItem = { labelKey: string; href: string; icon: LucideIcon }
+type NavItem = {
+	labelKey: string
+	href: string
+	icon: LucideIcon
+	allowedStores?: string[]
+}
 function useNavItems(): NavItem[] {
-	return [
-		{ labelKey: 'Asosiy panel', href: '/dashboard', icon: House },
-		{ labelKey: 'Buyurtma berish', href: '/dashboard/orders', icon: BadgePlus },
-		// { labelKey: "Buyurtma new", href: "/dashboard/order-new", icon: BadgePlus },
-		{ labelKey: 'Sotuvlar', href: '/dashboard/selers', icon: BadgeDollarSign },
-		{ labelKey: 'Xarajatlar', href: '/dashboard/expenses', icon: Expand },
-		{ labelKey: 'Qarzlar', href: '/dashboard/debts', icon: Kanban },
+	// 1. Store ID ni olamiz (agar null bo'lsa bo'sh string qaytaradi)
+	const storeId = localStorage.getItem('storeId') || ''
+
+	// 2. Barcha menyu elementlari ro'yxati (Config)
+	const allNavItems: NavItem[] = [
+		{
+			labelKey: 'Asosiy panel',
+			href: '/dashboard',
+			icon: House,
+		},
+		{
+			labelKey: 'Buyurtma berish',
+			href: '/dashboard/orders',
+			icon: BadgePlus,
+		},
+		{
+			labelKey: 'Buyurtma yangi',
+			href: '/dashboard/order-new',
+			icon: BadgePlus,
+			allowedStores: ['1', '4'], // <--- DIQQAT: Faqat 1 va 4 storeId uchun
+		},
+		{
+			labelKey: 'Sotuvlar',
+			href: '/dashboard/selers',
+			icon: BadgeDollarSign,
+		},
+		{
+			labelKey: 'Xarajatlar',
+			href: '/dashboard/expenses',
+			icon: Expand,
+		},
+		{
+			labelKey: 'Qarzlar',
+			href: '/dashboard/debts',
+			icon: Kanban,
+		},
 		{
 			labelKey: 'Mahsulotlar',
 			href: '/dashboard/products',
@@ -37,9 +71,26 @@ function useNavItems(): NavItem[] {
 			href: '/dashboard/low-products',
 			icon: ScanBarcode,
 		},
-		{ labelKey: 'Mijozlar', href: '/dashboard/customers', icon: Users },
-		{ labelKey: 'Birliklar', href: '/dashboard/units', icon: Combine },
+		{
+			labelKey: 'Mijozlar',
+			href: '/dashboard/customers',
+			icon: Users,
+		},
+		{
+			labelKey: 'Birliklar',
+			href: '/dashboard/units',
+			icon: Combine,
+		},
 	]
+
+	// 3. Filtrlash logikasi
+	return allNavItems.filter(item => {
+		// Agar allowedStores yozilmagan bo'lsa, hammaga ko'rinsin
+		if (!item.allowedStores) return true
+
+		// Agar allowedStores yozilgan bo'lsa, bizning storeId ichida bormi tekshiramiz
+		return item.allowedStores.includes(storeId)
+	})
 }
 
 export function AppSidebar({

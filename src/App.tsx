@@ -71,7 +71,7 @@ const router = createBrowserRouter([
 						path: 'dashboard/order-new',
 						element: (
 							<SuspenseWrapper>
-								<OrderNew />
+								<SelersPage2 />
 							</SuspenseWrapper>
 						),
 					},
