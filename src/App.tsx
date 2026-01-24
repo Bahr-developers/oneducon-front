@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast'
 const ProtectedRoute = lazy(() => import('./layout/protected-router'))
 const DashboardLayout = lazy(() => import('./layout/dashbord-layout'))
 const SelersPage = lazy(() => import('./pages/sales'))
+const SelersPage2 = lazy(() => import('./pages/sales2'))
 const Debts = lazy(() => import('./pages/debts'))
 const Products = lazy(() => import('./pages/pruducts'))
 const LowProducts = lazy(() => import('./pages/low-products'))
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <Root />,
+		errorElement: <ErrorPage />,
 		children: [
 			{
 				index: true,
@@ -56,7 +58,6 @@ const router = createBrowserRouter([
 								<DashboardMain />
 							</SuspenseWrapper>
 						),
-						errorElement: <ErrorPage />,
 					},
 					{
 						path: 'dashboard/orders',
@@ -79,6 +80,14 @@ const router = createBrowserRouter([
 						element: (
 							<SuspenseWrapper>
 								<SelersPage />
+							</SuspenseWrapper>
+						),
+					},
+					{
+						path: 'dashboard/selers2',
+						element: (
+							<SuspenseWrapper>
+								<SelersPage2 />
 							</SuspenseWrapper>
 						),
 					},
