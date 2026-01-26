@@ -6,7 +6,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
 import { useEffect, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
@@ -21,16 +21,20 @@ const LowProductTable = () => {
 	const [currentPage, setCurrentPage] = useState<number>(1)
 	const storeId = localStorage.getItem('storeId') || '1'
 	const { data: lowProducts, isLoading } = useQuery({
-		queryKey: ['get_all_products'],
+		queryKey: ['get_low_products', currentPage, postsPerPage],
+
 		queryFn: async () =>
 			await productUtils.getProductsLows({
 				limit: postsPerPage,
 				page: currentPage,
 			}),
+
+		placeholderData: keepPreviousData,
 	})
+
 	const totalPages = Math.max(
 		1,
-		Math.ceil((lowProducts?.total || 1) / postsPerPage)
+		Math.ceil((lowProducts?.total || 1) / postsPerPage),
 	)
 
 	useEffect(() => {
@@ -106,8 +110,8 @@ const LowProductTable = () => {
 											el.quantity > 10
 												? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
 												: el.quantity > 0
-												? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-												: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+													? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+													: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 										}`}
 									>
 										{el.quantity}

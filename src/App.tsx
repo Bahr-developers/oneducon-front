@@ -18,7 +18,6 @@ const NotificationsPage = lazy(() => import('./pages/notifications'))
 const OrderProducts = lazy(() => import('./pages/order'))
 const DashboardMain = lazy(() => import('./pages/dashboard'))
 const StoreProfile = lazy(() => import('./pages/profile'))
-const OrderNew = lazy(() => import('./pages/order-new'))
 const DebtsHistore = lazy(() => import('./pages/debts/debts-histore'))
 const Expenses = lazy(() => import('./pages/expenses'))
 const ErrorPage = lazy(() => import('./pages/error-page'))
@@ -36,7 +35,11 @@ const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <Root />,
-		errorElement: <ErrorPage />,
+		errorElement: (
+			<SuspenseWrapper>
+				<ErrorPage />
+			</SuspenseWrapper>
+		),
 		children: [
 			{
 				index: true,

@@ -41,7 +41,7 @@ function useNavItems(): NavItem[] {
 			icon: BadgePlus,
 		},
 		{
-			labelKey: 'Buyurtma yangi',
+			labelKey: 'Buyurtma new',
 			href: '/dashboard/order-new',
 			icon: BadgePlus,
 			allowedStores: ['1', '4'], // <--- DIQQAT: Faqat 1 va 4 storeId uchun
