@@ -1,9 +1,9 @@
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { product } from '@/types'
 import { productUtils } from '@/utils/products'
 import { useQuery } from '@tanstack/react-query'
+import { useRef, useEffect } from 'react'
 
 interface SearchSelectProps {
 	value: string
@@ -20,6 +20,9 @@ export default function SearchSelect({
 	onClose,
 	onSelect,
 }: SearchSelectProps) {
+	const containerRef = useRef<HTMLDivElement>(null)
+	const isSelectingRef = useRef(false)
+
 	const { data: filtered, isLoading } = useQuery({
 		queryKey: ['get_all_products', value],
 		queryFn: () => productUtils.getProducts({ search: value }),
@@ -28,25 +31,52 @@ export default function SearchSelect({
 
 	const results = filtered?.data || []
 
+	// Click outside handler
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				containerRef.current &&
+				!containerRef.current.contains(event.target as Node)
+			) {
+				if (!isSelectingRef.current) {
+					onClose()
+				}
+			}
+		}
+
+		if (open) {
+			document.addEventListener('mousedown', handleClickOutside)
+			return () => {
+				document.removeEventListener('mousedown', handleClickOutside)
+			}
+		}
+	}, [open, onClose])
+
 	const handleSelect = (product: product) => {
+		isSelectingRef.current = true
 		onSelect(product)
 		onChange('')
 		onClose()
+
+		// Reset flag
+		setTimeout(() => {
+			isSelectingRef.current = false
+		}, 100)
 	}
 
 	return (
-		<div className='relative w-full'>
+		<div ref={containerRef} className='relative w-full'>
 			<Input
 				type='text'
 				value={value}
 				onChange={e => onChange(e.target.value)}
 				placeholder='Artikul, shtrix-kod, mahsulot nomi...'
 				className='w-full bg-[#0a0a0a] border-[#333] text-white h-12 rounded-xl px-4 outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#666]'
-				onBlur={() => setTimeout(onClose, 200)}
+				autoComplete='off'
 			/>
 
 			{open && value && (
-				<Card className='absolute z-50 w-full mt-2 overflow-hidden bg-[#1a1a1a] border-[#333]'>
+				<div className='absolute z-50 w-full mt-2 overflow-hidden bg-[#1a1a1a] border border-[#333] rounded-lg shadow-xl'>
 					<ScrollArea className='max-h-[420px]'>
 						<div className='p-2 space-y-2'>
 							{isLoading ? (
@@ -64,33 +94,32 @@ export default function SearchSelect({
 										<button
 											key={p.id}
 											type='button'
-											onMouseDown={e => e.preventDefault()}
 											onClick={() => !isDisabled && handleSelect(p)}
 											disabled={isDisabled}
 											className={`w-full text-left rounded-xl border border-[#2a2a2a] p-3 transition ${
 												isDisabled
 													? 'bg-[#0f0f0f] cursor-not-allowed opacity-50'
-													: 'hover:bg-[#2a2a2a]'
+													: 'hover:bg-[#2a2a2a] active:bg-[#333]'
 											}`}
 										>
 											<div className='flex items-start justify-between gap-3'>
-												<div className='min-w-0'>
-													<div className='font-medium truncate text-white'>
+												<div className='min-w-0 flex-1'>
+													<h2 className='font-medium truncate text-white'>
 														{p.name}
-													</div>
-													<div className='text-xs text-[#888] mt-1'>
+													</h2>
+													<span className='text-xs text-[#888] mt-1'>
 														ID: {p.id}
-													</div>
+													</span>
 												</div>
 
-												<div className='text-right'>
-													<div className='font-semibold text-white'>
+												<div className='text-right whitespace-nowrap'>
+													<p className='font-semibold text-white'>
 														{p.sale_price?.toLocaleString()} UZS
-													</div>
-													<div className='text-xs text-[#888]'>
+													</p>
+													<span className='text-xs text-[#888]'>
 														Mavjud: {p.quantity ?? '-'} dona
 														{isDisabled && ' (tugagan)'}
-													</div>
+													</span>
 												</div>
 											</div>
 										</button>
@@ -99,7 +128,7 @@ export default function SearchSelect({
 							)}
 						</div>
 					</ScrollArea>
-				</Card>
+				</div>
 			)}
 		</div>
 	)

@@ -77,9 +77,9 @@ export default function CompleteOrderPage() {
 	}
 
 	return (
-		<div className='min-h-screen bg-black p-6'>
+		<div className='min-h-screen bg-black'>
 			<div className='max-w-7xl mx-auto'>
-				<div className='grid gap-4 lg:grid-cols-[1fr_420px]'>
+				<div className='grid gap-2 lg:grid-cols-[1fr_420px]'>
 					{/* LEFT PANEL - Products */}
 					<div className='rounded-xl border border-[#2a2a2a] bg-[#0a0a0a]'>
 						{/* Top Search */}
