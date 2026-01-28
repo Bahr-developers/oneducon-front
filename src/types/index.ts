@@ -62,15 +62,15 @@ export interface client {
     store_id: string;
 }
 export interface orderItem {
-    id?: string;
+    id: string;
     order_id: string;
-    product_id?: string;
+    product_id: string;
     name: string;
     count: number
     discount: number
-    quantity?: number;
-    price?: number;
-    total?: number;
+    quantity: number;
+    price: number;
+    total: number;
     product: product
 }
 export interface payment {

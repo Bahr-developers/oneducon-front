@@ -37,7 +37,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleCountChange = (value: string) => {
-		// Bo'sh bo'lsa yoki 0 bo'lsa, vaqtincha ruxsat beramiz
 		if (value === '') {
 			dispatch(updateOrderItem({ id: item.id, updates: { count: 0 } }))
 			return
@@ -55,19 +54,17 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			updateOrderItem({
 				id: item.id,
 				updates: { count: num },
-			})
+			}),
 		)
 	}
 
-	// Inputdan tashqariga bosganda ishlaydigan funksiya
 	const handleBlur = () => {
-		// Agar bo'sh yoki 1 dan kichik bo'lsa, 1 ga qaytaramiz
 		if (!item.count || item.count < 1) {
 			dispatch(
 				updateOrderItem({
 					id: item.id,
 					updates: { count: 1 },
-				})
+				}),
 			)
 		}
 	}
@@ -79,7 +76,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			updateOrderItem({
 				id: item.id,
 				updates: { discount: isNaN(numericDiscount) ? 0 : numericDiscount },
-			})
+			}),
 		)
 	}
 
@@ -130,7 +127,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 								item?.product?.usd_rate
 									? (
 											item?.product?.cost_price / item?.product?.usd_rate
-									  ).toFixed(2)
+										).toFixed(2)
 									: 0
 							}
 							readOnly

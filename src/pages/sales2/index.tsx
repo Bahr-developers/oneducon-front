@@ -1,167 +1,227 @@
-import { useQuery } from '@tanstack/react-query'
-import { useMemo, useState } from 'react'
-import OrderHeader from './components/sales-header'
-import OrderItemsList from './components/sales-item-list'
-import OrderRightPanel from './components/sales-right-panel'
-import { orderUtils } from '@/utils/orders'
-import TopProductSearch from './components/top-search'
-import { Client, Product } from '@/types/sales-type2'
+/**
+ * COMPLETE ORDER SYSTEM WITH REDUX STORE
+ *
+ * Bu fayl barcha komponentlarni birlashtiradi va to'liq ishlaydi
+ */
 
-export default function OrderPage() {
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+	addOrderItem,
+	selectOrderItems,
+	resetOrder,
+	setProductToItem,
+	addPayment,
+	selectPayments,
+	selectTotals,
+} from '@/store/order-slice'
+import { useState } from 'react'
+import { product } from '@/types'
+import SearchSelect from './search-select-new'
+import OrderItemRow from './order'
+
+export default function CompleteOrderPage() {
+	const dispatch = useAppDispatch()
+	const items = useAppSelector(selectOrderItems)
+	const payments = useAppSelector(selectPayments)
+	const totals = useAppSelector(selectTotals)
+
 	const [topSearch, setTopSearch] = useState('')
-	const [open, setOpen] = useState(false)
+	const [searchOpen, setSearchOpen] = useState(false)
 
-	const [cartItems, setCartItems] = useState<
-		Array<{
-			product_id: string
-			name: string
-			price: number
-			count: number
-			discount: number
-			clientName: string
-		}>
-	>([])
+	// Tanlangan mahsulotlar soni
+	const itemCount = items.filter(i => i.product !== null).length
 
-	const { data, isLoading, isError } = useQuery({
-		queryKey: ['get_all_products'],
-		queryFn: () => orderUtils.getOrders2(),
-	})
+	const handleReset = () => {
+		dispatch(resetOrder())
+		setTopSearch('')
+	}
 
-	const orders = data?.data ?? []
+	const handleProductSelect = (selectedProduct: product) => {
+		// Agar bo'sh item bo'lsa, unga mahsulot biriktirish
+		const emptyItem = items.find(i => i.product === null)
 
-	const { clients: products } = useMemo(() => {
-		const map = new Map<string, Client>()
+		if (emptyItem) {
+			dispatch(
+				setProductToItem({
+					id: emptyItem.id,
+					product: selectedProduct,
+				}),
+			)
+		} else {
+			// Aks holda yangi item qo'shish
+			const newItemId = crypto.randomUUID()
+			dispatch(addOrderItem())
 
-		for (const o of orders ?? []) {
-			if (!o) continue
-
-			const c = o.client
-			if (!c?.id) continue
-
-			const id = String(c.id)
-
-			if (!map.has(id)) {
-				map.set(id, {
-					id,
-					name: String(c.name ?? ''),
-					phone: String(c.phone ?? ''),
-					order_items: [],
-					store_id: c.store_id ?? '',
-					created_at: c.created_at ?? new Date().toISOString(),
-					updated_at: c.updated_at ?? new Date().toISOString(),
-				})
-			}
-
-			const items = Array.isArray(o.order_items) ? o.order_items : []
-			map.get(id)!.order_items.push(...items)
+			setTimeout(() => {
+				dispatch(
+					setProductToItem({
+						id: newItemId,
+						product: selectedProduct,
+					}),
+				)
+			}, 50)
 		}
-		return {
-			clients: Array.from(map.values()),
-		}
-	}, [orders])
-
-	const results = useMemo(() => {
-		const q = topSearch.trim().toLowerCase()
-		if (!q) return []
-
-		const map = new Map<string, Product>()
-
-		for (const client of products) {
-			const items = Array.isArray(client.order_items) ? client.order_items : []
-
-			for (const orderItem of items) {
-				const product = orderItem?.product // ✅ bitta object
-				if (!product?.id) continue
-
-				const hay = `${product.name ?? ''} ${product.id}`.toLowerCase()
-				if (hay.includes(q)) {
-					product.clientName = client.name
-					map.set(String(product.id), product)
-				}
-			}
-		}
-
-		return Array.from(map.values())
-	}, [products, topSearch])
-
-	function addToCart(p: Product) {
-		const pid = String(p.id)
-
-		setCartItems(prev => {
-			const idx = prev.findIndex(x => x.product_id === pid)
-
-			if (idx >= 0) {
-				const copy = [...prev]
-				copy[idx].count += 1
-				return copy
-			}
-
-			return [
-				...prev,
-				{
-					product_id: pid,
-					name: p.name,
-					price: Number(p.usd_rate ?? 0),
-					count: 1,
-					discount: 0,
-					clientName: p.clientName ?? 'Nomaʼlum',
-				},
-			]
-		})
 
 		setTopSearch('')
-		setOpen(false)
+		setSearchOpen(false)
 	}
 
-	const remove = (productId: string) => {
-		setCartItems(prev => prev.filter(it => it.product_id !== productId))
+	const handleAddPayment = () => {
+		dispatch(addPayment())
 	}
 
-	if (isLoading) {
-		return (
-			<div className='rounded-xl border bg-background p-6'>Yuklanmoqda...</div>
-		)
-	}
-
-	if (isError) {
-		return (
-			<div className='rounded-xl border bg-background p-6'>Xatolik bo'ldi.</div>
-		)
+	const formatPrice = (price: number) => {
+		return price.toLocaleString()
 	}
 
 	return (
-		<div className='grid gap-4 lg:grid-cols-[1fr_380px]'>
-			<div className='rounded-xl border bg-background'>
-				<TopProductSearch
-					value={topSearch}
-					onChange={(v: string) => {
-						setTopSearch(v)
-						setOpen(!!v.trim())
-					}}
-					open={open}
-					results={results}
-					onPick={addToCart}
-					onClose={() => setOpen(false)}
-				/>
+		<div className='min-h-screen bg-black p-6'>
+			<div className='max-w-7xl mx-auto'>
+				<div className='grid gap-4 lg:grid-cols-[1fr_420px]'>
+					{/* LEFT PANEL - Products */}
+					<div className='rounded-xl border border-[#2a2a2a] bg-[#0a0a0a]'>
+						{/* Top Search */}
+						<div className='p-4 border-b border-[#2a2a2a]'>
+							<SearchSelect
+								value={topSearch}
+								onChange={(v: string) => {
+									setTopSearch(v)
+									setSearchOpen(!!v.trim())
+								}}
+								open={searchOpen}
+								onClose={() => setSearchOpen(false)}
+								onSelect={handleProductSelect}
+							/>
+						</div>
 
-				<OrderHeader count={cartItems.length} />
+						{/* Header */}
+						<div className='border-b border-[#2a2a2a] p-4'>
+							<div className='flex items-center justify-between'>
+								<div className='flex items-center gap-3'>
+									<h2 className='text-white text-2xl font-semibold'>
+										Korzinka
+									</h2>
+									<Badge
+										variant='secondary'
+										className='bg-[#2a2a2a] text-white border-none'
+									>
+										{itemCount}
+									</Badge>
+								</div>
+								<Button
+									variant='outline'
+									onClick={handleReset}
+									className='border-[#2a2a2a] text-white hover:bg-[#2a2a2a]'
+								>
+									Tozalash
+								</Button>
+							</div>
+						</div>
 
-				<OrderItemsList
-					items={cartItems}
-					onChangeCount={(productId: string, count: number) => {
-						setCartItems(prev =>
-							prev.map(it =>
-								it.product_id === productId
-									? { ...it, count: Math.max(count, 1) }
-									: it,
-							),
-						)
-					}}
-					onRemove={remove}
-				/>
+						{/* Items List */}
+						<div className='p-4 space-y-4'>
+							{items?.length === 0 || items.every(i => !i.product) ? (
+								<div className='h-[520px] rounded-xl border border-[#2a2a2a] flex items-center justify-center text-center'>
+									<div>
+										<div className='text-white text-lg font-semibold'>
+											Korzinka hozircha bo'sh
+										</div>
+										<div className='mt-1 text-[#888] text-sm'>
+											Tepadan qidirib mahsulot qo'shing
+										</div>
+									</div>
+								</div>
+							) : (
+								<>
+									{items
+										.filter(i => i.product !== null)
+										.map(item => (
+											<OrderItemRow key={item.id} item={item} />
+										))}
+								</>
+							)}
+						</div>
+					</div>
+
+					{/* RIGHT PANEL - Summary */}
+					<div className='space-y-4'>
+						{/* Summary Card */}
+						<div className='rounded-xl border border-[#2a2a2a] bg-[#0a0a0a] p-5'>
+							<h3 className='text-white text-xl font-semibold mb-4'>
+								Hisob-kitob
+							</h3>
+
+							<div className='space-y-3'>
+								<div className='flex justify-between items-center'>
+									<span className='text-[#888]'>Jami</span>
+									<span className='text-white font-semibold text-lg'>
+										{formatPrice(totals.totalItemsAmount)} UZS
+									</span>
+								</div>
+
+								<div className='flex justify-between items-center'>
+									<span className='text-[#888]'>To'langan</span>
+									<span className='text-white font-semibold text-lg'>
+										{formatPrice(totals.totalPaidAmount)} UZS
+									</span>
+								</div>
+
+								<div className='border-t border-[#2a2a2a] pt-3'>
+									<div className='flex justify-between items-center'>
+										<span className='text-[#888]'>Qoldiq</span>
+										<span
+											className={`font-bold text-xl ${
+												totals.remainingDebt > 0
+													? 'text-red-500'
+													: 'text-green-500'
+											}`}
+										>
+											{formatPrice(totals.remainingDebt)} UZS
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<Button
+								className='w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white h-12'
+								disabled={itemCount === 0}
+							>
+								To'lash
+							</Button>
+						</div>
+
+						{/* Payments Info */}
+						{payments.length > 0 && (
+							<div className='rounded-xl border border-[#2a2a2a] bg-[#0a0a0a] p-5'>
+								<h3 className='text-white text-lg font-semibold mb-3'>
+									To'lovlar
+								</h3>
+								<div className='space-y-2'>
+									{payments.map((payment, idx) => (
+										<div
+											key={idx}
+											className='flex justify-between items-center text-sm'
+										>
+											<span className='text-[#888]'>To'lov {idx + 1}</span>
+											<span className='text-white font-medium'>
+												{formatPrice(payment.price)} UZS
+											</span>
+										</div>
+									))}
+								</div>
+								<Button
+									className='w-full mt-3 bg-[#2a2a2a] hover:bg-[#333] text-white'
+									onClick={handleAddPayment}
+								>
+									+ To'lov qo'shish
+								</Button>
+							</div>
+						)}
+					</div>
+				</div>
 			</div>
-
-			<OrderRightPanel items={cartItems} />
 		</div>
 	)
 }

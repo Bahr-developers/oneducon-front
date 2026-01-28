@@ -22,30 +22,68 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 			onKeyDown,
 			onFocus,
 		},
-		ref
+		ref,
 	) => {
 		const [inputValue, setInputValue] = useState('')
 
+		// Formatlash funksiyasi: Butun qismni probel bilan, kasrni o'z holicha qaytaradi
+		const formatNumber = (numStr: string) => {
+			if (!numStr) return ''
+
+			// Nuqta bo'yicha ikkiga bo'lamiz
+			const parts = numStr.split('.')
+			const integerPart = parts[0]
+			const decimalPart = parts[1]
+
+			// Butun qismiga probel qo'shamiz
+			const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+
+			// Agar kasr qismi bo'lsa, ularni birlashtiramiz
+			if (parts.length > 1) {
+				return `${formattedInteger}.${decimalPart}`
+			}
+
+			return formattedInteger
+		}
+
 		useEffect(() => {
-			if (value !== undefined && value !== 0 && !isNaN(value)) {
-				const formatted = value
-					?.toString()
-					?.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-				setInputValue(formatted)
+			if (value !== undefined && value !== null && !isNaN(value)) {
+				// Agar 0 kelsa va user yozayotgan bo'lsa muammo bo'lmasligi uchun tekshiramiz
+				// Lekin backenddan 0 kelsa ko'rsatish kerak, shuning uchun 0 ni ham inobatga olamiz
+				if (value === 0) {
+					setInputValue('') // Yoki '0' xohishingizga qarab
+				} else {
+					setInputValue(formatNumber(value.toString()))
+				}
 			} else {
 				setInputValue('')
 			}
 		}, [value])
 
 		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-			const raw = e.target?.value?.replace(/\D/g, '')
-			const formatted = raw?.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+			// 1. Faqat raqam va bitta nuqtani qoldiramiz
+			let raw = e.target.value.replace(/[^0-9.]/g, '')
 
+			// 2. Agar bir nechta nuqta bo'lsa, faqat birinchisini qoldiramiz
+			const dots = raw.match(/\./g)
+			if (dots && dots.length > 1) {
+				return // Ikkinchi nuqta yozilganda o'zgartirmaymiz
+			}
+
+			// 3. Kasr qismi 2 xonadan oshmasligini tekshiramiz
+			const parts = raw.split('.')
+			if (parts[1] && parts[1].length > 2) {
+				return // 2 xonadan oshsa yozdirmaymiz
+			}
+
+			// 4. Ekranga chiqarish uchun formatlaymiz
+			const formatted = formatNumber(raw)
 			setInputValue(formatted)
 
 			if (onChange) {
 				onChange({
 					formatted,
+					// Agar oxiri nuqta bilan tugagan bo'lsa ham raw formatda raqam qilib beramiz
 					raw: raw === '' ? 0 : Number(raw),
 				})
 			}
@@ -55,7 +93,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 			<Input
 				ref={ref}
 				type='text'
-				inputMode='numeric'
+				inputMode='decimal' // Mobil telefonda nuqtali klaviatura chiqishi uchun
 				value={inputValue}
 				readOnly={readonly}
 				onChange={handleChange}
@@ -66,7 +104,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 				className={`border rounded-lg px-3 py-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring transition-all ${className}`}
 			/>
 		)
-	}
+	},
 )
 
 NumberInput.displayName = 'NumberInput'
