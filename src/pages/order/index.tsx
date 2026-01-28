@@ -33,7 +33,6 @@ export default function OrderProducts() {
 	const debt = useAppSelector(selectDebt)
 	const [returnTime, setReturnTime] = useState<Date | undefined>()
 	const [selectedUser, setSelectedUser] = useState<client | null>(null)
-	const [isChecked, setIsChecked] = useState(false)
 	const storeId = localStorage.getItem('storeId') || 1
 	const [reminder, setReminder] = useState('')
 	const { data: paymentTypes } = useQuery({
@@ -147,11 +146,7 @@ export default function OrderProducts() {
 									</p>
 								) : (
 									items.map(item => (
-										<OrderItem
-											key={item.id}
-											item={item}
-											constPrice={isChecked}
-										/>
+										<OrderItem key={item.id} item={item} constPrice={false} />
 									))
 								)}
 							</div>
