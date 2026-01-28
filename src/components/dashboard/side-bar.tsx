@@ -23,12 +23,11 @@ type NavItem = {
 	href: string
 	icon: LucideIcon
 	allowedStores?: string[]
+	isNew?: boolean
 }
 function useNavItems(): NavItem[] {
-	// 1. Store ID ni olamiz (agar null bo'lsa bo'sh string qaytaradi)
 	const storeId = localStorage.getItem('storeId') || ''
 
-	// 2. Barcha menyu elementlari ro'yxati (Config)
 	const allNavItems: NavItem[] = [
 		{
 			labelKey: 'Asosiy panel',
@@ -39,12 +38,7 @@ function useNavItems(): NavItem[] {
 			labelKey: 'Buyurtma berish',
 			href: '/dashboard/orders',
 			icon: BadgePlus,
-		},
-		{
-			labelKey: 'Buyurtma new',
-			href: '/dashboard/order-new',
-			icon: BadgePlus,
-			allowedStores: ['1', '4'], // <--- DIQQAT: Faqat 1 va 4 storeId uchun
+			isNew: true,
 		},
 		{
 			labelKey: 'Sotuvlar',
@@ -83,12 +77,9 @@ function useNavItems(): NavItem[] {
 		},
 	]
 
-	// 3. Filtrlash logikasi
 	return allNavItems.filter(item => {
-		// Agar allowedStores yozilmagan bo'lsa, hammaga ko'rinsin
 		if (!item.allowedStores) return true
 
-		// Agar allowedStores yozilgan bo'lsa, bizning storeId ichida bormi tekshiramiz
 		return item.allowedStores.includes(storeId)
 	})
 }
@@ -154,6 +145,7 @@ export function AppSidebar({
 
 							return (
 								<div className={`flex items-center gap-2 w-full`} key={n.href}>
+									{/* Active chizig'i */}
 									{!collapsed && (
 										<span
 											className={`w-[4px] h-[44px] block rounded-2xl  ${
@@ -161,10 +153,11 @@ export function AppSidebar({
 											}`}
 										></span>
 									)}
+
 									<NavLink
-										key={n.href}
 										to={n.href}
-										className={`flex mx-auto text-[15px]  items-center gap-x-2 h-[44px] ${
+										className={`flex mx-auto text-[15px] items-center gap-x-2 h-[44px] relative ${
+											// relative qo'shildi
 											collapsed
 												? 'justify-center w-11 h-11 ml-1'
 												: 'w-full pl-4'
@@ -172,24 +165,43 @@ export function AppSidebar({
 											active
 												? 'bg-[#6A81FF33] text-[#6A81FF] font-medium'
 												: 'font-medium'
-										} p-[10px] rounded-[8px] hover:bg-[#6A81FF33] text-[#666A7F] dark:text-[#e3dbdb]`}
+										} p-[10px] rounded-[8px] hover:bg-[#6A81FF33] text-[#666A7F] dark:text-[#e3dbdb] group`} // group classi qo'shildi hover effekt uchun
 									>
+										{/* --- ICON QISMI --- */}
 										{!collapsed ? (
 											<n.icon
 												className={`w-5 h-5 ${active ? 'text-[#6A81FF]' : 'text-[#666A7F] dark:text-[#e3dbdb]'}`}
 											/>
 										) : (
 											<CustomTooltip tooltipText={t(n.labelKey)}>
-												<n.icon
-													className={`${active ? 'text-[#6A81FF]' : 'text-[#666A7F] dark:text-[#e3dbdb]'}`}
-												/>
+												<div className='relative'>
+													<n.icon
+														className={`${active ? 'text-[#6A81FF]' : 'text-[#666A7F] dark:text-[#e3dbdb]'}`}
+													/>
+													{/* Yopiq holatdagi indikator (nuqta) */}
+													{n.isNew && (
+														<span className='absolute -top-1 -right-1 flex h-2.5 w-2.5'>
+															<span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'></span>
+															<span className='relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500'></span>
+														</span>
+													)}
+												</div>
 											</CustomTooltip>
 										)}
+
+										{/* --- TEXT VA BADGE QISMI (Ochiq holatda) --- */}
 										{!collapsed && (
-											<div className='flex-1 flex flex-row items-center justify-between'>
+											<div className='flex-1 flex flex-row items-center justify-between pr-2'>
 												<span className={active ? 'text-[#6A81FF]' : ''}>
 													{t(n.labelKey)}
 												</span>
+
+												{/* Yangi Badge qismi */}
+												{n.isNew && (
+													<span className='bg-green-100 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200 shadow-sm'>
+														NEW
+													</span>
+												)}
 											</div>
 										)}
 									</NavLink>

@@ -3,21 +3,21 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./index";
 import { product } from "@/types";
 
-
 export interface OrderItem {
     id: string;
-    product: product | null;
+    product: product; // Null bo'lmaydi endi
     product_id: number;
     count: number;
     discount: number;
     price: number;
 }
 
+// ... Payment va Debt interfacelari o'zgarmaydi ...
 export interface Payment {
     payment_type_id: string;
     price: number;
     isNew?: boolean;
-    userModified?: boolean; // User o'zi o'zgartirganini belgilash
+    userModified?: boolean;
 }
 
 export interface Debt {
@@ -38,16 +38,7 @@ interface OrderState {
 }
 
 const initialState: OrderState = {
-    items: [
-        {
-            id: crypto.randomUUID(),
-            product: null,
-            product_id: 0,
-            count: 1,
-            discount: 0,
-            price: 0,
-        }
-    ],
+    items: [], // Boshlang'ich holat bo'sh bo'ladi
     payments: [],
     debt: null,
     totalItemsAmount: 0,
@@ -60,15 +51,33 @@ const orderSlice = createSlice({
     name: "order",
     initialState,
     reducers: {
-        addOrderItem: (state) => {
+        // YANGI ACTION: To'g'ridan-to'g'ri mahsulot qo'shish
+        addProductToOrder: (state, action: PayloadAction<product>) => {
+            // Agar mahsulot allaqachon bor bo'lsa, uni countini oshirish mumkin
+            // Lekin sizning talabingiz bo'yicha "arrayga qo'shilib ketaveradi"
+            
+            const newProduct = action.payload;
+            
             state.items.push({
                 id: crypto.randomUUID(),
-                product: null,
-                product_id: 0,
+                product: newProduct,
+                product_id: Number(newProduct.id),
                 count: 1,
                 discount: 0,
-                price: 0,
+                price: newProduct.sale_price,
             });
+
+            recalculateTotals(state);
+
+            // Avtomatik to'lov (Naqd) qo'shish logikasi (agar birinchi mahsulot bo'lsa)
+            if (state.items.length === 1 && state.payments.length === 0) {
+                 state.payments.push({
+                    payment_type_id: "1",
+                    price: state.totalItemsAmount,
+                    isNew: true,
+                });
+                recalculateTotals(state);
+            }
         },
 
         removeOrderItem: (state, action: PayloadAction<string>) => {
@@ -87,41 +96,12 @@ const orderSlice = createSlice({
             }
         },
 
-        setProductToItem: (
-            state,
-            action: PayloadAction<{ id: string; product: product }>
-        ) => {
-            const item = state.items.find((i) => i.id === action.payload.id);
-            if (item) {
-                item.product = action.payload.product;
-                item.product_id = Number(action.payload.product.id);
-                item.price = action.payload.product.sale_price;
-
-                // Avval totallarni hisoblash
-                recalculateTotals(state);
-
-                // Agar birinchi mahsulot tanlansa va payment yo'q bo'lsa, payment qo'shish
-                const hasAnyProduct = state.items.some(i => i.product !== null);
-                if (hasAnyProduct && state.payments.length === 0) {
-                    // "Naqd" (ID: "1") bilan payment qo'shish
-                    state.payments.push({
-                        payment_type_id: "1",
-                        price: state.totalItemsAmount,
-                        isNew: true,
-                    });
-
-                    // Paymentdan keyin yana totalni hisoblash
-                    recalculateTotals(state);
-                }
-            }
-        },
-
-        // ======== PAYMENTS ========
+        // ======== PAYMENTS (O'zgarmadi) ========
         addPayment: (state) => {
             state.payments.push({
                 payment_type_id: "",
                 price: 0,
-                isNew: true, // Yangi payment deb belgilash
+                isNew: true,
             });
         },
 
@@ -138,7 +118,7 @@ const orderSlice = createSlice({
             recalculateTotals(state);
         },
 
-        // ======== DEBT ========
+        // ======== DEBT (O'zgarmadi) ========
         setDebt: (state, action: PayloadAction<Debt>) => {
             state.debt = action.payload;
         },
@@ -150,27 +130,13 @@ const orderSlice = createSlice({
 
         // ======== RESET ========
         resetOrder: () => {
-            // Yangi order uchun bitta bo'sh item bilan qaytarish
-            return {
-                ...initialState,
-                items: [
-                    {
-                        id: crypto.randomUUID(),
-                        product: null,
-                        product_id: 0,
-                        count: 1,
-                        discount: 0,
-                        price: 0,
-                    }
-                ]
-            };
+            return initialState;
         },
     },
 });
 
-// Helper function - hisoblashlar
+// Helper function (O'zgarmadi)
 function recalculateTotals(state: OrderState) {
-    // 1. Items umumiy summasi (barcha mahsulotlar)
     state.totalItemsAmount = state.items.reduce((sum, item) => {
         if (item.product && item.product_id) {
             return sum + (item.price - item.discount) * item.count;
@@ -178,31 +144,24 @@ function recalculateTotals(state: OrderState) {
         return sum;
     }, 0);
 
-    // 2. To'langan summa (barcha paymentlar)
     state.totalPaidAmount = state.payments.reduce((sum, payment) => {
         return sum + Number(payment.price || 0);
     }, 0);
 
-    // 3. Qarz summasi - faqat agar to'langan summa kamroq bo'lsa
     state.remainingDebt = Math.max(0, state.totalItemsAmount - state.totalPaidAmount);
-
-    // 4. Qarz bormi? - Faqat agar haqiqatan qarz bo'lsa
     state.hasDebt = state.remainingDebt > 0 && state.totalItemsAmount > 0;
 
-    // 5. Agar qarz bo'lmasa (to'liq to'langan), debt objectni tozalash
     if (!state.hasDebt || state.remainingDebt === 0) {
         state.debt = null;
     } else if (state.debt) {
-        // Agar qarz bor va debt object mavjud bo'lsa, price ni yangilash
         state.debt.price = state.remainingDebt;
     }
 }
 
 export const {
-    addOrderItem,
+    addProductToOrder, // O'zgargan action
     removeOrderItem,
     updateOrderItem,
-    setProductToItem,
     addPayment,
     updatePayment,
     removePayment,

@@ -1,21 +1,15 @@
+// order-item.tsx
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
-import SearchSelect from './search-select'
+import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import {
-	updateOrderItem,
-	removeOrderItem,
-	setProductToItem,
-	selectOrderItems,
-} from '@/store/order-slice'
+import { useAppDispatch } from '@/store/hooks'
+import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
 import { product } from '@/types'
 
 interface OrderItemProps {
 	item: {
 		id: string
-		product: product | null
+		product: product
 		count: number
 		discount: number
 		price: number
@@ -25,16 +19,6 @@ interface OrderItemProps {
 
 const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
-	const allItems = useAppSelector(selectOrderItems)
-
-	// Tanlangan mahsulotlar ID larini olish (joriy itemdan tashqari)
-	const disabledProductIds = allItems
-		.filter(i => i.id !== item.id && i.product !== null)
-		.map(i => Number(i.product?.id))
-
-	const handleSelectProduct = (product: product) => {
-		dispatch(setProductToItem({ id: item.id, product }))
-	}
 
 	const handleCountChange = (value: string) => {
 		if (value === '') {
@@ -45,7 +29,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		let num = Number(value)
 		if (isNaN(num)) return
 
-		// Faqat MAX qiymatni tekshiramiz (yozayotganda)
 		if (item.product?.quantity && num > item.product.quantity) {
 			num = item.product.quantity
 		}
@@ -68,6 +51,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			)
 		}
 	}
+
 	const handleDiscountChange = (val: { raw: number }) => {
 		const discountValue = val?.raw ?? 0
 		const numericDiscount = Number(discountValue)
@@ -84,105 +68,100 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		dispatch(removeOrderItem(item.id))
 	}
 
-	const totalPrice = item.product
-		? (item.price - item.discount) * item.count
-		: 0
+	const totalPrice = (item.price - item.discount) * item.count
 
 	return (
-		<div className='w-full border rounded-lg p-3 flex flex-wrap gap-3 bg-[#f0f0f0] dark:bg-[#2d2d2d] items-center pb-10'>
-			<div className='w-full flex justify-end py-2 border-b'>
-				<Button
-					className='cursor-pointer'
-					variant='destructive'
-					onClick={handleRemove}
-				>
-					<Trash2 />
-				</Button>
+		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
+			<button
+				onClick={handleRemove}
+				className='absolute top-2 right-2 md:static md:order-last text-muted-foreground hover:text-destructive transition-colors p-2 rounded-full hover:bg-destructive/10'
+				title="O'chirish"
+			>
+				<X className='h-5 w-5' />
+			</button>
+
+			<div className='flex-1 w-full md:w-auto flex flex-col gap-1'>
+				<h3 className='font-semibold text-base leading-tight line-clamp-1'>
+					{item.product.name}
+				</h3>
+				<div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
+					<div className='flex items-center gap-1 bg-secondary/50 px-2 py-0.5 rounded-md'>
+						<span>Narxi:</span>
+						<span className='font-medium text-foreground'>
+							{item.product.sale_price.toLocaleString()}
+						</span>
+					</div>
+
+					{constPrice && (
+						<div className='flex gap-2 text-xs opacity-80'>
+							<span>Tan: {item.product?.cost_price?.toLocaleString()}</span>
+							{item.product?.usd_rate && (
+								<span>
+									($
+									{(item.product.cost_price / item.product.usd_rate).toFixed(2)}
+									)
+								</span>
+							)}
+						</div>
+					)}
+				</div>
 			</div>
 
-			<label>
-				<span className='my-1 block'>Mahsulot *</span>
-				<SearchSelect
-					onSelect={handleSelectProduct}
-					selectedProduct={item.product}
-					disabledProductIds={disabledProductIds}
-				/>
-			</label>
-			{constPrice && (
-				<>
-					<label className='w-52'>
-						<span className='my-1 block'>Tan narxi(UZS)</span>
-						<NumberInput
-							className='w-full h-12'
-							placeholder='0'
-							value={item.product?.cost_price || 0}
-							readonly={true}
-						/>
+			{/* 3. INPUTS SECTION (Count & Discount) */}
+			<div className='flex items-end gap-3 w-full md:w-auto justify-between md:justify-start'>
+				{/* Count Input */}
+				<div className='flex flex-col gap-1.5'>
+					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
+						Miqdor
 					</label>
-					<label className='w-52'>
-						<span className='my-1 block'>Tan narxi($)</span>
+					<div className='relative'>
 						<Input
-							className='w-full h-12'
-							value={
-								item?.product?.usd_rate
-									? (
-											item?.product?.cost_price / item?.product?.usd_rate
-										).toFixed(2)
-									: 0
-							}
-							readOnly
+							className='w-20 h-9 text-center font-medium'
+							type='number'
+							value={item.count === 0 ? '' : item.count}
+							onFocus={e => e.target.select()}
+							onChange={e => handleCountChange(e.target.value)}
+							onBlur={handleBlur}
 						/>
+						<div className='absolute right-0 -bottom-4 text-[10px] text-muted-foreground w-full text-right pr-1'>
+							max: {item.product.quantity}
+						</div>
+					</div>
+				</div>
+
+				{/* Discount Input */}
+				<div className='flex flex-col gap-1.5'>
+					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
+						Chegirma
 					</label>
-				</>
-			)}
+					<NumberInput
+						value={item.discount ?? 0}
+						onChange={handleDiscountChange}
+						placeholder='0'
+						className='w-28 h-9 text-right pr-3 font-medium'
+					/>
+				</div>
+			</div>
 
-			<label className='w-52'>
-				<span className='my-1 block'>Sotuv narxi</span>
-				<NumberInput
-					className='w-full h-12'
-					placeholder='0'
-					value={item.product?.sale_price || 0}
-					readonly={true}
-				/>
-			</label>
-
-			<label className='w-52 relative'>
-				<span className='my-1 block'>Miqdori *</span>
-				<Input
-					className='w-full h-12'
-					type='number'
-					placeholder='0'
-					value={item.count === 0 ? '' : item.count} // 0 bo'lsa input bo'sh ko'rinadi
-					onFocus={e => e.target.select()}
-					onChange={e => handleCountChange(e.target.value)}
-					onBlur={handleBlur} // <--- SHU YERDA QO'SHILDI
-				/>
-				{item.product && (
-					<span className='absolute -bottom-6 left-0 text-sm'>
-						Mavjud: {item.product.quantity}
+			{/* 4. TOTAL PRICE SECTION */}
+			<div className='flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-40 pl-4 md:border-l border-dashed border-border gap-1'>
+				<span className=' text-sm font-medium text-muted-foreground'>
+					Jami summa:
+				</span>
+				<div className='flex flex-col items-end'>
+					<span className='text-lg font-bold text-primary tracking-tight'>
+						{totalPrice.toLocaleString()}
+						<span className='text-xs font-normal text-muted-foreground ml-1'>
+							UZS
+						</span>
 					</span>
-				)}
-			</label>
-
-			<label className='w-52'>
-				<span className='my-1 block'>Chegirma UZS</span>
-				<NumberInput
-					value={item.discount ?? 0}
-					onChange={handleDiscountChange}
-					placeholder='0'
-					className='w-full h-12'
-				/>
-			</label>
-
-			<label className='w-56'>
-				<span className='my-1 block'>Umumiy narxi</span>
-				<NumberInput
-					className='w-full h-12'
-					placeholder='0'
-					readonly={true}
-					value={totalPrice}
-				/>
-			</label>
+					{item.discount > 0 && (
+						<span className='text-xs text-green-600 font-medium'>
+							-{(item.discount * item.count).toLocaleString()} skidka
+						</span>
+					)}
+				</div>
+			</div>
 		</div>
 	)
 }

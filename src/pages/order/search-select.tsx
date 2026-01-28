@@ -50,7 +50,7 @@ export default function SearchSelect({
 	}
 
 	return (
-		<div className='relative w-[550px]'>
+		<div className='relative w-full'>
 			<Input
 				type='text'
 				value={query}

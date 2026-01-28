@@ -1,144 +1,158 @@
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import NumberInput from "@/components/_components/number-input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { updatePayment, removePayment, selectTotals, selectPayments } from "@/store/order-slice";
-import { useEffect, useRef } from "react";
+// PaymentItem.tsx
+import { X, CreditCard, Banknote } from 'lucide-react' // Iconlar qo'shildi
+import NumberInput from '@/components/_components/number-input'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+	updatePayment,
+	removePayment,
+	selectTotals,
+	selectPayments,
+} from '@/store/order-slice'
+import { useEffect, useRef } from 'react'
 
 interface PaymentType {
-    id: string;
-    name: string;
+	id: string
+	name: string
 }
 
 interface PaymentItemProps {
-    index: number;
-    payment: {
-        payment_type_id: string;
-        price: number;
-        isNew?: boolean;
-        userModified?: boolean;
-    };
-    paymentTypes?: PaymentType[];
+	index: number
+	payment: {
+		payment_type_id: string
+		price: number
+		isNew?: boolean
+		userModified?: boolean
+	}
+	paymentTypes?: PaymentType[]
 }
 
 const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
-    const dispatch = useAppDispatch();
-    const totals = useAppSelector(selectTotals);
-    const payments = useAppSelector(selectPayments);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const { totalItemsAmount } = totals;
+	const dispatch = useAppDispatch()
+	const totals = useAppSelector(selectTotals)
+	const payments = useAppSelector(selectPayments)
+	const inputRef = useRef<HTMLInputElement>(null)
+	const { totalItemsAmount } = totals
 
-    // Umumiy summa o'zgarganda qolgan summani hisoblash va yangilash
-    useEffect(() => {
-        // Oldingi to'lovlar yig'indisini hisoblash
-        const previousPayments = payments
-            .slice(0, index)
-            .reduce((sum, p) => sum + Number(p.price || 0), 0);
+	useEffect(() => {
+		const previousPayments = payments
+			.slice(0, index)
+			.reduce((sum, p) => sum + Number(p.price || 0), 0)
 
-        // Qolgan summani hisoblash
-        const remainingAmount = Math.max(0, totalItemsAmount - previousPayments);
+		const remainingAmount = Math.max(0, totalItemsAmount - previousPayments)
 
-        // Agar payment yangi bo'lsa yoki user o'zgartirmagan bo'lsa, avtomatik yangilash
-        if (payment.isNew || !payment.userModified) {
-            if (payment.price !== remainingAmount) {
-                dispatch(updatePayment({
-                    index,
-                    payment: { ...payment, price: remainingAmount, isNew: false },
-                }));
-            }
-        }
-    }, [totalItemsAmount, payments, index, payment, dispatch]);
+		if (payment.isNew || !payment.userModified) {
+			if (payment.price !== remainingAmount) {
+				dispatch(
+					updatePayment({
+						index,
+						payment: { ...payment, price: remainingAmount, isNew: false },
+					}),
+				)
+			}
+		}
+	}, [totalItemsAmount, payments, index, payment, dispatch])
 
-    const handleSelectType = (typeId: string) => {
-        dispatch(updatePayment({
-            index,
-            payment: { ...payment, payment_type_id: typeId, isNew: false },
-        }));
-    };
+	const handleSelectType = (typeId: string) => {
+		dispatch(
+			updatePayment({
+				index,
+				payment: { ...payment, payment_type_id: typeId, isNew: false },
+			}),
+		)
+	}
 
-    // Tanlangan payment typelarni olish (joriy paymentdan tashqari)
-    const selectedPaymentTypes = payments
-        .filter((_, i) => i !== index)
-        .map(p => p.payment_type_id)
-        .filter(Boolean);
+	const selectedPaymentTypes = payments
+		.filter((_, i) => i !== index)
+		.map(p => p.payment_type_id)
+		.filter(Boolean)
 
-    const handlePriceChange = (val: { raw: number }) => {
-        // Boshqa to'lovlar yig'indisini hisoblash (joriy to'lovdan tashqari)
-        const otherPaymentsTotal = payments
-            .filter((_, i) => i !== index)
-            .reduce((sum, p) => sum + Number(p.price || 0), 0);
+	const handlePriceChange = (val: { raw: number }) => {
+		const otherPaymentsTotal = payments
+			.filter((_, i) => i !== index)
+			.reduce((sum, p) => sum + Number(p.price || 0), 0)
 
-        // Joriy to'lov uchun maksimal ruxsat etilgan summa
-        const maxAllowedPrice = Math.max(0, totalItemsAmount - otherPaymentsTotal);
+		const maxAllowedPrice = Math.max(0, totalItemsAmount - otherPaymentsTotal)
+		const newPrice = Math.min(val.raw, maxAllowedPrice)
 
-        // Kiritilgan summani cheklash
-        const newPrice = Math.min(val.raw, maxAllowedPrice);
+		dispatch(
+			updatePayment({
+				index,
+				payment: {
+					...payment,
+					price: newPrice,
+					isNew: false,
+					userModified: true,
+				},
+			}),
+		)
+	}
 
-        dispatch(updatePayment({
-            index,
-            payment: { ...payment, price: newPrice, isNew: false, userModified: true },
-        }));
-    };
+	const handleRemove = () => {
+		dispatch(removePayment(index))
+	}
 
-    const handleRemove = () => {
-        dispatch(removePayment(index));
-    };
+	const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+		e.target.select()
+	}
 
-    // Focus bo'lganda barcha raqamlarni select qilish
-    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-        e.target.select();
-    };
+	return (
+		<div className='group relative flex flex-col md:flex-row items-end md:items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
+			<button
+				onClick={handleRemove}
+				className='absolute top-2 right-2 text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-full hover:bg-destructive/10'
+				title="O'chirish"
+			>
+				<X className='h-4 w-4' />
+			</button>
 
-    return (
-        <div className="w-full border rounded-lg p-3 gap-3 bg-[#f0f0f0] dark:bg-[#2d2d2d] items-center">
-            <div className="w-full flex justify-end py-2 border-b">
-                <Button className="cursor-pointer" variant="destructive" onClick={handleRemove}>
-                    <Trash2 />
-                </Button>
-            </div>
+			<div className='flex-1 w-full space-y-1.5'>
+				<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1 flex items-center gap-1'>
+					<CreditCard className='w-3 h-3' /> To'lov turi
+				</label>
+				<Select
+					value={payment.payment_type_id || ''}
+					onValueChange={handleSelectType}
+				>
+					<SelectTrigger size='sm' className='w-full h-10 bg-background'>
+						<SelectValue placeholder='Tanlang' />
+					</SelectTrigger>
+					<SelectContent>
+						{paymentTypes?.map(type => {
+							const isDisabled = selectedPaymentTypes.includes(type.id)
+							return (
+								<SelectItem key={type.id} value={type.id} disabled={isDisabled}>
+									{type.name} {isDisabled ? '(tanlangan)' : ''}
+								</SelectItem>
+							)
+						})}
+					</SelectContent>
+				</Select>
+			</div>
 
-            <div className="w-full flex gap-x-5">
-                <label>
-                    <span className="my-1 block">To'lov turi *</span>
-                    <Select
-                        value={payment.payment_type_id || ""}
-                        onValueChange={handleSelectType}
-                    >
-                        <SelectTrigger className="w-[450px]">
-                            <SelectValue placeholder="To'lov turini tanlang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {paymentTypes?.map((type) => {
-                                const isDisabled = selectedPaymentTypes.includes(type.id);
-                                return (
-                                    <SelectItem
-                                        key={type.id}
-                                        value={type.id}
-                                        disabled={isDisabled}
-                                    >
-                                        {type.name} {isDisabled ? '(tanlangan)' : ''}
-                                    </SelectItem>
-                                );
-                            })}
-                        </SelectContent>
-                    </Select>
-                </label>
+			<div className='w-full md:w-48 space-y-1.5'>
+				<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1 flex items-center gap-1'>
+					<Banknote className='w-3 h-3' /> Summa (UZS)
+				</label>
+				<div className='relative'>
+					<NumberInput
+						ref={inputRef}
+						value={payment.price}
+						onChange={handlePriceChange}
+						placeholder='0'
+						className='w-full h-8 font-medium pr-3 bg-background'
+						onFocus={handleFocus}
+					/>
+				</div>
+			</div>
+		</div>
+	)
+}
 
-                <label className="w-60">
-                    <span className="my-1 block">Summasi *</span>
-                    <NumberInput
-                        ref={inputRef}
-                        value={payment.price}
-                        onChange={handlePriceChange}
-                        placeholder="0"
-                        className="w-full h-12"
-                        onFocus={handleFocus}
-                    />
-                </label>
-            </div>
-        </div>
-    );
-};
-
-export default PaymentItem;
+export default PaymentItem
