@@ -24,6 +24,8 @@ import UniversalSearchSelect from '@/components/_components/search-select'
 import CreateCustomer from '../customers/create-cus'
 import { customerUtils } from '@/utils/customer'
 import SearchSelect from './search-select'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 export default function OrderProducts() {
 	const dispatch = useAppDispatch()
@@ -35,6 +37,7 @@ export default function OrderProducts() {
 	const [selectedUser, setSelectedUser] = useState<client | null>(null)
 	const storeId = localStorage.getItem('storeId') || 1
 	const [reminder, setReminder] = useState('')
+	const [isActive, setIsActive] = useState<boolean>(false)
 	const { data: paymentTypes } = useQuery({
 		queryKey: ['get_payment'],
 		queryFn: paymentUtils.getPayments,
@@ -46,6 +49,10 @@ export default function OrderProducts() {
 			price: el.price,
 		}
 	})
+	const handleToggle = (checked: boolean) => {
+		setIsActive(checked)
+		console.log('Yangi qiymat:', checked)
+	}
 	const disabledProductIds = items.map(i => i.product_id)
 	const handleAddPayment = () => {
 		dispatch(addPayment())
@@ -124,6 +131,7 @@ export default function OrderProducts() {
 						<div className='w-full'>
 							<div className='flex justify-between items-center mb-5'>
 								<h3 className='text-xl'>Mahsulotlar</h3>
+								<div className='flex items-center space-x-2'></div>
 								<Button
 									className='w-[20%]'
 									variant='outline'
@@ -132,6 +140,18 @@ export default function OrderProducts() {
 									Tozalash
 								</Button>
 							</div>
+							{items?.length === 0 ? (
+								''
+							) : (
+								<div className='flex items-center justify-end space-x-2 my-2'>
+									<Switch
+										id='airplane-mode'
+										checked={isActive}
+										onCheckedChange={handleToggle}
+									/>
+									<Label htmlFor='airplane-mode'>Tan narxi</Label>
+								</div>
+							)}
 							<div className='flex flex-col justify-center items-center space-y-3'>
 								{items?.length === 0 ? (
 									<p className='text-center text-gray-500 py-4'>
@@ -146,7 +166,11 @@ export default function OrderProducts() {
 									</p>
 								) : (
 									items.map(item => (
-										<OrderItem key={item.id} item={item} constPrice={false} />
+										<OrderItem
+											key={item.id}
+											item={item}
+											constPrice={isActive}
+										/>
 									))
 								)}
 							</div>
