@@ -1,18 +1,16 @@
-// src/store/order-slice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./index";
 import { product } from "@/types";
 
 export interface OrderItem {
     id: string;
-    product: product; // Null bo'lmaydi endi
+    product: product; 
     product_id: number;
     count: number;
     discount: number;
     price: number;
 }
 
-// ... Payment va Debt interfacelari o'zgarmaydi ...
 export interface Payment {
     payment_type_id: string;
     price: number;
@@ -159,7 +157,7 @@ function recalculateTotals(state: OrderState) {
 }
 
 export const {
-    addProductToOrder, // O'zgargan action
+    addProductToOrder, 
     removeOrderItem,
     updateOrderItem,
     addPayment,
