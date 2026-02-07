@@ -48,7 +48,7 @@ const DownloadExel = () => {
 	return (
 		<Dialog onOpenChange={setOpen} open={open}>
 			<DialogTrigger asChild>
-				<Button className='h-12 bg-green-600 hover:bg-green-700 gap-2'>
+				<Button className='h-12 bg-green-600 hover:bg-green-700 gap-2 text-white'>
 					<FileSpreadsheet size={20} />
 					Excel yuklab olish
 				</Button>
