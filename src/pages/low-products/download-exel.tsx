@@ -54,7 +54,7 @@ const DownloadExel = () => {
 				</Button>
 			</DialogTrigger>
 
-			<DialogContent className='sm:max-w-[425px]'>
+			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Excel hisobotlar</DialogTitle>
 					<DialogDescription>
