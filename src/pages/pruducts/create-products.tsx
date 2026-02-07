@@ -13,7 +13,7 @@ import { DollarSign, TrendingUp, X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
-import { categoryType, product } from '@/types'
+import { categoryType, product } from '@/@types'
 import { categoryUtils } from '@/utils/categories'
 import { unitUtils } from '@/utils/units'
 import toast from 'react-hot-toast'
@@ -94,7 +94,7 @@ const ProductCreate = () => {
 
 		// To‘liq mos nomni tekshirish
 		const exists = products.some(
-			p => p.name.toLowerCase() === value.trim().toLowerCase()
+			p => p.name.toLowerCase() === value.trim().toLowerCase(),
 		)
 
 		setIsDuplicate(exists)
@@ -115,7 +115,7 @@ const ProductCreate = () => {
 		if (!nameValue.trim()) return []
 		return products
 			.filter(p =>
-				p.name.toLowerCase().includes(nameValue.trim().toLowerCase())
+				p.name.toLowerCase().includes(nameValue.trim().toLowerCase()),
 			)
 			.slice(0, 5)
 	}, [data.name, products])
@@ -262,32 +262,37 @@ const ProductCreate = () => {
 									onChange={handleNameChange}
 									onKeyDown={e => handleEnter(e, 0)}
 									onFocus={() => setShowSuggestions(true)}
-									onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-									className={`h-12 transition-all ${isDuplicate
-										? 'border-red-500 text-red-600'
-										: 'border-gray-300'
-										}`}
+									onBlur={() =>
+										setTimeout(() => setShowSuggestions(false), 120)
+									}
+									className={`h-12 transition-all ${
+										isDuplicate
+											? 'border-red-500 text-red-600'
+											: 'border-gray-300'
+									}`}
 									autoComplete='off'
 								/>
 								{showSuggestions && filteredProducts.length > 0 && (
-									<ul className="absolute left-0 top-full mt-1 z-50 w-full max-h-40 overflow-y-auto 
+									<ul
+										className='absolute left-0 top-full mt-1 z-50 w-full max-h-40 overflow-y-auto 
   [scrollbar-width:none] 
-  [&::-webkit-scrollbar]:hidden bg-[#514e4e] text-white border rounded-md shadow-lg">
+  [&::-webkit-scrollbar]:hidden bg-[#514e4e] text-white border rounded-md shadow-lg'
+									>
 										{filteredProducts.map(p => (
 											<li
 												key={p.id}
-												onMouseDown={(e) => { // MUHIM
-													e.preventDefault();
-													handleSelect(p.name);
+												onMouseDown={e => {
+													// MUHIM
+													e.preventDefault()
+													handleSelect(p.name)
 												}}
-												className="px-3 py-2 cursor-pointer hover:bg-black/20"
+												className='px-3 py-2 cursor-pointer hover:bg-black/20'
 											>
 												{p.name}
 											</li>
 										))}
 									</ul>
 								)}
-
 
 								{/* Duplicate xabar */}
 								{isDuplicate && (
@@ -350,8 +355,9 @@ const ProductCreate = () => {
 										inputRefs.current[3] = el
 									}}
 									onChange={({ raw }) => handleUsdRateChange(raw)}
-									className={`h-12 ${!isEditingRate ? 'bg-muted cursor-not-allowed' : ''
-										}`}
+									className={`h-12 ${
+										!isEditingRate ? 'bg-muted cursor-not-allowed' : ''
+									}`}
 									readonly={!isEditingRate}
 									onKeyDown={e => handleEnter(e, 3)}
 								/>

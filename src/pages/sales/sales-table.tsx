@@ -12,7 +12,7 @@ import { HandCoins, Search } from 'lucide-react'
 import FilterData from './filter-data'
 import { useQuery } from '@tanstack/react-query'
 import { orderUtils } from '@/utils/orders'
-import { order } from '@/types'
+import { order } from '@/@types'
 import PaginationContyent from '@/components/_components/pagination'
 import { useEffect, useState } from 'react'
 import ViewSale from './view-sale'
@@ -37,19 +37,18 @@ const SalesTable = () => {
 	useEffect(() => {
 		updateURL({
 			from: from ? from.toISOString().split('T')[0] : '',
-			to: to ? to.toISOString().split('T')[0] : ''
+			to: to ? to.toISOString().split('T')[0] : '',
 		})
 	}, [from, to, updateURL])
 
-
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '5'))
+		parseInt(getParam('limit', '5')),
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '1'))
+		parseInt(getParam('page', '1')),
 	)
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
-		getParam('search', '')
+		getParam('search', ''),
 	)
 	const { data: sales, isLoading } = useQuery<{ data: order[]; total: number }>(
 		{
@@ -70,7 +69,7 @@ const SalesTable = () => {
 					payment_type: paymentType,
 					to: to,
 				}),
-		}
+		},
 	)
 
 	const resetFilter = () => {
@@ -141,7 +140,13 @@ const SalesTable = () => {
 						}}
 					/>
 					<div>
-						<Button variant={'outline'} className={isHidden ? 'hidden' : ''} onClick={resetFilter}>Filterni tozalash</Button>
+						<Button
+							variant={'outline'}
+							className={isHidden ? 'hidden' : ''}
+							onClick={resetFilter}
+						>
+							Filterni tozalash
+						</Button>
 					</div>
 				</div>
 			</div>
@@ -170,7 +175,7 @@ const SalesTable = () => {
 								const totalPayments =
 									el?.payments?.reduce(
 										(sum, p) => sum + (p.price || p.amount || 0),
-										0
+										0,
 									) || 0
 								const remainingDebt = el?.total_price - totalPayments
 								return (
@@ -188,7 +193,7 @@ const SalesTable = () => {
 														{item.product.name}
 														<span title='Mahsulotlar yana mavjud' className=''>
 															{index === arr.length - 1 &&
-																el.order_items.length > 3
+															el.order_items.length > 3
 																? ' ...'
 																: ''}
 														</span>
@@ -217,10 +222,11 @@ const SalesTable = () => {
 													variant={
 														remainingDebt > 0 ? 'destructive' : 'default'
 													}
-													className={`${remainingDebt > 0
-														? 'text-[9px] absolute -top-2'
-														: 'text-sm'
-														} `}
+													className={`${
+														remainingDebt > 0
+															? 'text-[9px] absolute -top-2'
+															: 'text-sm'
+													} `}
 												>
 													{remainingDebt > 0 ? 'Qarzli' : "To'liq to'langan"}
 												</Badge>

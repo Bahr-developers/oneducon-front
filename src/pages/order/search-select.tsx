@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input'
-import { product } from '@/types'
+import { product } from '@/@types'
 import { productUtils } from '@/utils/products'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'

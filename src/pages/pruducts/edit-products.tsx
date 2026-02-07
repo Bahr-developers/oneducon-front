@@ -17,7 +17,7 @@ import {
 import { Pencil } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { product, categoryType } from '@/types'
+import { product, categoryType } from '@/@types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { categoryUtils } from '@/utils/categories'
 import { unitUtils } from '@/utils/units'

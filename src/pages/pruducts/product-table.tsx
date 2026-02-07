@@ -18,7 +18,7 @@ import EditProsucts from './edit-products'
 import { Input } from '@/components/ui/input'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
-import { categoryType, product } from '@/types'
+import { categoryType, product } from '@/@types'
 import { categoryUtils } from '@/utils/categories'
 import ProductView from './product-view'
 import { Search } from 'lucide-react'
@@ -37,16 +37,16 @@ const Productstable = () => {
 	const queryClient = useQueryClient()
 	// URL dan qiymatlarni olish
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '5'))
+		parseInt(getParam('limit', '5')),
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '1'))
+		parseInt(getParam('page', '1')),
 	)
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
-		getParam('search', '')
+		getParam('search', ''),
 	)
 	const [selectedCategory, setSelectedCategory] = useState<string>(() =>
-		getParam('category', '')
+		getParam('category', ''),
 	)
 
 	const removeParam = (key: string) => {
@@ -230,8 +230,8 @@ const Productstable = () => {
 													el?.quantity > 10
 														? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
 														: el?.quantity > 0
-														? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-														: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+															? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+															: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
 												}`}
 											>
 												{el?.quantity}

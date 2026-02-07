@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
-import { product } from '@/types'
+import { product } from '@/@types'
 
 interface OrderItemProps {
 	item: {

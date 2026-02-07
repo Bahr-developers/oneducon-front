@@ -38,7 +38,6 @@ function useNavItems(): NavItem[] {
 			labelKey: 'Buyurtma berish',
 			href: '/dashboard/orders',
 			icon: BadgePlus,
-			isNew: true,
 		},
 		{
 			labelKey: 'Sotuvlar',
@@ -99,7 +98,7 @@ export function AppSidebar({
 		<aside
 			className={cn(
 				'hidden md:flex sticky overflow-y-auto top-0 left-0 border-r ',
-				collapsed ? 'w-[52px]' : 'w-[270px]',
+				collapsed ? 'w-[52px]' : 'w-[275px]',
 			)}
 		>
 			<div className='flex w-full flex-col'>

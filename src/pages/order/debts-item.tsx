@@ -8,7 +8,7 @@ import { DatePicker } from '@/components/functions/date-picer'
 import { useQuery } from '@tanstack/react-query'
 import { customerUtils } from '@/utils/customer'
 import UniversalSearchSelect from '@/components/_components/search-select'
-import { client } from '@/types'
+import { client } from '@/@types'
 import CreateCustomer from '../customers/create-cus'
 import { User, Calendar, WalletCards, MessageSquare } from 'lucide-react'
 

@@ -15,7 +15,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
-import { client, paymentType } from '@/types'
+import { client, paymentType } from '@/@types'
 import { customerUtils } from '@/utils/customer'
 import { paymentUtils } from '@/utils/payment-type'
 import { useQuery } from '@tanstack/react-query'

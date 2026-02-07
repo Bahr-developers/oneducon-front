@@ -1,4 +1,4 @@
-import { expense } from '@/types'
+import { expense } from '@/@types'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { EditExpenseModal } from './edit-expenses'
@@ -20,10 +20,10 @@ const ExpensesTable = () => {
 
 	// URL dan qiymatlarni olish
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '6'))
+		parseInt(getParam('limit', '6')),
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '1'))
+		parseInt(getParam('page', '1')),
 	)
 	const { data: expensesData, isLoading } = useQuery<{
 		data: expense[]
@@ -52,7 +52,7 @@ const ExpensesTable = () => {
 
 	const totalPages = Math.max(
 		1,
-		Math.ceil((expensesData?.total || 1) / postsPerPage)
+		Math.ceil((expensesData?.total || 1) / postsPerPage),
 	)
 
 	useEffect(() => {

@@ -116,3 +116,12 @@ export interface expense {
     updated_at: string;
     expense_type: expenseType;
 }
+
+export interface ReminderItem {
+  id: string
+  name: string
+  quantity: number
+  store_id: string
+  created_at: string
+  updated_at: string
+}

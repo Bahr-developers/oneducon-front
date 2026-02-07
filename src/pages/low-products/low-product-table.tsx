@@ -11,10 +11,11 @@ import { productUtils } from '@/utils/products'
 import { useEffect, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
 import ProductsTableSkeleton from '../pruducts/product-skeleton'
-import { product } from '@/types'
+import { product } from '@/@types'
 import EditProsucts from '../pruducts/edit-products'
 import ProductView from '../pruducts/product-view'
 import { Button } from '@/components/ui/button'
+import AddReminder from './add-reminder'
 
 const LowProductTable = () => {
 	const [postsPerPage, setPostsPerPage] = useState<number>(5)
@@ -59,16 +60,6 @@ const LowProductTable = () => {
 
 	return (
 		<div className='p-2 mt-4'>
-			<div className='flex my-4 justify-end'>
-				{/* <Input type="search" placeholder="Qidirish..." className="h-12 w-[450px]" /> */}
-				<Button
-					className='cursor-pointer h-12'
-					onClick={() => downloadMutation.mutate()}
-					disabled={downloadMutation.isPending}
-				>
-					{downloadMutation.isPending ? 'Yuklanmoqda...' : 'Excel yuklab olish'}
-				</Button>
-			</div>
 			<Table className='overflow-hidden rounded-xl'>
 				<TableHeader className='bg-muted/50'>
 					<TableRow className='bg-muted/50 hover:bg-muted/50 border-b'>

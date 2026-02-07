@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./index";
-import { product } from "@/types";
+import { product } from "@/@types";
 
 export interface OrderItem {
     id: string;
