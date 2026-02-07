@@ -1,5 +1,4 @@
 import { ReminderItem } from '@/@types'
-import Loader from '@/components/_components/loader'
 import NumberInput from '@/components/_components/number-input'
 import { Button } from '@/components/ui/button'
 import {

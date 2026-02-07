@@ -16,9 +16,7 @@ import { useEffect, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
 import ProductsTableSkeleton from '../pruducts/product-skeleton'
 import { product } from '@/@types'
-import { Button } from '@/components/ui/button'
 import { reminderUtils } from '@/utils/reminder'
-import AddReminder from './add-reminder'
 import EditReminder from './edit-reminder'
 import { DeleteConfirm } from '@/components/ui/alerd-dialog'
 import toast from 'react-hot-toast'
@@ -45,25 +43,7 @@ const ReminderTable = () => {
 	}, [currentPage, totalPages])
 
 	const paginated = reminderProducts?.data
-	const downloadMutation = useMutation({
-		mutationFn: reminderUtils.getProductExport,
-		onSuccess: response => {
-			const blob = new Blob([response], {
-				type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-			})
-			const url = window.URL.createObjectURL(blob)
-			const link = document.createElement('a')
-			link.href = url
 
-			link.setAttribute(
-				'download',
-				`mahsulotlar_hisoboti_${new Date().toLocaleDateString()}.xlsx`,
-			)
-			document.body.appendChild(link)
-			link.click()
-			window.URL.revokeObjectURL(url)
-		},
-	})
 	const deleteProduct = useMutation({
 		mutationFn: reminderUtils.deleteReminderProduct,
 		onSuccess: () => {

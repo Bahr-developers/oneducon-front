@@ -9,11 +9,6 @@ interface postData{
   name: string 
   quantity: number| null,
 }
-interface exportFile {
-    categoryId?: string | null,
-    search?: string,
-   
-}
 export const  reminderUtils ={
     getReminder: async ({limit, page}:getParams) => {
         const params = new URLSearchParams();

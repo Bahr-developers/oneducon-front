@@ -6,7 +6,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
 import { useEffect, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
@@ -14,13 +14,10 @@ import ProductsTableSkeleton from '../pruducts/product-skeleton'
 import { product } from '@/@types'
 import EditProsucts from '../pruducts/edit-products'
 import ProductView from '../pruducts/product-view'
-import { Button } from '@/components/ui/button'
-import AddReminder from './add-reminder'
 
 const LowProductTable = () => {
 	const [postsPerPage, setPostsPerPage] = useState<number>(5)
 	const [currentPage, setCurrentPage] = useState<number>(1)
-	const storeId = localStorage.getItem('storeId') || '1'
 	const { data: lowProducts, isLoading } = useQuery({
 		queryKey: ['get_low_products', currentPage, postsPerPage],
 
@@ -43,20 +40,6 @@ const LowProductTable = () => {
 	}, [currentPage, totalPages])
 
 	const paginated = lowProducts?.data
-	const downloadMutation = useMutation({
-		mutationFn: () => productUtils.getLowProductExport(storeId),
-		onSuccess: response => {
-			const blob = new Blob([response], { type: 'application/vnd.ms-excel' })
-			const url = window.URL.createObjectURL(blob)
-
-			const a = document.createElement('a')
-			a.href = url
-			a.download = 'low-products.xlsx'
-			a.click()
-
-			window.URL.revokeObjectURL(url)
-		},
-	})
 
 	return (
 		<div className='p-2 mt-4'>
