@@ -40,7 +40,7 @@ function formatUzPhone(value: string): string {
 
 // Validatsiya
 function isValidUzPhone(phone: string): boolean {
-	const re = /^\+998\s(90|91|93|94|95|97|98|99)\s(\d{3})\s(\d{2})\s(\d{2})$/
+	const re = /^\+998\s\d{2}\s\d{3}\s\d{2}\s\d{2}$/
 	return re.test(phone)
 }
 
