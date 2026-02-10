@@ -21,14 +21,19 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
 
 	const handleCountChange = (value: string) => {
+		// Agar bo'sh bo'lsa 0 ga tenglashtiramiz (yozish jarayoni uchun)
 		if (value === '') {
 			dispatch(updateOrderItem({ id: item.id, updates: { count: 0 } }))
 			return
 		}
 
-		let num = Number(value)
+		// Vergulni nuqtaga aylantiramiz (ba'zi klaviaturalar uchun)
+		let normalizedValue = value.replace(',', '.')
+		let num = Number(normalizedValue)
+
 		if (isNaN(num)) return
 
+		// Ombordagi qoldiqdan oshib ketmasligini tekshirish
 		if (item.product?.quantity && num > item.product.quantity) {
 			num = item.product.quantity
 		}
@@ -42,7 +47,9 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleBlur = () => {
-		if (!item.count || item.count < 1) {
+		// O'ZGARISH: 1 dan emas, 0 dan kichik yoki teng bo'lsa 1 ga qaytarish.
+		// Bu 0.1, 0.5 kabi raqamlarga ruxsat beradi.
+		if (!item.count || item.count <= 0) {
 			dispatch(
 				updateOrderItem({
 					id: item.id,
@@ -118,10 +125,14 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 						<Input
 							className='w-20 h-9 text-center font-medium'
 							type='number'
-							value={item.count === 0 ? '' : item.count}
+							// O'ZGARISH: step="any" kasr sonlarni kiritishga ruxsat beradi
+							step='any'
+							// 0 bo'lsa bo'sh ko'rsatish, aks holda qiymatni string qilib berish
+							value={item.count === 0 ? '' : item.count.toString()}
 							onFocus={e => e.target.select()}
 							onChange={e => handleCountChange(e.target.value)}
 							onBlur={handleBlur}
+							min={0}
 						/>
 						<div className='absolute right-0 -bottom-4 text-[10px] text-muted-foreground w-full text-right pr-1'>
 							max: {item.product.quantity}
@@ -150,14 +161,18 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				</span>
 				<div className='flex flex-col items-end'>
 					<span className='text-lg font-bold text-primary tracking-tight'>
-						{totalPrice.toLocaleString()}
+						{totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
 						<span className='text-xs font-normal text-muted-foreground ml-1'>
 							UZS
 						</span>
 					</span>
 					{item.discount > 0 && (
 						<span className='text-xs text-green-600 font-medium'>
-							-{(item.discount * item.count).toLocaleString()} skidka
+							-
+							{(item.discount * item.count).toLocaleString(undefined, {
+								maximumFractionDigits: 2,
+							})}{' '}
+							skidka
 						</span>
 					)}
 				</div>
