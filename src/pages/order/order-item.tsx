@@ -1,4 +1,5 @@
 // order-item.tsx
+import { useState, useEffect } from 'react' // useEffect qo'shildi
 import { Input } from '@/components/ui/input'
 import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
@@ -20,24 +21,46 @@ interface OrderItemProps {
 const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
 
+	// 1. LOCAL STATE: Inputdagi yozuvni ushlab turish uchun
+	const [localCount, setLocalCount] = useState(item.count.toString())
+
+	// 2. SYNC: Agar tashqaridan (Reduxdan) count o'zgarsa, local stateni yangilash
+	// Masalan, savatcha tozalandi yoki API dan ma'lumot keldi
+	useEffect(() => {
+		// Agar local qiymat va store qiymati farq qilsa, yangilaymiz.
+		// Bu "0." yozayotganda kursor sakrashini oldini oladi.
+		if (Number(localCount) !== item.count) {
+			setLocalCount(item.count === 0 ? '' : item.count.toString())
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [item.count])
+
 	const handleCountChange = (value: string) => {
-		// Agar bo'sh bo'lsa 0 ga tenglashtiramiz (yozish jarayoni uchun)
-		if (value === '') {
+		// Vergulni nuqtaga aylantiramiz (mobil klaviaturalar uchun)
+		let normalizedValue = value.replace(',', '.')
+
+		// 1. Inputda ko'rinishi uchun local stateni darhol yangilaymiz
+		// Bu foydalanuvchiga "0." yoki "0.5" ni bemalol yozishga imkon beradi
+		setLocalCount(normalizedValue)
+
+		if (normalizedValue === '') {
 			dispatch(updateOrderItem({ id: item.id, updates: { count: 0 } }))
 			return
 		}
 
-		// Vergulni nuqtaga aylantiramiz (ba'zi klaviaturalar uchun)
-		let normalizedValue = value.replace(',', '.')
 		let num = Number(normalizedValue)
 
+		// Agar son bo'lmasa (masalan faqat "."), Reduxni yangilamaymiz, lekin inputda turaveradi
 		if (isNaN(num)) return
 
-		// Ombordagi qoldiqdan oshib ketmasligini tekshirish
+		// Max quantity tekshiruvi
 		if (item.product?.quantity && num > item.product.quantity) {
 			num = item.product.quantity
+			// Agar max dan oshsa, local stateni ham to'g'irlab qo'yamiz
+			setLocalCount(num.toString())
 		}
 
+		// Reduxga faqat toza raqamni jo'natamiz
 		dispatch(
 			updateOrderItem({
 				id: item.id,
@@ -47,15 +70,21 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleBlur = () => {
-		// O'ZGARISH: 1 dan emas, 0 dan kichik yoki teng bo'lsa 1 ga qaytarish.
-		// Bu 0.1, 0.5 kabi raqamlarga ruxsat beradi.
-		if (!item.count || item.count <= 0) {
+		// Inputdan chiqqanda (focus yo'qolganda) tekshiramiz
+		let currentVal = Number(localCount.replace(',', '.'))
+
+		if (!currentVal || currentVal <= 0) {
+			// Agar 0 yoki bo'sh bo'lsa, 1 ga qaytarish
+			setLocalCount('1')
 			dispatch(
 				updateOrderItem({
 					id: item.id,
 					updates: { count: 1 },
 				}),
 			)
+		} else {
+			// Agar "0.5000" kabi yozilgan bo'lsa, chiroyli qilib "0.5" ga o'tkazib qo'yamiz
+			setLocalCount(currentVal.toString())
 		}
 	}
 
@@ -87,6 +116,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				<X className='h-5 w-5' />
 			</button>
 
+			{/* PRODUCT INFO SECTION - (O'zgarishsiz) */}
 			<div className='flex-1 w-full md:w-auto flex flex-col gap-1'>
 				<h3 className='font-semibold text-base leading-tight line-clamp-1'>
 					{item.product.name}
@@ -114,7 +144,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				</div>
 			</div>
 
-			{/* 3. INPUTS SECTION (Count & Discount) */}
+			{/* INPUTS SECTION */}
 			<div className='flex items-end gap-3 w-full md:w-auto justify-between md:justify-start'>
 				{/* Count Input */}
 				<div className='flex flex-col gap-1.5'>
@@ -124,15 +154,13 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					<div className='relative'>
 						<Input
 							className='w-20 h-9 text-center font-medium'
-							type='number'
-							// O'ZGARISH: step="any" kasr sonlarni kiritishga ruxsat beradi
-							step='any'
-							// 0 bo'lsa bo'sh ko'rsatish, aks holda qiymatni string qilib berish
-							value={item.count === 0 ? '' : item.count.toString()}
+							type='text' // Number emas, TEXT ishlatamiz (xatolarni oldini olish uchun)
+							inputMode='decimal' // Mobil telefonda raqamlar klaviaturasi chiqishi uchun
+							// MUHIM: Endi item.count emas, localCount ni ulaymiz
+							value={localCount}
 							onFocus={e => e.target.select()}
 							onChange={e => handleCountChange(e.target.value)}
 							onBlur={handleBlur}
-							min={0}
 						/>
 						<div className='absolute right-0 -bottom-4 text-[10px] text-muted-foreground w-full text-right pr-1'>
 							max: {item.product.quantity}
@@ -140,7 +168,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					</div>
 				</div>
 
-				{/* Discount Input */}
+				{/* Discount Input - (O'zgarishsiz) */}
 				<div className='flex flex-col gap-1.5'>
 					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
 						Chegirma
@@ -154,7 +182,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				</div>
 			</div>
 
-			{/* 4. TOTAL PRICE SECTION */}
+			{/* TOTAL PRICE SECTION */}
 			<div className='flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-40 pl-4 md:border-l border-dashed border-border gap-1'>
 				<span className=' text-sm font-medium text-muted-foreground'>
 					Jami summa:
