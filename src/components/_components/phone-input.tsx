@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { Input } from '../ui/input'
 
 interface PhoneInputProps {
-	value?: string // tashqaridan keladigan qiymat (formatted yoki raw)
+	value?: string
 	onChange?: (data: {
-		formatted: string // +998 97 108 20 04
-		raw: string // 998971082004
-		isValid: boolean // true/false
+		formatted: string
+		raw: string
+		isValid: boolean
 	}) => void
 	className?: string
 }
@@ -38,13 +38,10 @@ function formatUzPhone(value: string): string {
 	return out
 }
 
-// Validatsiya
 function isValidUzPhone(phone: string): boolean {
 	const re = /^\+998\s\d{2}\s\d{3}\s\d{2}\s\d{2}$/
 	return re.test(phone)
 }
-
-// Faqat raqamlarni olish
 function getRawUzPhone(phone: string): string {
 	return phone.replace(/\D/g, '')
 }
@@ -57,7 +54,6 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 	const [internalValue, setInternalValue] = useState('+998 ')
 	const [isValid, setIsValid] = useState(true)
 
-	// 🧩 Agar tashqaridan value kelsa (edit holati) — initial holatda o‘rnatamiz
 	useEffect(() => {
 		if (value) {
 			const formatted = formatUzPhone(value)
