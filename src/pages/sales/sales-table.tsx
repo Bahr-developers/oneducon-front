@@ -48,7 +48,7 @@ const SalesTable = () => {
 		parseInt(getParam('limit', '5')),
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '0')),
+		parseInt(getParam('page', '1')),
 	)
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
 		getParam('search', ''),
