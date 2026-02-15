@@ -33,11 +33,13 @@ interface ProductFormData {
 const ProductCreate = () => {
 	const [open, setOpen] = useState(false)
 	const [data, setData] = useState<Partial<ProductFormData>>({})
-	const [usdRate, setUsdRate] = useState(12500)
+	const storeId = localStorage.getItem('storeId') || 1
+	const usd_rate = JSON.parse(localStorage.getItem('usd_rate') || '12500')
+	const [usdRate, setUsdRate] = useState(usd_rate ? parseFloat(usd_rate) : 1)
 	const [isEditingRate, setIsEditingRate] = useState(false)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([])
-	const storeId = localStorage.getItem('storeId') || 1
+
 	const [barcode, setBArcode] = useState('')
 	// Validate form - all required fields filled
 	const queryClient = useQueryClient()

@@ -40,8 +40,6 @@ const DebtsTable = () => {
 
 	const paginated = debts?.data || []
 
-	console.log(paginated)
-
 	return (
 		<div className='mt-5'>
 			<div className='relative w-full sm:w-[450px] my-2'>

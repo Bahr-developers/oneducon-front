@@ -61,7 +61,7 @@ export default function OrderProducts() {
 	const createOrder = useMutation({
 		mutationFn: orderUtils.postOrder,
 		onSuccess: () => {
-			toast.success('Order yaratildi ')
+			toast.success('Sotuv amalga oshirildi ')
 			dispatch(resetOrder())
 			setSelectedUser(null)
 			setReturnTime(undefined)
@@ -181,7 +181,7 @@ export default function OrderProducts() {
 					<div className='p-2 border rounded-lg mb-1'>
 						{!hasDebt && (
 							<div className='flex text-[14px] flex-col space-y-1 items-start mt-2 w-full'>
-								<h3>Mijozni belgilash(ixtiyoriy)</h3>
+								<h3>Mijozning ismi yoki raqami</h3>
 								<div className='flex justify-between items-center gap-x-3 w-full'>
 									<UniversalSearchSelect
 										data={customers?.data}

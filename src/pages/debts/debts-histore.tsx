@@ -113,7 +113,7 @@ const DebtsPage = () => {
 		updateDebts.mutate({
 			client_id: Number(id),
 			id: debtId,
-			price: debt.price,
+			price: debt.price === 0 ? null : debt.price,
 			reminder: debt.reminder,
 			return_time: debt.return_time,
 			status: debt.status,
