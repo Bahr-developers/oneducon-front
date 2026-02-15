@@ -20,6 +20,8 @@ import { useQueryParams } from '@/components/functions/query-params'
 import { useDebounce } from '@/components/functions/useDebounce'
 import { Badge } from '@/components/ui/badge'
 import SelesTableSkeleton from './seles-table-skeleton'
+import { normalizeDateRange } from '@/components/functions/normalize-date'
+import { formatLocalDate } from '@/components/functions/format-locale-date'
 
 const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
@@ -27,17 +29,18 @@ const SalesTable = () => {
 	const [to, setTo] = useState<Date | undefined>()
 	const [client, setClient] = useState('')
 	const [paymentType, setPaymentType] = useState('')
+
 	const [appliedFilters, setAppliedFilters] = useState<{
 		from?: Date
 		to?: Date
 		client?: string
 		paymentType?: string
 	}>({})
-
+	const { normalizedFrom, normalizedTo } = normalizeDateRange(from, to)
 	useEffect(() => {
 		updateURL({
-			from: from ? from.toISOString().split('T')[0] : '',
-			to: to ? to.toISOString().split('T')[0] : '',
+			from: normalizedFrom ? formatLocalDate(normalizedFrom) : '',
+			to: normalizedTo ? formatLocalDate(normalizedTo) : '',
 		})
 	}, [from, to, updateURL])
 
@@ -45,7 +48,7 @@ const SalesTable = () => {
 		parseInt(getParam('limit', '5')),
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '1')),
+		parseInt(getParam('page', '0')),
 	)
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
 		getParam('search', ''),
@@ -64,10 +67,10 @@ const SalesTable = () => {
 					limit: postsPerPage,
 					page: currentPage,
 					search: searchQuery,
-					client: client,
-					from: from,
-					payment_type: paymentType,
-					to: to,
+					client: appliedFilters.client,
+					payment_type: appliedFilters.paymentType,
+					from: appliedFilters.from?.toISOString(),
+					to: appliedFilters.to?.toISOString(),
 				}),
 		},
 	)
@@ -123,20 +126,38 @@ const SalesTable = () => {
 				</div>
 				<div className='flex justify-center gap-2.5'>
 					<FilterData
-						from={from}
+						from={normalizedFrom}
 						setFrom={setFrom}
 						setTo={setTo}
-						to={to}
+						to={normalizedTo}
 						setClient={setClient}
 						setPaymentType={setPaymentType}
 						onApply={() => {
+							let backendFrom = from
+							let backendTo = to
+
+							if (from && to) {
+								backendFrom = new Date(from)
+								backendFrom.setHours(0, 0, 0, 0)
+
+								backendTo = new Date(to)
+								backendTo.setHours(0, 0, 0, 0)
+
+								if (from.getTime() === to.getTime()) {
+									backendTo.setDate(backendTo.getDate() + 1)
+								} else {
+									backendTo.setDate(backendTo.getDate() + 1)
+								}
+							}
+
 							setAppliedFilters({
-								from,
-								to,
+								from: backendFrom,
+								to: backendTo,
 								client,
 								paymentType,
 							})
-							setCurrentPage(1) // pagination reset
+
+							setCurrentPage(1)
 						}}
 					/>
 					<div>

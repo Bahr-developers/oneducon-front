@@ -181,7 +181,7 @@ export default function OrderProducts() {
 					<div className='p-2 border rounded-lg mb-1'>
 						{!hasDebt && (
 							<div className='flex text-[14px] flex-col space-y-1 items-start mt-2 w-full'>
-								<h3>Mijozning ismi yoki raqami</h3>
+								<h3 className='text-[17px] font-semibold'>Mijoz</h3>
 								<div className='flex justify-between items-center gap-x-3 w-full'>
 									<UniversalSearchSelect
 										data={customers?.data}
@@ -190,7 +190,7 @@ export default function OrderProducts() {
 										secondaryKey='phone'
 										value={selectedUser}
 										onSelect={setSelectedUser}
-										placeholder='User nomini kiriting...'
+										placeholder='Mijozning ismi yoki raqami...'
 										className='w-[80%]'
 									/>
 									<CreateCustomer />
