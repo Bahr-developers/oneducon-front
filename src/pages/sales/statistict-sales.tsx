@@ -1,15 +1,21 @@
 import { orderUtils } from '@/utils/orders'
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 
 const StatisticsSales = () => {
+	const [searchParams] = useSearchParams()
+	const from = searchParams.get('from') || undefined
+	const to = searchParams.get('to') || undefined
 	const { data: stats } = useQuery<{
 		totalOrders: number
 		totalPayments: number
 		totalDebts: number
 	}>({
-		queryKey: ['stats'],
-		queryFn: orderUtils.getOrderStats,
+		queryKey: ['stats', from, to],
+		queryFn: () => orderUtils.getOrdersStats({ from, to }),
 	})
+
+	console.log(searchParams.get('from'), searchParams.get('to'))
 
 	const data = [
 		{

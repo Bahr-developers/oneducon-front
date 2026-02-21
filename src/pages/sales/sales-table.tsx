@@ -27,8 +27,8 @@ const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
 	const [from, setFrom] = useState<Date | undefined>()
 	const [to, setTo] = useState<Date | undefined>()
-	const [client, setClient] = useState('')
-	const [paymentType, setPaymentType] = useState('')
+	const [client, setClient] = useState<string | undefined>()
+	const [paymentType, setPaymentType] = useState<string | undefined>()
 
 	const [appliedFilters, setAppliedFilters] = useState<{
 		from?: Date
@@ -38,11 +38,13 @@ const SalesTable = () => {
 	}>({})
 	const { normalizedFrom, normalizedTo } = normalizeDateRange(from, to)
 	useEffect(() => {
-		updateURL({
-			from: normalizedFrom ? formatLocalDate(normalizedFrom) : '',
-			to: normalizedTo ? formatLocalDate(normalizedTo) : '',
-		})
-	}, [from, to, updateURL])
+		if (from || to) {
+			updateURL({
+				from: normalizedFrom ? formatLocalDate(normalizedFrom) : '',
+				to: normalizedTo ? formatLocalDate(normalizedTo) : '',
+			})
+		}
+	}, [from, to, updateURL, normalizedFrom, normalizedTo])
 
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
 		parseInt(getParam('limit', '5')),
@@ -53,13 +55,14 @@ const SalesTable = () => {
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
 		getParam('search', ''),
 	)
+	const searchText = useDebounce(searchQuery, 500)
 	const { data: sales, isLoading } = useQuery<{ data: order[]; total: number }>(
 		{
 			queryKey: [
 				'get_all_orders',
 				currentPage,
 				postsPerPage,
-				searchQuery,
+				searchText,
 				appliedFilters,
 			],
 			queryFn: async () =>
@@ -74,8 +77,8 @@ const SalesTable = () => {
 				}),
 		},
 	)
-
 	const resetFilter = () => {
+		// 1. Local state-larni tozalash
 		setFrom(undefined)
 		setTo(undefined)
 		setClient('')
@@ -83,11 +86,14 @@ const SalesTable = () => {
 		setAppliedFilters({})
 		setCurrentPage(1)
 
+		// 2. URL-ni tozalash
+		// Muhim: Agar updateURL ob'ekt qabul qilsa, barcha kalitlarni bo'shatish kerak
 		updateURL({
 			client: '',
 			paymentType: '',
 			from: '',
 			to: '',
+			page: 1, // Sahifani ham birinchi sahifaga qaytarish yaxshi praktika
 		})
 	}
 
@@ -109,7 +115,11 @@ const SalesTable = () => {
 
 	const paginated = sales?.data
 
-	const isHidden = !from && !to && !client && !paymentType
+	const isHidden =
+		getParam('from', '') ||
+		getParam('to', '') ||
+		getParam('client', '') ||
+		getParam('paymentType', '')
 
 	return (
 		<div className='mt-10'>
@@ -163,7 +173,7 @@ const SalesTable = () => {
 					<div>
 						<Button
 							variant={'outline'}
-							className={isHidden ? 'hidden' : ''}
+							className={isHidden ? '' : 'hidden'}
 							onClick={resetFilter}
 						>
 							Filterni tozalash

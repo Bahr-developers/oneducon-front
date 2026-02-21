@@ -93,8 +93,11 @@ export const orderUtils = {
     const { data } = await customAxios.get(`orders/${id}`);
     return data;
   },
-  getOrderStats: async () => {
-    const { data } = await customAxios.get(`orders/stats`);
+  getOrdersStats: async (params?: GetOrdersParams) => {
+    const sp = new URLSearchParams();    
+    if (params?.from) sp.append("from", params.from);
+    if (params?.to) sp.append("to", params.to);
+    const { data } = await customAxios.get(`orders/stats?${sp.toString()}`);
     return data;
   },
   postOrder: async (order: OrderData) => {
