@@ -118,8 +118,8 @@ export default function OrderProducts() {
 	return (
 		<div className=''>
 			{/* <h2 className='text-xl font-medium my-3'>Buyurtma berish</h2> */}
-			<div className='w-full flex items-start gap-4 '>
-				<div className='order-products w-[65%]  sticky top-20  pb-10'>
+			<div className='w-full flex items-start gap-4'>
+				<div className='order-products w-[65%]'>
 					<div className='w-full flex flex-col items-start mb-4'>
 						<SearchSelect
 							key={items.length}
@@ -127,7 +127,7 @@ export default function OrderProducts() {
 							disabledProductIds={disabledProductIds}
 						/>
 					</div>
-					<div className='w-full px-5 my-5 rounded-lg border p-3 h-[80vh] overflow-y-auto'>
+					<div className='w-full px-5  rounded-lg border p-3 h-[80vh] overflow-y-auto'>
 						<div className='w-full'>
 							<div className='flex justify-between items-center mb-5'>
 								<h3 className='text-xl'>Mahsulotlar</h3>
@@ -177,7 +177,7 @@ export default function OrderProducts() {
 						</div>
 					</div>
 				</div>
-				<div className='flex-1 flex flex-col gap-5 w-[25%]'>
+				<div className='flex-1 flex flex-col gap-5 w-[25%] h-[85vh] overflow-y-auto'>
 					<div className='p-2 border rounded-lg mb-1'>
 						{!hasDebt && (
 							<div className='flex text-[14px] flex-col space-y-1 items-start mt-2 w-full'>
@@ -256,7 +256,7 @@ export default function OrderProducts() {
 						}
 					>
 						{createOrder.isPending ? (
-							<span className='flex items-center gap-2'>
+							<span className='flex items-center justify-center gap-2'>
 								<span className='animate-spin'>⏳</span>
 								Saqlanmoqda...
 							</span>

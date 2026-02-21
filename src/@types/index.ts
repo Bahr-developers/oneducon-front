@@ -23,6 +23,7 @@ export interface product {
     count: number
     created_at: string
     barcode?:string
+    wholesale_price: number | null
 }
 
 export interface user {

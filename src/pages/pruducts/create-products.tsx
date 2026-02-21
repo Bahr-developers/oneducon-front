@@ -39,7 +39,7 @@ const ProductCreate = () => {
 	const [isEditingRate, setIsEditingRate] = useState(false)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([])
-
+	const [wholesalePriceUZS, setWholesalePriceUZS] = useState(0)
 	const [barcode, setBArcode] = useState('')
 	// Validate form - all required fields filled
 	const queryClient = useQueryClient()
@@ -210,6 +210,7 @@ const ProductCreate = () => {
 			store_id: +storeId,
 			usd_rate: usdRate,
 			barcode: barcode,
+			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : 0,
 		}
 
 		createProduct.mutate(productData)
@@ -455,7 +456,7 @@ const ProductCreate = () => {
 								</div>
 							</label>
 
-							<label className='w-full flex col-span-2 flex-col space-y-2'>
+							<label className='w-full flex col-span-1 flex-col space-y-2'>
 								<span className='text-sm font-medium flex items-center gap-2'>
 									Barcode
 								</span>
@@ -468,6 +469,22 @@ const ProductCreate = () => {
 										className='h-12 pr-10'
 										placeholder='4780087820048'
 										onChange={e => setBArcode(e.target.value)}
+									/>
+								</div>
+							</label>
+							<label className='w-full flex col-span-1 flex-col space-y-2'>
+								<span className='text-sm font-medium flex items-center gap-2'>
+									Ulgurji narxi (UZS)
+									<span className='text-red-500'>*</span>
+								</span>
+								<div className='relative'>
+									<NumberInput
+										ref={el => {
+											inputRefs.current[6] = el
+										}}
+										className='h-12 pr-10'
+										placeholder='Masalan: 5 000 000'
+										onChange={({ raw }) => setWholesalePriceUZS(raw)}
 									/>
 								</div>
 							</label>

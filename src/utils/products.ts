@@ -13,7 +13,8 @@ interface productData {
     unit_id: number | null
     category_id: number | null
     store_id?: number
-    barcode: string
+    barcode: string,
+    wholesale_price: number
 }
 
 interface getParams {

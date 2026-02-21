@@ -32,6 +32,7 @@ interface EditProductProps {
 const EditProduct = ({ product }: EditProductProps) => {
 	const [open, setOpen] = useState(false)
 	const [barcode, setBarcode] = useState(product?.barcode || '')
+	const [wholesalePriceUZS, setWholesalePriceUZS] = useState(0)
 	const [data, setData] = useState({
 		name: product?.name,
 		count: product?.quantity ?? 0,
@@ -43,6 +44,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 		usd_rate: product?.usd_rate,
 		unitId: product?.unit?.id ?? '',
 		categoryId: product?.category?.id ?? '',
+		wholesale_price: product?.wholesale_price ?? 0,
 	})
 
 	console.log(data)
@@ -88,6 +90,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 			sale_price_usd: Number(data?.saler_narxi_dol),
 			usd_rate: Number(data?.usd_rate),
 			barcode,
+			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : 0,
 		})
 	}
 
@@ -163,6 +166,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 				usd_rate: product?.usd_rate,
 				unitId: product?.unit?.id ?? '',
 				categoryId: product?.category?.id ?? '',
+				wholesale_price: product?.wholesale_price ?? 0,
 			})
 			setBarcode(product?.barcode || '')
 		}
@@ -256,7 +260,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 							/>
 						</label>
 
-						<label className='w-full flex col-span-2 flex-col space-y-2'>
+						<label className='w-full flex col-span-1 flex-col space-y-2'>
 							<span className='text-sm font-medium flex items-center gap-2'>
 								Barcode
 							</span>
@@ -268,6 +272,20 @@ const EditProduct = ({ product }: EditProductProps) => {
 									placeholder='Misol: 4780087820048'
 									value={barcode}
 									onChange={e => setBarcode(e.target.value)}
+								/>
+							</div>
+						</label>
+						<label className='w-full flex col-span-1 flex-col space-y-2'>
+							<span className='text-sm font-medium flex items-center gap-2'>
+								Ulgurji narxi (UZS)
+								<span className='text-red-500'>*</span>
+							</span>
+							<div className='relative'>
+								<NumberInput
+									value={data?.wholesale_price}
+									className='h-12 pr-10'
+									placeholder='Masalan: 5 000 000'
+									onChange={({ raw }) => setWholesalePriceUZS(raw)}
 								/>
 							</div>
 						</label>

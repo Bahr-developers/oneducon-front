@@ -35,13 +35,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import NumberInput from '@/components/_components/number-input'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select'
+
 import OrderDetailsDialog from './view-debts'
 import toast from 'react-hot-toast'
 
@@ -49,7 +43,6 @@ const DebtsPage = () => {
 	const { id: userId } = useParams()
 	const [editingDebt, setEditingDebt] = useState<string | null>(null)
 	const [editedDebts, setEditedDebts] = useState<Record<string, any>>({})
-	const [statusFilter, setStatusFilter] = useState('ALL')
 
 	const queryClient = useQueryClient()
 	const { id } = useParams()
@@ -136,16 +129,7 @@ const DebtsPage = () => {
 			[debtId]: { ...prev[debtId], [field]: value },
 		}))
 	}
-	const filteredDebts =
-		debtsArray?.filter(
-			(debt: any) => statusFilter === 'ALL' || debt?.status === statusFilter,
-		) ?? []
-
-	const totalOverallDebt =
-		filteredDebts?.reduce(
-			(sum: number, debt: any) => sum + (debt?.price || 0),
-			0,
-		) ?? 0
+	const filteredDebts = debtsArray
 
 	if (isLoading) {
 		return (
@@ -170,17 +154,6 @@ const DebtsPage = () => {
 					<div className='text-sm text-gray-600'>Umumiy qarz summasi</div>
 				</div>
 			</div>
-			<Select onValueChange={value => setStatusFilter(value)}>
-				<SelectTrigger className='max-w-[180px]'>
-					<SelectValue placeholder={statusFilter} />
-				</SelectTrigger>
-				<SelectContent>
-					<SelectItem value='ALL'>Barcha holatlar</SelectItem>
-					<SelectItem value='UNPAID'>To'lanmagan</SelectItem>
-					<SelectItem value='PAID'>To'langan</SelectItem>
-					<SelectItem value='PARTIAL'>Qisman to'langan</SelectItem>
-				</SelectContent>
-			</Select>
 
 			{clientData && (
 				<Card className='border-l-4 border-l-blue-500 shadow-sm'>
@@ -205,12 +178,12 @@ const DebtsPage = () => {
 									</CardDescription>
 								</div>
 							</div>
-							<div className='text-right'>
+							{/* <div className='text-right'>
 								<div className='text-2xl font-bold text-red-600'>
 									{formatCurrency(totalOverallDebt)}
 								</div>
 								<div className='text-sm text-gray-600'>Jami qarz summasi</div>
-							</div>
+							</div> */}
 						</div>
 					</CardHeader>
 
@@ -308,36 +281,7 @@ const DebtsPage = () => {
 														</div>
 													)}
 												</TableCell>
-												<TableCell>
-													{editingDebt === debt?.id ? (
-														<Select
-															onValueChange={value =>
-																handleChange(debt?.id, 'status', value)
-															}
-														>
-															<SelectTrigger className='w-[180px]'>
-																<SelectValue
-																	placeholder={
-																		editedDebts[debt.id]?.status ??
-																		debt.status ??
-																		"To'lanmagan"
-																	}
-																/>
-															</SelectTrigger>
-															<SelectContent>
-																<SelectItem value='UNPAID'>
-																	To'lanmagan
-																</SelectItem>
-																<SelectItem value='PARTIAL'>
-																	Qisman to'langan
-																</SelectItem>
-																<SelectItem value='PAID'>To'langan</SelectItem>
-															</SelectContent>
-														</Select>
-													) : (
-														getStatusBadge(debt?.status)
-													)}
-												</TableCell>
+												<TableCell>{getStatusBadge(debt?.status)}</TableCell>
 												<TableCell className='text-sm text-gray-600'>
 													<Calendar className='h-4 w-4 inline mr-1' />
 													{debt?.return_time?.slice(0, 10)}

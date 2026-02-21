@@ -190,6 +190,9 @@ const Productstable = () => {
 							<TableRow className='bg-muted/50 hover:bg-muted/50 border-b'>
 								<TableHead className='w-[60px] font-semibold'>№</TableHead>
 								<TableHead className='font-semibold'>Nomi</TableHead>
+								<TableHead className='font-semibold'>
+									Ulgurji narxi (uzs)
+								</TableHead>
 								<TableHead className='font-semibold'>Tan narxi (uzs)</TableHead>
 								<TableHead className='font-semibold'>
 									Sotuv narxi (uzs)
@@ -215,6 +218,11 @@ const Productstable = () => {
 											#{index + 1}
 										</TableCell>
 										<TableCell className='font-medium'>{el?.name}</TableCell>
+										<TableCell className='text-muted-foreground'>
+											{el?.wholesale_price
+												? el?.wholesale_price?.toLocaleString()
+												: el?.cost_price?.toLocaleString()}
+										</TableCell>
 										<TableCell className='text-muted-foreground'>
 											{el?.cost_price?.toLocaleString()}
 										</TableCell>
