@@ -210,7 +210,9 @@ const ProductCreate = () => {
 			store_id: +storeId,
 			usd_rate: usdRate,
 			barcode: barcode,
-			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : 0,
+			wholesale_price: wholesalePriceUZS
+				? wholesalePriceUZS
+				: data.tan_narx_uzb!,
 		}
 
 		createProduct.mutate(productData)
@@ -575,7 +577,7 @@ const ProductCreate = () => {
 								onClick={onHandleSubmit}
 								disabled={!isFormValid || isSubmitting}
 								size='lg'
-								className='flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed'
+								className='flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white'
 							>
 								{isSubmitting ? 'Yuklanmoqda...' : 'Yaratish'}
 							</Button>

@@ -90,7 +90,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 			sale_price_usd: Number(data?.saler_narxi_dol),
 			usd_rate: Number(data?.usd_rate),
 			barcode,
-			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : 0,
+			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : null,
 		})
 	}
 
@@ -166,7 +166,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 				usd_rate: product?.usd_rate,
 				unitId: product?.unit?.id ?? '',
 				categoryId: product?.category?.id ?? '',
-				wholesale_price: product?.wholesale_price ?? 0,
+				wholesale_price: product?.wholesale_price ?? product.cost_price,
 			})
 			setBarcode(product?.barcode || '')
 		}

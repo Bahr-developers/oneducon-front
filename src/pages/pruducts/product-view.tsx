@@ -168,9 +168,12 @@ const ProductView = (product: product) => {
 								</div>
 							</div>
 							<div className='p-3 rounded-lg border border-orange-100'>
-								<div className='text-sm text-orange-600'>USD kursi</div>
+								<h4 className='text-sm text-orange-600'>USD kursi</h4>
 								<div className='text-lg font-bold text-orange-900'>
-									{formatNumber(product?.usd_rate)} so'm
+									{/* {formatNumber(product?.usd_rate)} so'm */}
+									{product?.wholesale_price &&
+										formatNumber(product?.wholesale_price)}{' '}
+									so'm
 								</div>
 							</div>
 						</div>
