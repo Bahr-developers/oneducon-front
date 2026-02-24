@@ -10,7 +10,6 @@ import {
 	X,
 	User,
 	Phone,
-	Calendar,
 	Package,
 	ShoppingCart,
 	AlertCircle,
