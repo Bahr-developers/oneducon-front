@@ -30,7 +30,7 @@ const CreateCustomer = ({ title, width = '50px' }: cusCreate) => {
 		isValid: false,
 	})
 	const queryClient = useQueryClient()
-	const storeId = localStorage.getItem('storeId')
+	const storeId = localStorage.getItem('storeId') || '1'
 
 	const createCustomer = useMutation({
 		mutationFn: customerUtils.postCustomer,

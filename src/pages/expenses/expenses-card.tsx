@@ -42,7 +42,6 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
 								className='line-clamp-1 cursor-pointer'
 								title={expense.expense_type.name}
 							>
-								{' '}
 								{expense.expense_type.name}
 							</span>
 						</div>

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import PaginationContyent from '@/components/_components/pagination'
 import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { useDebounce } from '@/components/functions/useDebounce'
+import { useDebounce } from '@/hooks/useDebounce'
 import DebtsTableSkeleton from './debts-skeleton'
 import { Link } from 'react-router-dom'
 

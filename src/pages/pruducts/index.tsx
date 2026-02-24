@@ -10,13 +10,10 @@ const Products = () => {
 	const queryClient = useQueryClient()
 	const importFile = useMutation({
 		mutationFn: async (formData: FormData) => {
-			console.log('Mutation started') // Debug
 			const result = await productUtils.postProductImport(formData)
-			console.log('Mutation completed', result) // Debug
 			return result
 		},
 		onSuccess: () => {
-			console.log('Success callback')
 			toast.success('Fayl yuklandi')
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 		},

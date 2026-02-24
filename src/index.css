@@ -4,7 +4,7 @@
 /* Faqat kerakli weight'larni qoldiring */
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-Regular.woff2') format('woff2');
+  src: url('./assets/fonts/Poppins-Regular.woff2') format('woff2');
   font-weight: 400;
   font-display: swap;
   /* Muhim! */
@@ -12,7 +12,7 @@
 
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-Medium.woff2') format('woff2');
+  src: url('./assets/fonts/Poppins-Medium.woff2') format('woff2');
   font-weight: 500;
   font-display: swap;
 }

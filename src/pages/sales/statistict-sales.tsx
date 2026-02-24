@@ -15,8 +15,6 @@ const StatisticsSales = () => {
 		queryFn: () => orderUtils.getOrdersStats({ from, to }),
 	})
 
-	console.log(searchParams.get('from'), searchParams.get('to'))
-
 	const data = [
 		{
 			id: 1,

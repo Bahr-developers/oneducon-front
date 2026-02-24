@@ -47,9 +47,6 @@ const EditProduct = ({ product }: EditProductProps) => {
 		wholesale_price: product?.wholesale_price ?? 0,
 	})
 
-	console.log(data)
-	console.log(product, product.name)
-
 	const queryClient = useQueryClient()
 
 	const { data: categories } = useQuery({

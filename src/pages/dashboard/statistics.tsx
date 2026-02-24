@@ -10,6 +10,7 @@ const Statistics = () => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['storeStats'],
 		queryFn: storeUtils.getStats,
+		staleTime: 5 * 60 * 1000, // 5 daqiqa
 	})
 
 	// Ma'lumotlarni shakllantirish

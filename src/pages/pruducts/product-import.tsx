@@ -7,19 +7,14 @@ interface Props {
 	loading?: boolean
 }
 
-export function ProductImportButton({ onUpload, loading }: Props) {
+export function ProductImportButton({ loading }: Props) {
 	const fileRef = useRef<HTMLInputElement | null>(null)
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		console.log('File selected') // Debug uchun
-
 		const file = e.target.files?.[0]
 		if (!file) {
-			console.log('No file selected')
 			return
 		}
-
-		console.log('File:', file.name, file.type) // Debug uchun
 
 		const allowedTypes = [
 			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -34,9 +29,6 @@ export function ProductImportButton({ onUpload, loading }: Props) {
 			return
 		}
 
-		console.log('Calling onUpload') // Debug uchun
-		onUpload(file)
-
 		// Input ni tozalash
 		setTimeout(() => {
 			if (fileRef.current) {
@@ -46,7 +38,6 @@ export function ProductImportButton({ onUpload, loading }: Props) {
 	}
 
 	const handleClick = () => {
-		console.log('Button clicked') // Debug uchun
 		fileRef.current?.click()
 	}
 

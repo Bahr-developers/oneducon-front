@@ -111,7 +111,6 @@ const DebtsPage = () => {
 			status: debt.status,
 		})
 	}
-	console.log(editedDebts, editedDebts?.data?.status)
 
 	const handleCancel = (debtId: string) => {
 		setEditingDebt(null)

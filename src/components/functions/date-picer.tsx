@@ -26,11 +26,11 @@ export function DatePicker({
 	startTitle,
 	className,
 }: DatePickerProps) {
-	const [open, setOpen] = useState(false) // Popover ochiq/yopiq holati
+	const [open, setOpen] = useState(false)
 
 	const handleDateSelect = (selectedDate: Date | undefined) => {
 		setDate(selectedDate)
-		setOpen(false) // Sana tanlanganda popover yopiladi
+		setOpen(false)
 	}
 
 	return (

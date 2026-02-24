@@ -51,7 +51,6 @@ export default function OrderProducts() {
 	})
 	const handleToggle = (checked: boolean) => {
 		setIsActive(checked)
-		console.log('Yangi qiymat:', checked)
 	}
 	const disabledProductIds = items.map(i => i.product_id)
 	const handleAddPayment = () => {
