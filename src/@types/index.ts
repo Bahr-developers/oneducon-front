@@ -47,6 +47,8 @@ export interface debt {
     status: string;
     client: client;
     order: order
+    paid_amount: number;
+    remaining_amount:number
 }
 
 export interface sotreDebts {

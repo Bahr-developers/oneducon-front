@@ -151,14 +151,22 @@ const ProductView = (product: product) => {
 									{formatCurrency(product?.cost_price, 'UZS')}
 								</div>
 							</div>
-							<div className='p-3 rounded-lg border border-green-100'>
-								<div className='text-sm text-green-600'>Tan narxi ($)</div>
-								<div className='text-lg font-bold text-green-900'>
-									{/* {formatCurrency(product?.cost_price_usd, 'USD')} */}
-									{formatCurrency(
-										(product?.cost_price / product?.usd_rate).toFixed(2),
-										'USD',
-									)}
+							<div className='p-3 rounded-lg border border-green-100 flex justify-between items-center'>
+								<div className=''>
+									<h4 className='text-sm text-green-600'>Tan narxi ($)</h4>
+									<span className='text-lg font-bold text-green-900'>
+										{formatCurrency(
+											(product?.cost_price / product?.usd_rate).toFixed(2),
+											'USD',
+										)}
+									</span>
+								</div>
+								<span className='block w-[1px] bg-gray-400 rounded-md h-full'></span>
+								<div className=''>
+									<h4 className='text-sm text-green-600'>USD kursi</h4>
+									<span className='text-md font-bold text-green-700'>
+										{formatNumber(product?.usd_rate)} so'm
+									</span>
 								</div>
 							</div>
 							<div className='p-3 rounded-lg border border-purple-100'>
@@ -168,12 +176,11 @@ const ProductView = (product: product) => {
 								</div>
 							</div>
 							<div className='p-3 rounded-lg border border-orange-100'>
-								<h4 className='text-sm text-orange-600'>USD kursi</h4>
+								<h4 className='text-sm text-orange-600'>Ulgurji narxi (UZS)</h4>
 								<div className='text-lg font-bold text-orange-900'>
-									{/* {formatNumber(product?.usd_rate)} so'm */}
-									{product?.wholesale_price &&
-										formatNumber(product?.wholesale_price)}{' '}
-									so'm
+									{product?.wholesale_price
+										? formatNumber(product?.wholesale_price)
+										: formatCurrency(product?.cost_price, 'UZS')}
 								</div>
 							</div>
 						</div>

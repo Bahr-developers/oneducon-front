@@ -19,6 +19,12 @@ interface debtsInfo {
     status: 'PAID' | 'UNPAID' | ''
 }
 
+interface paymentINfo {
+    debts_id:string,
+    amount: number,
+    note: string
+}
+
 export const debtsUtils = {
     getDebts: async ({ limit, page, search }: getParams) => {
         const { data } = await customAxios.get(`debts?page=${page}&limit=${limit}&search=${search}`)
@@ -30,6 +36,13 @@ export const debtsUtils = {
     },
     getDebtsAll: async () => {
         const { data } = await customAxios.get(`debts`)
+        return data
+    },
+    paymentDebts: async ({amount,debts_id,note}:paymentINfo) => {
+        const {data} = await customAxios.post(`debts/${debts_id}/payments`, {
+            amount,
+            note
+        })
         return data
     },
     editDebts: async ({ client_id, id, price, reminder, return_time, status }: debtsInfo) => {

@@ -34,10 +34,10 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
-import NumberInput from '@/components/_components/number-input'
 
 import OrderDetailsDialog from './view-debts'
 import toast from 'react-hot-toast'
+import PaymentAdd from './payment-add'
 
 const DebtsPage = () => {
 	const { id: userId } = useParams()
@@ -140,42 +140,39 @@ const DebtsPage = () => {
 	}
 
 	return (
-		<div className='mx-auto p-6 space-y-6 w-full'>
-			{/* Header */}
-			<div className='flex justify-between items-start'>
-				<div>
-					<h1 className='text-3xl font-bold'>Qarzlar Boshqaruvi</h1>
-					<p className='mt-2'>{filteredDebts?.length || 0} ta qarz</p>
-				</div>
-				<div className='text-right'>
-					<div className='text-2xl font-bold text-red-600'>
-						{formatCurrency(debtsData?.total_amount || 0)}
-					</div>
-					<div className='text-sm text-gray-600'>Umumiy qarz summasi</div>
-				</div>
-			</div>
-
+		<div className='mx-auto p-6 space-y-4 w-full'>
+			<h1 className='text-2xl font-bold'>Qarzlar Boshqaruvi</h1>
 			{clientData && (
 				<Card className='border-l-4 border-l-blue-500 shadow-sm'>
 					<CardHeader className='bg-gradient-to-r  border-b'>
 						<div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4'>
-							<div className='flex items-center gap-4'>
-								<div className='p-2 bg-blue-100 rounded-lg'>
-									<User className='h-6 w-6 text-blue-600' />
+							<div className='flex items-center gap-4 justify-between w-full'>
+								<div className='flex items-center gap-4'>
+									<div className='p-2 bg-blue-100 rounded-lg'>
+										<User className='h-6 w-6 text-blue-600' />
+									</div>
+									<div className=''>
+										<CardTitle className='flex items-center gap-2 text-xl'>
+											{clientData?.name}
+											<Badge variant='outline' className='ml-2'>
+												{filteredDebts?.length || 0} ta qarz
+											</Badge>
+										</CardTitle>
+										<CardDescription className='flex items-center gap-2 mt-1'>
+											<Phone className='h-4 w-4' />
+											{clientData?.phone}
+											<span className='text-gray-400'>•</span>
+											<span>ID: {clientData?.id}</span>
+										</CardDescription>
+									</div>
 								</div>
-								<div>
-									<CardTitle className='flex items-center gap-2 text-xl'>
-										{clientData?.name}
-										<Badge variant='outline' className='ml-2'>
-											{filteredDebts?.length || 0} ta qarz
-										</Badge>
-									</CardTitle>
-									<CardDescription className='flex items-center gap-2 mt-1'>
-										<Phone className='h-4 w-4' />
-										{clientData?.phone}
-										<span className='text-gray-400'>•</span>
-										<span>ID: {clientData?.id}</span>
-									</CardDescription>
+								<div className='text-right'>
+									<div className='text-2xl font-bold text-red-600'>
+										{formatCurrency(debtsData?.total_remaining_amount || 0)}
+									</div>
+									<div className='text-sm text-gray-600'>
+										Umumiy qarz summasi
+									</div>
 								</div>
 							</div>
 							{/* <div className='text-right'>
@@ -196,9 +193,11 @@ const DebtsPage = () => {
 										<TableHead>Buyurtma №</TableHead>
 										<TableHead>Buyurtma summasi</TableHead>
 										<TableHead>Qarz miqdori</TableHead>
+										<TableHead>To'langan miqdor</TableHead>
+										<TableHead>Qolgan miqdor</TableHead>
 										<TableHead>Eslatma</TableHead>
 										<TableHead>Holati</TableHead>
-										<TableHead>Sana</TableHead>
+										{/* <TableHead>Sana</TableHead> */}
 										<TableHead>Harakatlar</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -230,23 +229,15 @@ const DebtsPage = () => {
 													{formatCurrency(debt?.order?.total_price || 0)}
 												</TableCell>
 												<TableCell>
-													{editingDebt === debt?.id ? (
-														<NumberInput
-															value={
-																editedDebts[debt?.id]?.price ??
-																debt?.price ??
-																''
-															}
-															onChange={e =>
-																handleChange(debt?.id, 'price', Number(e.raw))
-															}
-															className='w-32'
-														/>
-													) : (
-														<div className='font-bold text-red-600'>
-															{formatCurrency(debt?.price || 0)}
-														</div>
-													)}
+													<span className='font-bold text-red-600'>
+														{formatCurrency(debt?.price || 0)}
+													</span>
+												</TableCell>
+												<TableCell className='text-green-700'>
+													{formatCurrency(debt?.paid_amount || 0)}
+												</TableCell>
+												<TableCell className='text-amber-600'>
+													{formatCurrency(debt?.remaining_amount || 0)}
 												</TableCell>
 												<TableCell>
 													{editingDebt === debt?.id ? (
@@ -267,25 +258,28 @@ const DebtsPage = () => {
 													) : (
 														<div>
 															{debt?.reminder ? (
-																<div className='flex items-start gap-2'>
+																<div className='flex items-start gap-2 max-w-32 '>
 																	<AlertCircle className='h-4 w-4 text-yellow-500 mt-0.5' />
-																	<span className='text-sm'>
+																	<span
+																		className='text-sm line-clamp-2 w-full'
+																		title={debt?.reminder}
+																	>
 																		{debt?.reminder}
 																	</span>
 																</div>
 															) : (
 																<span className='text-gray-400 text-sm italic'>
-																	Eslatma yo'q
+																	Eslatma yo'q...
 																</span>
 															)}
 														</div>
 													)}
 												</TableCell>
 												<TableCell>{getStatusBadge(debt?.status)}</TableCell>
-												<TableCell className='text-sm text-gray-600'>
+												{/* <TableCell className='text-sm text-gray-600'>
 													<Calendar className='h-4 w-4 inline mr-1' />
 													{debt?.return_time?.slice(0, 10)}
-												</TableCell>
+												</TableCell> */}
 												<TableCell>
 													<div className='flex items-center gap-2'>
 														{editingDebt === debt?.id ? (
@@ -318,6 +312,9 @@ const DebtsPage = () => {
 																	debt={debt}
 																	formatCurrency={formatCurrency}
 																/>
+																{debt?.status !== 'PAID' && (
+																	<PaymentAdd debt={debt} />
+																)}
 															</>
 														)}
 													</div>
