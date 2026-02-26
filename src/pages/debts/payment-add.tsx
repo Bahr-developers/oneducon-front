@@ -40,8 +40,7 @@ const PaymentAdd = ({ debt }: { debt: debt }) => {
 			note,
 		})
 	}
-	const isValid =
-		paymentSum > 0 && paymentSum <= (debt?.order?.total_price || 0)
+	const isValid = paymentSum > 0 && paymentSum <= (debt?.remaining_amount || 0)
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
@@ -72,6 +71,12 @@ const PaymentAdd = ({ debt }: { debt: debt }) => {
 							placeholder="To'lov summasini kiriting"
 							className='mt-1 h-12 w-full'
 						/>
+						{paymentSum <= (debt?.remaining_amount || 0) &&
+						paymentSum > 0 ? null : (
+							<p className='text-red-500 text-[12px] mt-1'>
+								Kiritilgan summa buyurtma qarzdan ko'p bo'lmasligi kerak !
+							</p>
+						)}
 					</label>
 
 					<label className='w-full'>

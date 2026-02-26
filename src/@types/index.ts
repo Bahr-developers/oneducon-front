@@ -56,6 +56,7 @@ export interface sotreDebts {
     user_id: number,
     debts: debt[]
     total_amount: number
+    total_remaining_amount: number
 }
 
 export interface client {

@@ -61,7 +61,9 @@ const DebtsTable = () => {
 							</TableHead>
 							<TableHead className='font-semibold'>Mijoz</TableHead>
 							<TableHead className='font-semibold'>Telefon raqam</TableHead>
-							<TableHead className='font-semibold'>Umumiy narx</TableHead>
+							<TableHead className='font-semibold'>Umumiy qarz</TableHead>
+							<TableHead className='font-semibold'>Qolgan qarz</TableHead>
+							<TableHead className='font-semibold'></TableHead>
 						</TableRow>
 					</TableHeader>
 					{isLoading ? (
@@ -88,8 +90,8 @@ const DebtsTable = () => {
 									<TableCell className='font-medium text-red-400'>
 										{el?.total_amount?.toLocaleString()} so'm
 									</TableCell>
-									<TableCell className='text-muted-foreground'>
-										{/* {el.reminder} */}
+									<TableCell className='font-medium text-red-400'>
+										{el?.total_remaining_amount?.toLocaleString()} so'm
 									</TableCell>
 									<TableCell className='text-right'>
 										<div className='flex gap-x-3 justify-center items-center'>
