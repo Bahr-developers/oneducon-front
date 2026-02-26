@@ -39,6 +39,7 @@ const DebtsTable = () => {
 	}, [currentPage, totalPages])
 
 	const paginated = debts?.data || []
+	console.log(paginated?.length, paginated)
 
 	return (
 		<div className='mt-5'>

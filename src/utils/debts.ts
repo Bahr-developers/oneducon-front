@@ -27,7 +27,13 @@ interface paymentINfo {
 
 export const debtsUtils = {
     getDebts: async ({ limit, page, search }: getParams) => {
-        const { data } = await customAxios.get(`debts?page=${page}&limit=${limit}&search=${search}`)
+        const params = new URLSearchParams()
+        params.append('limit', limit.toString())
+        params.append('page', page.toString())
+        if (search) {
+            params.append('search', search)
+        }
+        const { data } = await customAxios.get(`debts?${params.toString()}`)
         return data
     },
     getDebtByClientId: async (id: string) => {
