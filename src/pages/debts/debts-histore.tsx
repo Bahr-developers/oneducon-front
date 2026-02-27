@@ -234,7 +234,7 @@ const DebtsPage = () => {
 												<TableCell className='text-green-700'>
 													{formatCurrency(debt?.paid_amount || 0)}
 												</TableCell>
-												<TableCell className='text-amber-600'>
+												<TableCell className='text-[#7000ff]'>
 													{formatCurrency(debt?.remaining_amount || 0)}
 												</TableCell>
 												<TableCell>
