@@ -92,9 +92,9 @@ export default function SearchSelect({
 					setQuery(e.target.value)
 					setIsOpen(true)
 				}}
-				onFocus={() => setIsOpen(true)} // Qo'shimcha: inputga bosilganda ham list ochilsin
+				onFocus={() => setIsOpen(true)}
 				placeholder='Mahsulot nomi...'
-				className='w-full border h-12 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500'
+				className='w-full border h-12 rounded-lg px-3 text-[15px] font-medium py-2 outline-none focus:ring-2 focus:ring-blue-500'
 			/>
 
 			{isOpen && query && (
@@ -118,7 +118,7 @@ export default function SearchSelect({
 									}`}
 								>
 									{/* O'ZGARTIRILDI: highlightText funksiyasi ishlatildi */}
-									<span className='flex-1'>
+									<span className='flex-1 font-bold'>
 										{highlightText(product.name, query)}
 									</span>
 

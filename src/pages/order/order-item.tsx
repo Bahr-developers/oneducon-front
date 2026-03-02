@@ -124,29 +124,38 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				<div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
 					<div className='flex items-center gap-1 bg-secondary/50 px-2 py-0.5 rounded-md'>
 						<span>Narxi:</span>
-						<span className='font-medium text-foreground'>
+						<span className='font-medium text-foreground text-[15px]'>
 							{item.product.sale_price.toLocaleString()}
 						</span>
 					</div>
 
 					{constPrice && (
-						<div className='flex gap-2 text-xs opacity-80'>
-							<span>Tan: {item.product?.cost_price?.toLocaleString()}</span>
-							{item.product?.usd_rate && (
-								<span>
-									($
-									{(item.product.cost_price / item.product.usd_rate).toFixed(2)}
-									)
-								</span>
-							)}
+						<div className='flex flex-col  gap-2 text-[15px] font-medium'>
+							<div className=''>
+								<span>Tan: {item.product?.cost_price?.toLocaleString()}</span>
+								{item.product?.usd_rate && (
+									<span>
+										($
+										{(item.product.cost_price / item.product.usd_rate).toFixed(
+											2,
+										)}
+										)
+									</span>
+								)}
+							</div>
+							<span>
+								Ulgitji:{' '}
+								{item.product?.wholesale_price
+									? item.product?.wholesale_price?.toLocaleString()
+									: item.product?.cost_price?.toLocaleString()}{' '}
+								UZS
+							</span>
 						</div>
 					)}
 				</div>
 			</div>
 
-			{/* INPUTS SECTION */}
 			<div className='flex items-end gap-3 w-full md:w-auto justify-between md:justify-start'>
-				{/* Count Input */}
 				<div className='flex flex-col gap-1.5'>
 					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
 						Miqdor
@@ -156,7 +165,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 							className='w-20 h-9 text-center font-medium'
 							type='text' // Number emas, TEXT ishlatamiz (xatolarni oldini olish uchun)
 							inputMode='decimal' // Mobil telefonda raqamlar klaviaturasi chiqishi uchun
-							// MUHIM: Endi item.count emas, localCount ni ulaymiz
 							value={localCount}
 							onFocus={e => e.target.select()}
 							onChange={e => handleCountChange(e.target.value)}
