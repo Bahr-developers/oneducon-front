@@ -20,6 +20,9 @@ interface OrderItemProps {
 
 const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
+	const [discountMode, setDiscountMode] = useState<'amount' | 'percent'>(
+		'amount',
+	)
 
 	// 1. LOCAL STATE: Inputdagi yozuvni ushlab turish uchun
 	const [localCount, setLocalCount] = useState(item.count.toString())
@@ -89,13 +92,22 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleDiscountChange = (val: { raw: number }) => {
-		const discountValue = val?.raw ?? 0
-		const numericDiscount = Number(discountValue)
+		const enteredValue = Number(val?.raw ?? 0)
+		if (isNaN(enteredValue)) return
+
+		let discountValue = 0
+
+		if (discountMode === 'percent') {
+			const safePercent = Math.min(100, Math.max(0, enteredValue))
+			discountValue = (item.price * safePercent) / 100
+		} else {
+			discountValue = Math.min(item.price, Math.max(0, enteredValue))
+		}
 
 		dispatch(
 			updateOrderItem({
 				id: item.id,
-				updates: { discount: isNaN(numericDiscount) ? 0 : numericDiscount },
+				updates: { discount: discountValue },
 			}),
 		)
 	}
@@ -105,6 +117,10 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const totalPrice = (item.price - item.discount) * item.count
+	const discountInputValue =
+		discountMode === 'percent' && item.price > 0
+			? (item.discount / item.price) * 100
+			: item.discount
 
 	return (
 		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
@@ -144,7 +160,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 								)}
 							</div>
 							<span>
-								Ulgitji:{' '}
+								Ulgurji:{' '}
 								{item.product?.wholesale_price
 									? item.product?.wholesale_price?.toLocaleString()
 									: item.product?.cost_price?.toLocaleString()}{' '}
@@ -181,12 +197,38 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
 						Chegirma
 					</label>
-					<NumberInput
-						value={item.discount ?? 0}
-						onChange={handleDiscountChange}
-						placeholder='0'
-						className='w-28 h-9 text-right pr-3 font-medium'
-					/>
+					<div className='flex items-center gap-1'>
+						<NumberInput
+							value={discountInputValue}
+							onChange={handleDiscountChange}
+							placeholder='0'
+							className='w-24 h-9 text-right pr-3 font-medium'
+						/>
+						<div className='flex h-9 rounded-md border overflow-hidden'>
+							<button
+								type='button'
+								onClick={() => setDiscountMode('percent')}
+								className={`px-2 text-xs font-semibold transition-colors ${
+									discountMode === 'percent'
+										? 'bg-primary text-primary-foreground'
+										: 'bg-background text-muted-foreground hover:bg-muted'
+								}`}
+							>
+								%
+							</button>
+							<button
+								type='button'
+								onClick={() => setDiscountMode('amount')}
+								className={`px-2 text-xs font-semibold transition-colors ${
+									discountMode === 'amount'
+										? 'bg-primary text-primary-foreground'
+										: 'bg-background text-muted-foreground hover:bg-muted'
+								}`}
+							>
+								UZS
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 

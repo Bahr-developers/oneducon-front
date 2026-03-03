@@ -55,81 +55,86 @@ const FilterData = ({
 
 	return (
 		<Dialog onOpenChange={setOpen} open={open}>
-			<DialogTrigger
-				onClick={() => setOpen(true)}
-				className='flex items-center gap-x-2 cursor-pointer'
-			>
-				Filter
-				<ListFilter size={20} />
+			<DialogTrigger asChild>
+				<button className='flex items-center gap-x-2 cursor-pointer outline-none'>
+					Filter
+					<ListFilter size={20} />
+				</button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className='sm:max-w-[425px]'>
 				<DialogHeader>
 					<DialogTitle>Filter</DialogTitle>
 					<DialogDescription>
-						Ma'lumotlarni filterlar xaridor,to'lov turi va vaqt bo'yicha
+						Ma'lumotlarni xaridor, to'lov turi va vaqt bo'yicha filterlang
 					</DialogDescription>
-					<div className='w-full flex flex-col items-end'>
-						<div className='flex items-center w-full justify-between gap-x-2'>
-							<label className='w-full'>
-								<span>Xaridor</span>
-								<Select onValueChange={value => setClient(value)}>
-									<SelectTrigger className='w-full'>
-										<SelectValue placeholder='Xaridor' />
-									</SelectTrigger>
-									<SelectContent>
-										{customers?.data?.map(client => (
-											<SelectItem key={client.id} value={client.id}>
-												{client.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</label>
-							<label className='w-full'>
-								<span>To'lov turi</span>
-								<Select onValueChange={value => setPaymentType(value)}>
-									<SelectTrigger className='w-full'>
-										<SelectValue placeholder="To'lov turi" />
-									</SelectTrigger>
-									<SelectContent>
-										{paymentTypes?.data?.map(client => (
-											<SelectItem key={client.id} value={client.id}>
-												{client.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</label>
-						</div>
-						<div className='flex items-center gap-2 my-3 w-full'>
-							<DatePicker
-								date={from}
-								setDate={setFrom}
-								title={i18n.language == 'uz' ? 'dan' : 'от'}
-								startTitle={
-									i18n.language == 'uz' ? 'Boshlang`ich sana' : 'Дата начала'
-								}
-							/>
-							<DatePicker
-								date={to}
-								setDate={setTo}
-								title={i18n.language == 'uz' ? 'gacha' : 'до'}
-								startTitle={
-									i18n.language == 'uz' ? 'Tugash sanasi' : 'Дата окончания'
-								}
-							/>
-						</div>
-						<Button
-							onClick={() => {
-								onApply()
-								setOpen(false)
-							}}
-							className='justify-end'
-						>
-							Filterlash
-						</Button>
-					</div>
 				</DialogHeader>
+
+				{/* Inputlar DialogHeader'dan tashqarida bo'lishi yaxshiroq */}
+				<div className='w-full flex flex-col gap-y-4 py-4'>
+					<div className='flex items-center w-full justify-between gap-x-4'>
+						<div className='w-full space-y-1'>
+							<span className='text-sm font-medium'>Xaridor</span>
+							<Select onValueChange={value => setClient(value)}>
+								<SelectTrigger className='w-full'>
+									<SelectValue placeholder='Xaridor' />
+								</SelectTrigger>
+								<SelectContent className='z-[70]'>
+									{customers?.data?.map(client => (
+										<SelectItem key={client.id} value={client.id}>
+											{client.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className='w-full space-y-1'>
+							<span className='text-sm font-medium'>To'lov turi</span>
+							<Select onValueChange={value => setPaymentType(value)}>
+								<SelectTrigger className='w-full'>
+									<SelectValue placeholder="To'lov turi" />
+								</SelectTrigger>
+								<SelectContent className='z-[70]'>
+									{paymentTypes?.data?.map(type => (
+										<SelectItem key={type.id} value={type.id}>
+											{type.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+
+					<div className='flex items-center gap-2 w-full'>
+						<DatePicker
+							date={from}
+							setDate={d => {
+								setFrom(d)
+							}}
+							title={i18n.language == 'uz' ? 'dan' : 'от'}
+							startTitle={
+								i18n.language == 'uz' ? 'Boshlang`ich sana' : 'Дата начала'
+							}
+						/>
+						<DatePicker
+							date={to}
+							setDate={setTo}
+							title={i18n.language == 'uz' ? 'gacha' : 'до'}
+							startTitle={
+								i18n.language == 'uz' ? 'Tugash sanasi' : 'Дата окончания'
+							}
+						/>
+					</div>
+
+					<Button
+						onClick={() => {
+							onApply()
+							setOpen(false)
+						}}
+						className='w-full mt-2'
+					>
+						Filterlash
+					</Button>
+				</div>
 			</DialogContent>
 		</Dialog>
 	)
