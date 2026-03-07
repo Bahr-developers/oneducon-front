@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
-import { X, Eye, EyeOff } from 'lucide-react'
+import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
 import { product } from '@/@types'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 interface OrderItemProps {
 	item: {
@@ -14,23 +16,51 @@ interface OrderItemProps {
 		discount: number
 		price: number
 	}
-	constPrice: boolean
 }
 
-const OrderItem = ({ item, constPrice }: OrderItemProps) => {
+const OrderItem = ({ item }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
 	const [discountMode, setDiscountMode] = useState<'amount' | 'percent'>(
 		'amount',
 	)
-
 	const [localCount, setLocalCount] = useState(item.count.toString())
-	const [showPrices, setShowPrices] = useState(false)
+
+	// Har bir item uchun alohida switch holati
+	const [useAltPrice, setUseAltPrice] = useState(false)
+
+	// Switch yoqilganda qaysi narx ishlatiladi
+	const selectedPrice = useMemo(() => {
+		if (useAltPrice) {
+			return (
+				item.product?.wholesale_price ?? item.product?.cost_price ?? item.price
+			)
+		}
+		return item.product?.sale_price ?? item.price
+	}, [
+		useAltPrice,
+		item.product?.wholesale_price,
+		item.product?.cost_price,
+		item.product?.sale_price,
+		item.price,
+	])
 
 	useEffect(() => {
 		if (Number(localCount) !== item.count) {
 			setLocalCount(item.count === 0 ? '' : item.count.toString())
 		}
-	}, [item.count])
+	}, [item.count, localCount])
+
+	// Narx o'zgarsa store ichidagi price ham yangilansin
+	useEffect(() => {
+		if (item.price !== selectedPrice) {
+			dispatch(
+				updateOrderItem({
+					id: item.id,
+					updates: { price: selectedPrice },
+				}),
+			)
+		}
+	}, [dispatch, item.id, item.price, selectedPrice])
 
 	const handleCountChange = (value: string) => {
 		let normalizedValue = value.replace(',', '.')
@@ -83,9 +113,9 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 
 		if (discountMode === 'percent') {
 			const safePercent = Math.min(100, Math.max(0, enteredValue))
-			discountValue = (item.price * safePercent) / 100
+			discountValue = (selectedPrice * safePercent) / 100
 		} else {
-			discountValue = Math.min(item.price, Math.max(0, enteredValue))
+			discountValue = Math.min(selectedPrice, Math.max(0, enteredValue))
 		}
 
 		dispatch(
@@ -100,13 +130,16 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		dispatch(removeOrderItem(item.id))
 	}
 
+	const handleToggle = (checked: boolean) => {
+		setUseAltPrice(checked)
+	}
+
 	const totalPrice = (item.price - item.discount) * item.count
+
 	const discountInputValue =
 		discountMode === 'percent' && item.price > 0
 			? (item.discount / item.price) * 100
 			: item.discount
-
-	const maskedValue = '******'
 
 	return (
 		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
@@ -118,69 +151,37 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				<X className='h-5 w-5' />
 			</button>
 
-			<div className='flex-1 w-full md:w-auto flex flex-col gap-1'>
+			<div className=' w-full md:w-auto flex flex-col gap-2'>
 				<h3 className='font-semibold text-base leading-tight line-clamp-1'>
 					{item.product.name}
 				</h3>
-
+				<div className='absolute top-2 right-2 flex items-center justify-end space-x-2 my-1'>
+					<Switch
+						id={`price-switch-${item.id}`}
+						checked={useAltPrice}
+						onCheckedChange={handleToggle}
+					/>
+					<Label htmlFor={`price-switch-${item.id}`}>Ulgurji narx</Label>
+				</div>
 				<div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
-					<div className='flex items-center gap-1 bg-secondary/50 px-2 py-0.5 rounded-md'>
-						<span>Narxi:</span>
-						<span className='font-medium text-foreground text-[15px]'>
-							{item.product.sale_price.toLocaleString()}
-						</span>
-					</div>
-
-					{constPrice && (
-						<div className='flex items-start gap-2'>
-							<div className='flex flex-col gap-2 text-[15px] font-medium'>
-								<div>
-									<span>
-										Tan:{' '}
-										{showPrices
-											? item.product?.cost_price?.toLocaleString()
-											: maskedValue}
-									</span>
-
-									{item.product?.usd_rate && (
-										<span>
-											{' '}
-											(
-											{showPrices
-												? `$${(
-														item.product.cost_price / item.product.usd_rate
-													).toFixed(2)}`
-												: maskedValue}
-											)
-										</span>
-									)}
-								</div>
-
-								<span>
-									Ulgurji:{' '}
-									{showPrices
-										? item.product?.wholesale_price
-											? item.product.wholesale_price.toLocaleString()
-											: item.product?.cost_price?.toLocaleString()
-										: maskedValue}{' '}
-									UZS
-								</span>
-							</div>
-
-							<button
-								type='button'
-								onClick={() => setShowPrices(prev => !prev)}
-								className='mt-0.5 p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground'
-								title={showPrices ? 'Narxni yashirish' : 'Narxni ko‘rsatish'}
-							>
-								{showPrices ? (
-									<EyeOff className='w-4 h-4' />
-								) : (
-									<Eye className='w-4 h-4' />
-								)}
-							</button>
+					<div className='flex flex-col items-start gap-1 bg-secondary/50 px-2 py-1 rounded-md'>
+						<div>
+							<span>Narxi: </span>
+							<span className='font-medium text-foreground text-[15px]'>
+								{item.price.toLocaleString()} UZS
+							</span>
 						</div>
-					)}
+
+						<div className='text-[13px] text-muted-foreground font-medium'>
+							Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
+						</div>
+
+						{/* {constPrice && (
+							<div className='text-[13px] text-muted-foreground'>
+								{alternativeLabel}: {alternativePrice?.toLocaleString()} UZS
+							</div>
+						)} */}
+					</div>
 				</div>
 			</div>
 
@@ -245,7 +246,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			</div>
 
 			<div className='flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-40 pl-4 md:border-l border-dashed border-border gap-1'>
-				<span className=' text-sm font-medium text-muted-foreground'>
+				<span className='text-sm font-medium text-muted-foreground'>
 					Jami summa:
 				</span>
 				<div className='flex flex-col items-end'>
@@ -255,6 +256,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 							UZS
 						</span>
 					</span>
+
 					{item.discount > 0 && (
 						<span className='text-xs text-green-600 font-medium'>
 							-

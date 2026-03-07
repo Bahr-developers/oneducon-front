@@ -24,9 +24,6 @@ import UniversalSearchSelect from '@/components/_components/search-select'
 import CreateCustomer from '../customers/create-cus'
 import { customerUtils } from '@/utils/customer'
 import SearchSelect from './search-select'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-
 export default function OrderProducts() {
 	const dispatch = useAppDispatch()
 	const items = useAppSelector(selectOrderItems)
@@ -37,7 +34,7 @@ export default function OrderProducts() {
 	const [selectedUser, setSelectedUser] = useState<client | null>(null)
 	const storeId = localStorage.getItem('storeId') || 1
 	const [reminder, setReminder] = useState('')
-	const [isActive, setIsActive] = useState<boolean>(false)
+	// const [isActive, setIsActive] = useState<boolean>(false)
 	const { data: paymentTypes } = useQuery({
 		queryKey: ['get_payment'],
 		queryFn: paymentUtils.getPayments,
@@ -49,9 +46,9 @@ export default function OrderProducts() {
 			price: el.price,
 		}
 	})
-	const handleToggle = (checked: boolean) => {
-		setIsActive(checked)
-	}
+	// const handleToggle = (checked: boolean) => {
+	// 	setIsActive(checked)
+	// }
 	const disabledProductIds = items.map(i => i.product_id)
 	const handleAddPayment = () => {
 		dispatch(addPayment())
@@ -112,6 +109,9 @@ export default function OrderProducts() {
 		dispatch(addProductToOrder(product))
 	}
 
+	const allPaymentsValid =
+		payments.length > 0 && payments.every(p => p.payment_type_id)
+
 	return (
 		<div className=''>
 			{/* <h2 className='text-xl font-medium my-3'>Buyurtma berish</h2> */}
@@ -119,7 +119,6 @@ export default function OrderProducts() {
 				<div className='order-products w-[65%]'>
 					<div className='w-full flex flex-col items-start mb-4'>
 						<SearchSelect
-							isActive={isActive}
 							key={items.length}
 							onSelect={handleAddProduct}
 							disabledProductIds={disabledProductIds}
@@ -138,7 +137,7 @@ export default function OrderProducts() {
 									Tozalash
 								</Button>
 							</div>
-							{items?.length === 0 ? (
+							{/* {items?.length === 0 ? (
 								''
 							) : (
 								<div className='flex items-center justify-end space-x-2 my-2'>
@@ -149,7 +148,7 @@ export default function OrderProducts() {
 									/>
 									<Label htmlFor='airplane-mode'>Tan narxi</Label>
 								</div>
-							)}
+							)} */}
 							<div className='flex flex-col justify-center items-center space-y-3'>
 								{items?.length === 0 ? (
 									<p className='text-center text-gray-500 py-4'>
@@ -163,13 +162,7 @@ export default function OrderProducts() {
 										Mahsulot qo'shilmagan. Yuqoridagi qidiruv orqali qo'shing.
 									</p>
 								) : (
-									items.map(item => (
-										<OrderItem
-											key={item.id}
-											item={item}
-											constPrice={isActive}
-										/>
-									))
+									items.map(item => <OrderItem key={item.id} item={item} />)
 								)}
 							</div>
 						</div>
@@ -249,6 +242,7 @@ export default function OrderProducts() {
 							items?.length === 0 ||
 							items.every(i => !i.product) ||
 							(hasDebt && (!selectedUser || !returnTime)) ||
+							!allPaymentsValid ||
 							createOrder.isPending
 						}
 					>
