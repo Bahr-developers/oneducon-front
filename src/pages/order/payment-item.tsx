@@ -1,5 +1,4 @@
-// PaymentItem.tsx
-import { X, CreditCard, Banknote } from 'lucide-react' // Iconlar qo'shildi
+import { X, CreditCard, Banknote } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import {
 	Select,
@@ -25,6 +24,7 @@ interface PaymentType {
 interface PaymentItemProps {
 	index: number
 	payment: {
+		id?: string
 		payment_type_id: string
 		price: number
 		isNew?: boolean
@@ -38,32 +38,51 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
 	const totals = useAppSelector(selectTotals)
 	const payments = useAppSelector(selectPayments)
 	const inputRef = useRef<HTMLInputElement>(null)
+
 	const { totalItemsAmount } = totals
+	const isLastPayment = index === payments.length - 1
 
 	useEffect(() => {
+		if (!isLastPayment) return
+		if (payment.userModified) return
+
 		const previousPayments = payments
 			.slice(0, index)
 			.reduce((sum, p) => sum + Number(p.price || 0), 0)
 
 		const remainingAmount = Math.max(0, totalItemsAmount - previousPayments)
 
-		if (payment.isNew || !payment.userModified) {
-			if (payment.price !== remainingAmount) {
-				dispatch(
-					updatePayment({
-						index,
-						payment: { ...payment, price: remainingAmount, isNew: false },
-					}),
-				)
-			}
+		if (payment.price !== remainingAmount) {
+			dispatch(
+				updatePayment({
+					index,
+					payment: {
+						...payment,
+						price: remainingAmount,
+						isNew: false,
+					},
+				}),
+			)
 		}
-	}, [totalItemsAmount, payments, index, payment, dispatch])
+	}, [
+		dispatch,
+		index,
+		isLastPayment,
+		payment.price,
+		payment.userModified,
+		payments,
+		totalItemsAmount,
+	])
 
 	const handleSelectType = (typeId: string) => {
 		dispatch(
 			updatePayment({
 				index,
-				payment: { ...payment, payment_type_id: typeId, isNew: false },
+				payment: {
+					...payment,
+					payment_type_id: typeId,
+					isNew: false,
+				},
 			}),
 		)
 	}
@@ -74,19 +93,14 @@ const PaymentItem = ({ index, payment, paymentTypes }: PaymentItemProps) => {
 		.filter(Boolean)
 
 	const handlePriceChange = (val: { raw: number }) => {
-		const otherPaymentsTotal = payments
-			.filter((_, i) => i !== index)
-			.reduce((sum, p) => sum + Number(p.price || 0), 0)
-
-		const maxAllowedPrice = Math.max(0, totalItemsAmount - otherPaymentsTotal)
-		const newPrice = Math.min(val.raw, maxAllowedPrice)
+		const safeRaw = Number.isFinite(val.raw) ? Math.max(0, val.raw) : 0
 
 		dispatch(
 			updatePayment({
 				index,
 				payment: {
 					...payment,
-					price: newPrice,
+					price: safeRaw,
 					isNew: false,
 					userModified: true,
 				},

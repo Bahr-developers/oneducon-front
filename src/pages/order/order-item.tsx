@@ -1,7 +1,6 @@
-// order-item.tsx
-import { useState, useEffect } from 'react' // useEffect qo'shildi
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
-import { X } from 'lucide-react'
+import { X, Eye, EyeOff } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
@@ -24,26 +23,18 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		'amount',
 	)
 
-	// 1. LOCAL STATE: Inputdagi yozuvni ushlab turish uchun
 	const [localCount, setLocalCount] = useState(item.count.toString())
+	const [showPrices, setShowPrices] = useState(false)
 
-	// 2. SYNC: Agar tashqaridan (Reduxdan) count o'zgarsa, local stateni yangilash
-	// Masalan, savatcha tozalandi yoki API dan ma'lumot keldi
 	useEffect(() => {
-		// Agar local qiymat va store qiymati farq qilsa, yangilaymiz.
-		// Bu "0." yozayotganda kursor sakrashini oldini oladi.
 		if (Number(localCount) !== item.count) {
 			setLocalCount(item.count === 0 ? '' : item.count.toString())
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [item.count])
 
 	const handleCountChange = (value: string) => {
-		// Vergulni nuqtaga aylantiramiz (mobil klaviaturalar uchun)
 		let normalizedValue = value.replace(',', '.')
 
-		// 1. Inputda ko'rinishi uchun local stateni darhol yangilaymiz
-		// Bu foydalanuvchiga "0." yoki "0.5" ni bemalol yozishga imkon beradi
 		setLocalCount(normalizedValue)
 
 		if (normalizedValue === '') {
@@ -53,17 +44,13 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 
 		let num = Number(normalizedValue)
 
-		// Agar son bo'lmasa (masalan faqat "."), Reduxni yangilamaymiz, lekin inputda turaveradi
 		if (isNaN(num)) return
 
-		// Max quantity tekshiruvi
 		if (item.product?.quantity && num > item.product.quantity) {
 			num = item.product.quantity
-			// Agar max dan oshsa, local stateni ham to'g'irlab qo'yamiz
 			setLocalCount(num.toString())
 		}
 
-		// Reduxga faqat toza raqamni jo'natamiz
 		dispatch(
 			updateOrderItem({
 				id: item.id,
@@ -73,11 +60,9 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleBlur = () => {
-		// Inputdan chiqqanda (focus yo'qolganda) tekshiramiz
 		let currentVal = Number(localCount.replace(',', '.'))
 
 		if (!currentVal || currentVal <= 0) {
-			// Agar 0 yoki bo'sh bo'lsa, 1 ga qaytarish
 			setLocalCount('1')
 			dispatch(
 				updateOrderItem({
@@ -86,7 +71,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				}),
 			)
 		} else {
-			// Agar "0.5000" kabi yozilgan bo'lsa, chiroyli qilib "0.5" ga o'tkazib qo'yamiz
 			setLocalCount(currentVal.toString())
 		}
 	}
@@ -122,6 +106,8 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			? (item.discount / item.price) * 100
 			: item.discount
 
+	const maskedValue = '******'
+
 	return (
 		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
 			<button
@@ -132,11 +118,11 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				<X className='h-5 w-5' />
 			</button>
 
-			{/* PRODUCT INFO SECTION - (O'zgarishsiz) */}
 			<div className='flex-1 w-full md:w-auto flex flex-col gap-1'>
 				<h3 className='font-semibold text-base leading-tight line-clamp-1'>
 					{item.product.name}
 				</h3>
+
 				<div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
 					<div className='flex items-center gap-1 bg-secondary/50 px-2 py-0.5 rounded-md'>
 						<span>Narxi:</span>
@@ -146,26 +132,53 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					</div>
 
 					{constPrice && (
-						<div className='flex flex-col  gap-2 text-[15px] font-medium'>
-							<div className=''>
-								<span>Tan: {item.product?.cost_price?.toLocaleString()}</span>
-								{item.product?.usd_rate && (
+						<div className='flex items-start gap-2'>
+							<div className='flex flex-col gap-2 text-[15px] font-medium'>
+								<div>
 									<span>
-										($
-										{(item.product.cost_price / item.product.usd_rate).toFixed(
-											2,
-										)}
-										)
+										Tan:{' '}
+										{showPrices
+											? item.product?.cost_price?.toLocaleString()
+											: maskedValue}
 									</span>
-								)}
+
+									{item.product?.usd_rate && (
+										<span>
+											{' '}
+											(
+											{showPrices
+												? `$${(
+														item.product.cost_price / item.product.usd_rate
+													).toFixed(2)}`
+												: maskedValue}
+											)
+										</span>
+									)}
+								</div>
+
+								<span>
+									Ulgurji:{' '}
+									{showPrices
+										? item.product?.wholesale_price
+											? item.product.wholesale_price.toLocaleString()
+											: item.product?.cost_price?.toLocaleString()
+										: maskedValue}{' '}
+									UZS
+								</span>
 							</div>
-							<span>
-								Ulgurji:{' '}
-								{item.product?.wholesale_price
-									? item.product?.wholesale_price?.toLocaleString()
-									: item.product?.cost_price?.toLocaleString()}{' '}
-								UZS
-							</span>
+
+							<button
+								type='button'
+								onClick={() => setShowPrices(prev => !prev)}
+								className='mt-0.5 p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground'
+								title={showPrices ? 'Narxni yashirish' : 'Narxni ko‘rsatish'}
+							>
+								{showPrices ? (
+									<EyeOff className='w-4 h-4' />
+								) : (
+									<Eye className='w-4 h-4' />
+								)}
+							</button>
 						</div>
 					)}
 				</div>
@@ -179,8 +192,8 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					<div className='relative'>
 						<Input
 							className='w-20 h-9 text-center font-medium'
-							type='text' // Number emas, TEXT ishlatamiz (xatolarni oldini olish uchun)
-							inputMode='decimal' // Mobil telefonda raqamlar klaviaturasi chiqishi uchun
+							type='text'
+							inputMode='decimal'
 							value={localCount}
 							onFocus={e => e.target.select()}
 							onChange={e => handleCountChange(e.target.value)}
@@ -192,7 +205,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					</div>
 				</div>
 
-				{/* Discount Input - (O'zgarishsiz) */}
 				<div className='flex flex-col gap-1.5'>
 					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
 						Chegirma
@@ -232,7 +244,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				</div>
 			</div>
 
-			{/* TOTAL PRICE SECTION */}
 			<div className='flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-40 pl-4 md:border-l border-dashed border-border gap-1'>
 				<span className=' text-sm font-medium text-muted-foreground'>
 					Jami summa:

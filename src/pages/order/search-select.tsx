@@ -8,11 +8,13 @@ interface SearchSelectProps {
 	onSelect: (product: product) => void
 	selectedProduct?: product | null
 	disabledProductIds?: number[]
+	isActive: boolean // ulgirji va tan narx
 }
 
 export default function SearchSelect({
 	onSelect,
 	disabledProductIds = [],
+	isActive,
 }: SearchSelectProps) {
 	const [query, setQuery] = useState('')
 	const [isOpen, setIsOpen] = useState(false)
@@ -98,43 +100,64 @@ export default function SearchSelect({
 			/>
 
 			{isOpen && query && (
-				<ul className='absolute z-10 w-full bg-[#ffffff] border dark:bg-background transition-colors rounded-lg mt-1.5 max-h-40 overflow-y-auto shadow-lg'>
+				<ul className='absolute z-10 w-full bg-[#f3f3f3] border border-gray-200 dark:bg-background transition-colors rounded-2xl mt-1.5 max-h-[550px] overflow-y-auto shadow-lg p-2 space-y-2'>
 					{isLoading ? (
-						<li className='px-3 py-2 text-gray-500 text-center'>
+						<li className='px-3 py-3 text-gray-500 text-center bg-white rounded-xl shadow-sm'>
 							Yuklanmoqda...
 						</li>
 					) : filtered?.data?.length > 0 ? (
 						filtered?.data?.map((product: product) => {
 							const disabled = isProductDisabled(product)
 							const disabledReason = getDisabledReason(product)
+
 							return (
 								<li
 									key={product.id}
 									onClick={() => !disabled && handleSelect(product)}
-									className={`px-3 py-2 cursor-pointer transition-colors flex justify-between items-center ${
+									className={`rounded-2xl bg-white shadow-sm border border-gray-100 px-4 py-3 transition-all flex justify-between items-center gap-3 ${
 										disabled
-											? 'bg-background text-gray-400 cursor-not-allowed'
-											: 'hover:bg-accent'
+											? 'opacity-60 cursor-not-allowed'
+											: 'cursor-pointer hover:shadow-md hover:border-gray-200 hover:bg-gray-50'
 									}`}
 								>
-									{/* O'ZGARTIRILDI: highlightText funksiyasi ishlatildi */}
-									<span className='flex-1 font-bold'>
-										{highlightText(product.name, query)}
-									</span>
+									<div className='flex-1 min-w-0'>
+										<span
+											className={`block font-semibold text-[18px]  truncate ${isActive ? 'text-blue-400' : ''}`}
+										>
+											{highlightText(product.name, query)}
+										</span>
 
-									<span className='text-gray-500 text-sm ml-2'>
-										{product.sale_price?.toLocaleString()} so'm
 										{disabledReason && (
-											<span className='text-red-400 ml-1'>
+											<span className='text-red-400 text-sm mt-1 inline-block'>
 												{disabledReason}
 											</span>
 										)}
-									</span>
+									</div>
+
+									<div className='shrink-0 text-right'>
+										{isActive ? (
+											<div className='flex flex-col gap-2 text-lg font-bold text-gray-700'>
+												<span>
+													Sotuv narxi: {product.sale_price?.toLocaleString()}{' '}
+													so'm
+												</span>
+												<span>
+													Tan narxi: {product.cost_price?.toLocaleString()} so'm
+												</span>
+											</div>
+										) : (
+											<span className='block text-lg font-bold text-gray-700'>
+												Sotuv narxi: {product.sale_price?.toLocaleString()} so'm
+											</span>
+										)}
+									</div>
 								</li>
 							)
 						})
 					) : (
-						<li className='px-3 py-2 text-gray-500'>Hech narsa topilmadi</li>
+						<li className='px-3 py-3 text-gray-500 text-center bg-white rounded-xl shadow-sm'>
+							Hech narsa topilmadi
+						</li>
 					)}
 				</ul>
 			)}

@@ -121,6 +121,7 @@ export default function OrderProducts() {
 				<div className='order-products w-[65%]'>
 					<div className='w-full flex flex-col items-start mb-4'>
 						<SearchSelect
+							isActive={isActive}
 							key={items.length}
 							onSelect={handleAddProduct}
 							disabledProductIds={disabledProductIds}
@@ -249,7 +250,6 @@ export default function OrderProducts() {
 						disabled={
 							items?.length === 0 ||
 							items.every(i => !i.product) ||
-							!allPaymentsValid ||
 							(hasDebt && (!selectedUser || !returnTime)) ||
 							createOrder.isPending
 						}
