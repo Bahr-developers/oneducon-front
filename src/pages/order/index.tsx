@@ -111,8 +111,6 @@ export default function OrderProducts() {
 	const handleAddProduct = (product: product) => {
 		dispatch(addProductToOrder(product))
 	}
-	const allPaymentsValid =
-		payments.length > 0 && payments.every(p => p.payment_type_id && p.price > 0)
 
 	return (
 		<div className=''>
