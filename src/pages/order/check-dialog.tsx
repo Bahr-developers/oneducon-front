@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { toPng } from 'html-to-image'
 import {
 	Dialog,

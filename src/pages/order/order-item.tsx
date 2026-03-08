@@ -24,6 +24,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const [discountMode, setDiscountMode] = useState<'amount' | 'percent'>(
 		'amount',
 	)
+
 	const [localCount, setLocalCount] = useState(item.count.toString())
 
 	// Har bir item uchun alohida switch holati
@@ -176,6 +177,8 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 						<div className='text-[13px] text-muted-foreground font-medium'>
 							Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
 						</div>
+
+						{constPrice && ''}
 
 						{/* {constPrice && (
 							<div className='text-[13px] text-muted-foreground'>

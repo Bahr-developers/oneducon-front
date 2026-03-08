@@ -28,7 +28,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import ReceiptPreviewModal from './check-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Check } from 'lucide-react'
 
 export default function OrderProducts() {
 	const dispatch = useAppDispatch()
