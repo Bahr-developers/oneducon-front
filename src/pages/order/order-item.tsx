@@ -16,9 +16,10 @@ interface OrderItemProps {
 		discount: number
 		price: number
 	}
+	constPrice: boolean
 }
 
-const OrderItem = ({ item }: OrderItemProps) => {
+const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
 	const [discountMode, setDiscountMode] = useState<'amount' | 'percent'>(
 		'amount',
@@ -178,7 +179,7 @@ const OrderItem = ({ item }: OrderItemProps) => {
 
 						{/* {constPrice && (
 							<div className='text-[13px] text-muted-foreground'>
-								{alternativeLabel}: {alternativePrice?.toLocaleString()} UZS
+								{item.price}: {item.price?.toLocaleString()} UZS
 							</div>
 						)} */}
 					</div>

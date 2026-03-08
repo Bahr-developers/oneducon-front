@@ -31,11 +31,12 @@ import toast from 'react-hot-toast'
 import { DeleteConfirm } from '@/components/ui/alerd-dialog'
 import { Button } from '@/components/ui/button'
 import { AxiosError } from 'axios'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const Productstable = () => {
 	const { updateURL, getParam } = useQueryParams()
 	const queryClient = useQueryClient()
-	// URL dan qiymatlarni olish
+
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
 		parseInt(getParam('limit', '5')),
 	)
@@ -49,12 +50,16 @@ const Productstable = () => {
 		getParam('category', ''),
 	)
 
+	const [selectedIds, setSelectedIds] = useState<string[]>([])
+
 	const removeParam = (key: string) => {
 		const url = new URL(window.location.href)
 		url.searchParams.delete(key)
 		window.history.replaceState({}, '', url.toString())
 	}
+
 	const debouncedSearch = useDebounce(searchQuery, 500)
+
 	const { data: procusts, isLoading } = useQuery<{
 		data: product[]
 		total: number
@@ -89,13 +94,34 @@ const Productstable = () => {
 		queryFn: categoryUtils.getCategory,
 	})
 
-	const paginated = procusts?.data
+	const paginated = procusts?.data ?? []
+
+	const currentPageIds = paginated.map(item => item.id)
+
+	const isAllSelected =
+		currentPageIds.length > 0 &&
+		currentPageIds.every(id => selectedIds.includes(id))
+
+	const handleSelectOne = (id: string, checked: boolean) => {
+		setSelectedIds(prev =>
+			checked ? [...new Set([...prev, id])] : prev.filter(item => item !== id),
+		)
+	}
+
+	const handleSelectAll = (checked: boolean) => {
+		if (checked) {
+			setSelectedIds(prev => [...new Set([...prev, ...currentPageIds])])
+		} else {
+			setSelectedIds(prev => prev.filter(id => !currentPageIds.includes(id)))
+		}
+	}
 
 	const deleteProduct = useMutation({
 		mutationFn: productUtils?.deleteProduct,
 		onSuccess: () => {
 			toast.success("Mahsulot o'chirildi.")
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
+			setSelectedIds(prev => prev.filter(id => !currentPageIds.includes(id)))
 		},
 		onError: err => {
 			console.log(err)
@@ -126,6 +152,13 @@ const Productstable = () => {
 		},
 	})
 
+	const handleBulkDelete = () => {
+		console.log('Tanlangan ID lar:', selectedIds)
+
+		// backendga yuborish uchun:
+		// bulkDeleteMutation.mutate(selectedIds)
+	}
+
 	return (
 		<div className='mt-4'>
 			<div className='border rounded-xl p-4 bg-card'>
@@ -140,7 +173,17 @@ const Productstable = () => {
 							className='h-12 pl-10 bg-background'
 						/>
 					</div>
-					<div className='flex items-center gap-x-2'>
+
+					<div className='flex items-center gap-x-2 flex-wrap'>
+						{/* <Button
+							variant='destructive'
+							className='cursor-pointer h-12'
+							disabled={selectedIds.length === 0}
+							onClick={handleBulkDelete}
+						>
+							Tanlanganlarni o‘chirish ({selectedIds.length})
+						</Button> */}
+
 						<Button
 							className='cursor-pointer h-12'
 							onClick={() => downloadMutation?.mutate()}
@@ -150,6 +193,7 @@ const Productstable = () => {
 								? 'Yuklanmoqda...'
 								: 'Excel yuklab olish'}
 						</Button>
+
 						<Select
 							value={selectedCategory}
 							onValueChange={value => {
@@ -188,6 +232,19 @@ const Productstable = () => {
 					<Table>
 						<TableHeader>
 							<TableRow className='bg-muted/50 hover:bg-muted/50 border-b'>
+								<TableHead className='w-[50px] font-semibold flex items-center'>
+									<Checkbox
+										checked={isAllSelected}
+										onCheckedChange={checked => handleSelectAll(!!checked)}
+										aria-label='Barchasini tanlash'
+										className='border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+									/>
+									{selectedIds.length ? (
+										<DeleteConfirm onConfirm={handleBulkDelete} />
+									) : (
+										''
+									)}
+								</TableHead>
 								<TableHead className='w-[60px] font-semibold'>№</TableHead>
 								<TableHead className='font-semibold'>Nomi</TableHead>
 								<TableHead className='font-semibold'>
@@ -199,21 +256,33 @@ const Productstable = () => {
 								</TableHead>
 								<TableHead className='font-semibold'>USD kursi</TableHead>
 								<TableHead className='font-semibold'>Miqdori</TableHead>
-								<TableHead className='font-semibold'>O'lchov</TableHead>
+								<TableHead className='font-semibold'>O&apos;lchov</TableHead>
 								<TableHead className='text-center font-semibold'>
 									Amallar
 								</TableHead>
 							</TableRow>
 						</TableHeader>
+
 						{isLoading ? (
 							<ProductsTableSkeleton />
-						) : (paginated?.length ?? 0) > 0 ? (
+						) : paginated.length > 0 ? (
 							<TableBody>
-								{paginated?.map((el: product, index: number) => (
+								{paginated.map((el: product, index: number) => (
 									<TableRow
 										key={el?.id}
 										className='hover:bg-muted/50 transition-colors'
 									>
+										<TableCell>
+											<Checkbox
+												checked={selectedIds.includes(el.id)}
+												onCheckedChange={checked =>
+													handleSelectOne(el.id, !!checked)
+												}
+												aria-label={`${el.name} ni tanlash`}
+												className='border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
+											/>
+										</TableCell>
+
 										<TableCell className='font-medium text-muted-foreground'>
 											#{index + 1}
 										</TableCell>
@@ -249,7 +318,7 @@ const Productstable = () => {
 											{el?.unit?.name}
 										</TableCell>
 										<TableCell className='text-right'>
-											<div className='flex gap-x-4 justify-center  items-center'>
+											<div className='flex gap-x-4 justify-center items-center'>
 												<EditProsucts product={el} />
 												<ProductView {...el} />
 												<DeleteConfirm
@@ -264,7 +333,7 @@ const Productstable = () => {
 							<TableBody>
 								<TableRow>
 									<TableCell
-										colSpan={7}
+										colSpan={10}
 										className='h-24 text-center text-muted-foreground'
 									>
 										Mahsulotlar topilmadi
@@ -275,6 +344,7 @@ const Productstable = () => {
 					</Table>
 				</div>
 			</div>
+
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {

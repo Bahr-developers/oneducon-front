@@ -3,6 +3,7 @@ import { product } from '@/@types'
 import { productUtils } from '@/utils/products'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface SearchSelectProps {
 	onSelect: (product: product) => void
@@ -16,11 +17,11 @@ export default function SearchSelect({
 }: SearchSelectProps) {
 	const [query, setQuery] = useState('')
 	const [isOpen, setIsOpen] = useState(false)
-
+	const debounce = useDebounce(query, 400)
 	const { data: filtered, isLoading } = useQuery({
-		queryKey: ['get_all_products', query],
-		queryFn: () => productUtils.getProducts({ search: query }),
-		enabled: query.length > 0,
+		queryKey: ['get_all_products', debounce],
+		queryFn: () => productUtils.getProducts({ search: debounce }),
+		enabled: debounce.length > 0,
 	})
 
 	const handleSelect = (product: product) => {
@@ -47,7 +48,6 @@ export default function SearchSelect({
 		return (
 			<span>
 				{parts.map((part, index) =>
-					// Agar qism qidirilayotgan so'zlardan biriga mos kelsa (registrga qaramasdan)
 					words.some(word => word.toLowerCase() === part.toLowerCase()) ? (
 						<mark
 							key={index}
