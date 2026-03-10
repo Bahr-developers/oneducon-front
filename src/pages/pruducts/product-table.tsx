@@ -127,6 +127,17 @@ const Productstable = () => {
 			console.log(err)
 		},
 	})
+	const deleteCheckProduct = useMutation({
+		mutationFn: productUtils.deleteBulk,
+		onSuccess: () => {
+			toast.success("Mahsulotlar o'chirildi.")
+			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
+			setSelectedIds([])
+		},
+		onError: err => {
+			console.log(err)
+		},
+	})
 
 	const downloadMutation = useMutation({
 		mutationFn: () =>
@@ -154,10 +165,11 @@ const Productstable = () => {
 
 	const handleBulkDelete = () => {
 		console.log('Tanlangan ID lar:', selectedIds)
-
+		deleteCheckProduct.mutate(selectedIds)
 		// backendga yuborish uchun:
 		// bulkDeleteMutation.mutate(selectedIds)
 	}
+	console.log(selectedIds)
 
 	return (
 		<div className='mt-4'>

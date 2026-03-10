@@ -31,6 +31,11 @@ const Statistics = () => {
 			currency: 'UZS',
 		},
 		{
+			title: 'Kassadagi pul',
+			value: data?.cashOnHand || 0,
+			currency: 'UZS',
+		},
+		{
 			title: 'Qarzlar',
 			value: data?.totalDebts || 0,
 			currency: 'UZS',
@@ -50,7 +55,7 @@ const Statistics = () => {
 					USD
 				</Label>
 			</div>
-			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
 				{statsList.map((el, index) => (
 					<div
 						className='w-full border p-5 rounded-xl bg-card shadow-sm'

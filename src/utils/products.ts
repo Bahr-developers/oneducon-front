@@ -85,4 +85,10 @@ export const productUtils = {
         const { data } = await customAxios.delete(`products/${id}`)
         return data
     },
+    deleteBulk: async (ids:string[]) => {
+        const {data} = await customAxios.delete('products/bulk', {
+            data: {ids}
+        })
+        return data
+    }
 }

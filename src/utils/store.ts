@@ -10,40 +10,16 @@ interface storeData {
   link?: string;
 }
 
-interface Decimal {
-  s: number;
-  e: number;
-  d: number[];
-}
-
 export interface StatisticsResponse {
   totalOrders: number;
   totalPayments: number;
   totalDebts: number;
-
-  totalCostPrices: {
-    _sum: {
-      cost_price: number;
-    };
-  };
-
-  totalCostPricesUsd: {
-    _sum: {
-      cost_price_usd: Decimal;
-    };
-  };
-
-  totalSalePrices: {
-    _sum: {
-      sale_price: number;
-    };
-  };
-
-  totalSalePricesUsd: {
-    _sum: {
-      sale_price_usd: Decimal;
-    };
-  };
+  totalCashBalance: number,
+  cashOnHand: number,
+  totalCostPrices: number,
+  totalCostPricesUsd: number,
+  totalSalePrices: number,
+  totalSalePricesUsd: number
 }
 
 export const storeUtils = {
