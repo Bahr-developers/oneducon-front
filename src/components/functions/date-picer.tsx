@@ -33,6 +33,7 @@ export function DatePicker({
 	portalContainer,
 }: DatePickerProps) {
 	const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+
 	const open = controlledOpen ?? uncontrolledOpen
 	const setOpen = controlledOnOpenChange ?? setUncontrolledOpen
 
@@ -45,10 +46,11 @@ export function DatePicker({
 		<Popover open={open} onOpenChange={setOpen}>
 			<div className='flex flex-col w-full'>
 				<p className='block w-full text-end'>{title}</p>
+
 				<PopoverTrigger asChild>
 					<Button
 						type='button'
-						variant={'outline'}
+						variant='outline'
 						className={cn(
 							'h-12 w-full justify-start text-left font-normal',
 							className,
@@ -62,12 +64,18 @@ export function DatePicker({
 
 				<PopoverContent
 					container={portalContainer}
-					className='z-[60] w-auto p-0'
+					className='z-[80] w-auto p-0'
 					align='start'
+					side='bottom'
+					sideOffset={8}
 					onCloseAutoFocus={e => e.preventDefault()}
-					onOpenAutoFocus={e => e.preventDefault()}
 				>
-					<Calendar mode='single' selected={date} onSelect={handleDateSelect} />
+					<Calendar
+						mode='single'
+						selected={date}
+						onSelect={handleDateSelect}
+						initialFocus
+					/>
 				</PopoverContent>
 			</div>
 		</Popover>

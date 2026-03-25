@@ -14,98 +14,128 @@ import { useQuery } from '@tanstack/react-query'
 import { orderUtils } from '@/utils/orders'
 import { order } from '@/@types'
 import PaginationContyent from '@/components/_components/pagination'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ViewSale from './view-sale'
 import { useQueryParams } from '@/hooks/query-params'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Badge } from '@/components/ui/badge'
 import SelesTableSkeleton from './seles-table-skeleton'
-import { normalizeDateRange } from '@/hooks/normalize-date'
 import { formatLocalDate } from '@/components/functions/format-locale-date'
 
 const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
-	const [from, setFrom] = useState<Date | undefined>()
-	const [to, setTo] = useState<Date | undefined>()
-	const [client, setClient] = useState<string | undefined>()
-	const [paymentType, setPaymentType] = useState<string | undefined>()
 
-	const [appliedFilters, setAppliedFilters] = useState<{
-		from?: Date
-		to?: Date
-		client?: string
-		paymentType?: string
-	}>({})
-	const { normalizedFrom, normalizedTo } = normalizeDateRange(from, to)
-	useEffect(() => {
-		if (from || to) {
-			updateURL({
-				from: normalizedFrom ? formatLocalDate(normalizedFrom) : '',
-				to: normalizedTo ? formatLocalDate(normalizedTo) : '',
-			})
-		}
-	}, [from, to, updateURL, normalizedFrom, normalizedTo])
+	const [from, setFrom] = useState<Date | undefined>(() => {
+		const value = getParam('from', '')
+		return value ? new Date(value) : undefined
+	})
+
+	const [to, setTo] = useState<Date | undefined>(() => {
+		const value = getParam('to', '')
+		return value ? new Date(value) : undefined
+	})
+
+	const [client, setClient] = useState<string>(() => getParam('client', ''))
+	const [paymentType, setPaymentType] = useState<string>(() =>
+		getParam('paymentType', ''),
+	)
 
 	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
 		parseInt(getParam('limit', '5')),
 	)
+
 	const [currentPage, setCurrentPage] = useState<number>(() =>
 		parseInt(getParam('page', '1')),
 	)
+
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
 		getParam('search', ''),
 	)
-	const searchText = useDebounce(searchQuery, 500)
+
+	const debouncedSearch = useDebounce(searchQuery, 500)
+
+	const backendFrom = useMemo(() => {
+		if (!from) return undefined
+		const d = new Date(from)
+		d.setHours(0, 0, 0, 0)
+		return d
+	}, [from])
+
+	const backendTo = useMemo(() => {
+		if (!to) return undefined
+		const d = new Date(to)
+		d.setHours(0, 0, 0, 0)
+		d.setDate(d.getDate() + 1)
+		return d
+	}, [to])
+
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [debouncedSearch, client, paymentType, from, to])
+
+	useEffect(() => {
+		updateURL({
+			search: debouncedSearch,
+			page: currentPage.toString(),
+			limit: postsPerPage.toString(),
+			client: client || '',
+			paymentType: paymentType || '',
+			from: from ? formatLocalDate(from) : '',
+			to: to ? formatLocalDate(to) : '',
+		})
+	}, [
+		debouncedSearch,
+		currentPage,
+		postsPerPage,
+		client,
+		paymentType,
+		from,
+		to,
+		updateURL,
+	])
+
 	const { data: sales, isLoading } = useQuery<{ data: order[]; total: number }>(
 		{
 			queryKey: [
 				'get_all_orders',
 				currentPage,
 				postsPerPage,
-				searchText,
-				appliedFilters,
+				debouncedSearch,
+				client,
+				paymentType,
+				backendFrom?.toISOString(),
+				backendTo?.toISOString(),
 			],
 			queryFn: async () =>
 				await orderUtils.getOrders({
 					limit: postsPerPage,
 					page: currentPage,
-					search: searchQuery,
-					client: appliedFilters.client,
-					payment_type: appliedFilters.paymentType,
-					from: appliedFilters.from?.toISOString(),
-					to: appliedFilters.to?.toISOString(),
+					search: debouncedSearch,
+					client: client || undefined,
+					payment_type: paymentType || undefined,
+					from: backendFrom?.toISOString(),
+					to: backendTo?.toISOString(),
 				}),
 		},
 	)
+
 	const resetFilter = () => {
-		// 1. Local state-larni tozalash
 		setFrom(undefined)
 		setTo(undefined)
 		setClient('')
 		setPaymentType('')
-		setAppliedFilters({})
+		setSearchQuery('')
 		setCurrentPage(1)
 
-		// 2. URL-ni tozalash
-		// Muhim: Agar updateURL ob'ekt qabul qilsa, barcha kalitlarni bo'shatish kerak
 		updateURL({
+			search: '',
 			client: '',
 			paymentType: '',
 			from: '',
 			to: '',
-			page: 1, // Sahifani ham birinchi sahifaga qaytarish yaxshi praktika
+			page: '1',
 		})
 	}
-
-	const debouncedSearch = useDebounce(searchQuery, 500)
-
-	useEffect(() => {
-		updateURL({
-			search: debouncedSearch,
-			page: currentPage?.toString(),
-			limit: postsPerPage?.toString(),
-		})
-	}, [debouncedSearch, currentPage, postsPerPage, updateURL])
 
 	const totalPages = Math.max(1, Math.ceil((sales?.total || 1) / postsPerPage))
 
@@ -115,11 +145,8 @@ const SalesTable = () => {
 
 	const paginated = sales?.data
 
-	const isHidden =
-		getParam('from', '') ||
-		getParam('to', '') ||
-		getParam('client', '') ||
-		getParam('paymentType', '')
+	const isFilterActive =
+		!!from || !!to || !!client || !!paymentType || !!debouncedSearch
 
 	return (
 		<div className='mt-10'>
@@ -134,51 +161,26 @@ const SalesTable = () => {
 						onChange={e => setSearchQuery(e.target.value)}
 					/>
 				</div>
+
 				<div className='flex justify-center gap-2.5'>
 					<FilterData
-						from={normalizedFrom}
+						from={from}
 						setFrom={setFrom}
+						to={to}
 						setTo={setTo}
-						to={normalizedTo}
+						client={client}
 						setClient={setClient}
+						paymentType={paymentType}
 						setPaymentType={setPaymentType}
-						onApply={() => {
-							let backendFrom = from
-							let backendTo = to
-
-							if (from && to) {
-								backendFrom = new Date(from)
-								backendFrom.setHours(0, 0, 0, 0)
-
-								backendTo = new Date(to)
-								backendTo.setHours(0, 0, 0, 0)
-
-								if (from.getTime() === to.getTime()) {
-									backendTo.setDate(backendTo.getDate() + 1)
-								} else {
-									backendTo.setDate(backendTo.getDate() + 1)
-								}
-							}
-
-							setAppliedFilters({
-								from: backendFrom,
-								to: backendTo,
-								client,
-								paymentType,
-							})
-
-							setCurrentPage(1)
-						}}
 					/>
-					<div>
-						<Button
-							variant={'outline'}
-							className={isHidden ? '' : 'hidden'}
-							onClick={resetFilter}
-						>
-							Filterni tozalash
-						</Button>
-					</div>
+
+					<Button
+						variant='outline'
+						className={isFilterActive ? '' : 'hidden'}
+						onClick={resetFilter}
+					>
+						Filterni tozalash
+					</Button>
 				</div>
 			</div>
 
@@ -190,7 +192,9 @@ const SalesTable = () => {
 							<TableHead className='font-semibold'>Mahsulotlar(3)</TableHead>
 							<TableHead className='font-semibold'>Xaridor</TableHead>
 							<TableHead className='font-semibold'>Umumiy narxi</TableHead>
-							<TableHead className='font-semibold'>To'langan narxi</TableHead>
+							<TableHead className='font-semibold'>
+								To&apos;langan narxi
+							</TableHead>
 							<TableHead className='font-semibold'>Qarzdorlik narxi</TableHead>
 							<TableHead className='font-semibold'>Yaratilgan sana</TableHead>
 							<TableHead className='text-center font-semibold'>
@@ -198,6 +202,7 @@ const SalesTable = () => {
 							</TableHead>
 						</TableRow>
 					</TableHeader>
+
 					{isLoading ? (
 						<SelesTableSkeleton />
 					) : (paginated?.length ?? 0) > 0 ? (
@@ -208,7 +213,9 @@ const SalesTable = () => {
 										(sum, p) => sum + (p.price || p.amount || 0),
 										0,
 									) || 0
+
 								const remainingDebt = el?.total_price - totalPayments
+
 								return (
 									<TableRow
 										key={el.id}
@@ -217,12 +224,13 @@ const SalesTable = () => {
 										<TableCell className='font-medium'>
 											#{el.order_number}
 										</TableCell>
+
 										<TableCell>
 											<ul className='list-decimal pl-5 space-y-0.5'>
 												{el.order_items.slice(0, 3).map((item, index, arr) => (
 													<li key={item.product.id}>
 														{item.product.name}
-														<span title='Mahsulotlar yana mavjud' className=''>
+														<span title='Mahsulotlar yana mavjud'>
 															{index === arr.length - 1 &&
 															el.order_items.length > 3
 																? ' ...'
@@ -232,19 +240,23 @@ const SalesTable = () => {
 												))}
 											</ul>
 										</TableCell>
+
 										<TableCell className='font-medium'>
 											{el.client?.name || "Noma'lum"}
 										</TableCell>
+
 										<TableCell>
 											<span className='font-semibold text-green-600 dark:text-green-400'>
-												{el.total_price?.toLocaleString()} so'm
+												{el.total_price?.toLocaleString()} so&apos;m
 											</span>
 										</TableCell>
+
 										<TableCell>
-											<span className='font-semibold text-green-600 dark:text-green-400'>
-												{totalPayments?.toLocaleString()} so'm
+											<span className='font-semibold text-blue-600 dark:text-blue-400'>
+												{totalPayments?.toLocaleString()} so&apos;m
 											</span>
 										</TableCell>
+
 										<TableCell>
 											<div className='font-semibold text-green-600 dark:text-green-400 relative'>
 												{remainingDebt > 0 && remainingDebt?.toLocaleString()}{' '}
@@ -257,7 +269,7 @@ const SalesTable = () => {
 														remainingDebt > 0
 															? 'text-[9px] absolute -top-2'
 															: 'text-sm'
-													} `}
+													}`}
 												>
 													{remainingDebt > 0 ? 'Qarzli' : "To'liq to'langan"}
 												</Badge>
@@ -269,6 +281,7 @@ const SalesTable = () => {
 												? new Date(el.created_at).toLocaleDateString('uz-UZ')
 												: '-'}
 										</TableCell>
+
 										<TableCell className='text-right'>
 											<div className='flex gap-x-2 justify-center items-center'>
 												<ViewSale {...el} />
@@ -296,6 +309,7 @@ const SalesTable = () => {
 					)}
 				</Table>
 			</div>
+
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {

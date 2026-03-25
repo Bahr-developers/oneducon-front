@@ -144,7 +144,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			: item.discount
 
 	return (
-		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200'>
+		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200 pt-5'>
 			<button
 				onClick={handleRemove}
 				className='absolute top-2 right-2 md:static md:order-last text-muted-foreground hover:text-destructive transition-colors p-2 rounded-full hover:bg-destructive/10'
@@ -154,31 +154,37 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			</button>
 
 			<div className=' w-full md:w-auto flex flex-col gap-2'>
-				<h3 className='font-semibold text-base leading-tight line-clamp-1'>
-					{item.product.name}
-				</h3>
-				<div className='absolute top-2 right-2 flex items-center justify-end space-x-2 my-1'>
+				<div className='absolute top-0 right-2 flex items-center justify-end space-x-2 my-1'>
 					<Switch
 						id={`price-switch-${item.id}`}
 						checked={useAltPrice}
 						onCheckedChange={handleToggle}
+						className='data-[state=checked]:bg-[#6A81FF]'
 					/>
-					<Label htmlFor={`price-switch-${item.id}`}>Ulgurji narx</Label>
+					<Label
+						htmlFor={`price-switch-${item.id}`}
+						className={`${useAltPrice ? 'text-[#6A81FF]' : 'text-primary'}`}
+					>
+						Ulgurji narx
+					</Label>
 				</div>
 				<div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
 					<div className='flex flex-col items-start gap-1 bg-secondary/50 px-2 py-1 rounded-md'>
-						<div>
+						<h3 className='font-semibold text-base leading-tight line-clamp-1'>
+							{item.product.name}
+						</h3>
+						{/* <div>
 							<span>Narxi: </span>
 							<span className='font-medium text-foreground text-[15px]'>
 								{item.price.toLocaleString()} UZS
 							</span>
-						</div>
+						</div> */}
 
-						<div className='text-[13px] text-muted-foreground font-medium'>
-							Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
-						</div>
-
-						{constPrice && ''}
+						{constPrice && (
+							<div className='text-[13px] text-muted-foreground font-medium'>
+								Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
+							</div>
+						)}
 
 						{/* {constPrice && (
 							<div className='text-[13px] text-muted-foreground'>
@@ -254,7 +260,9 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 					Jami summa:
 				</span>
 				<div className='flex flex-col items-end'>
-					<span className='text-lg font-bold text-primary tracking-tight'>
+					<span
+						className={`text-lg font-bold  tracking-tight ${useAltPrice ? 'text-[#6A81FF]' : 'text-primary'}`}
+					>
 						{totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
 						<span className='text-xs font-normal text-muted-foreground ml-1'>
 							UZS
@@ -266,7 +274,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 							-
 							{(item.discount * item.count).toLocaleString(undefined, {
 								maximumFractionDigits: 2,
-							})}{' '}
+							})}
 							skidka
 						</span>
 					)}

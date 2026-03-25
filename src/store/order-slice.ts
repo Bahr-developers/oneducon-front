@@ -49,13 +49,8 @@ const orderSlice = createSlice({
     name: "order",
     initialState,
     reducers: {
-        // YANGI ACTION: To'g'ridan-to'g'ri mahsulot qo'shish
         addProductToOrder: (state, action: PayloadAction<product>) => {
-            // Agar mahsulot allaqachon bor bo'lsa, uni countini oshirish mumkin
-            // Lekin sizning talabingiz bo'yicha "arrayga qo'shilib ketaveradi"
-            
-            const newProduct = action.payload;
-            
+            const newProduct = action.payload;            
             state.items.push({
                 id: crypto.randomUUID(),
                 product: newProduct,
@@ -67,7 +62,6 @@ const orderSlice = createSlice({
 
             recalculateTotals(state);
 
-            // Avtomatik to'lov (Naqd) qo'shish logikasi (agar birinchi mahsulot bo'lsa)
             if (state.items.length === 1 && state.payments.length === 0) {
                  state.payments.push({
                     payment_type_id: "1",
@@ -116,7 +110,6 @@ const orderSlice = createSlice({
             recalculateTotals(state);
         },
 
-        // ======== DEBT (O'zgarmadi) ========
         setDebt: (state, action: PayloadAction<Debt>) => {
             state.debt = action.payload;
         },
@@ -133,7 +126,6 @@ const orderSlice = createSlice({
     },
 });
 
-// Helper function (O'zgarmadi)
 function recalculateTotals(state: OrderState) {
     state.totalItemsAmount = state.items.reduce((sum, item) => {
         if (item.product && item.product_id) {

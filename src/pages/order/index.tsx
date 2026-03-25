@@ -107,7 +107,6 @@ export default function OrderProducts() {
 		onSuccess: (_response, variables) => {
 			toast.success('Sotuv amalga oshirildi')
 
-			// modal uchun kerak bo'ladigan snapshotni resetdan oldin saqlab qo'yamiz
 			if (showReceiptAfterSave) {
 				setReceiptData(variables.receipt)
 				setOpenCheck(true)
@@ -137,8 +136,8 @@ export default function OrderProducts() {
 		dispatch(addProductToOrder(product))
 	}
 
-	const allPaymentsValid =
-		payments.length > 0 && payments.every(p => p.payment_type_id)
+	// const allPaymentsValid =
+	// 	payments.length > 0 && payments.every(p => p.payment_type_id)
 
 	const handleSaveOrder = () => {
 		const finalOrderData = {
@@ -316,7 +315,6 @@ export default function OrderProducts() {
 								items?.length === 0 ||
 								items.every(i => !i.product) ||
 								(hasDebt && (!selectedUser || !returnTime)) ||
-								!allPaymentsValid ||
 								createOrder.isPending
 							}
 						>

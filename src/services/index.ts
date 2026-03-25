@@ -23,7 +23,7 @@ customAxios.interceptors.response.use(
     (response) => {
         return response;
     },
-    (error) => {
+    (error)  => {
         if (error.response && error.response.status === 406) {
             localStorage.removeItem("accessToken");
             localStorage.removeItem("storeId");

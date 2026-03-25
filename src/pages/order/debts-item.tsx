@@ -61,13 +61,6 @@ const DebtsItem = ({
 		queryKey: ['customers'],
 		queryFn: customerUtils.getCustomerAll,
 	})
-	useEffect(() => {
-		if (open && remainingDebt > 0 && !returnTime) {
-			const defaultDate = new Date()
-			defaultDate.setDate(defaultDate.getDate() + 3) // +3 kun
-			setReturnTime(defaultDate)
-		}
-	}, [open, remainingDebt, returnTime, setReturnTime])
 
 	return (
 		<div className='flex flex-col gap-4 w-full mt-3'>
@@ -154,11 +147,11 @@ const DebtsItem = ({
 							</label>
 							<div className='bg-background rounded-md border overflow-hidden'>
 								<DatePicker
-									className='w-full border-none shadow-none text-sm'
+									className='w-full border-none shadow-none text-sm h-10'
 									date={returnTime}
 									setDate={setReturnTime}
 									title={i18n.language == 'uz' ? '' : ''}
-									startTitle={''}
+									startTitle={'Qaytarish vaqti'}
 								/>
 							</div>
 						</div>
