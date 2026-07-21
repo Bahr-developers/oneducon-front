@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
 	Dialog,
 	DialogContent,
@@ -32,20 +31,6 @@ interface PropsFilter {
 	setClient: (value: string) => void
 	paymentType: string
 	setPaymentType: (value: string) => void
-}
-
-const toInputDateValue = (date?: Date) => {
-	if (!date) return ''
-	const year = date.getFullYear()
-	const month = String(date.getMonth() + 1).padStart(2, '0')
-	const day = String(date.getDate()).padStart(2, '0')
-	return `${year}-${month}-${day}`
-}
-
-const fromInputDateValue = (value: string): Date | undefined => {
-	if (!value) return undefined
-	const [year, month, day] = value.split('-').map(Number)
-	return new Date(year, month - 1, day)
 }
 
 const FilterData = ({
