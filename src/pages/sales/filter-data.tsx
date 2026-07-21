@@ -21,6 +21,7 @@ import { paymentUtils } from '@/utils/payment-type'
 import { useQuery } from '@tanstack/react-query'
 import { ListFilter } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import DatePickerSingle from '@/components/functions/DatePicerSingle'
 
 interface PropsFilter {
 	setFrom: (date: Date | undefined) => void
@@ -137,19 +138,31 @@ const FilterData = ({
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
 						<div className='space-y-1'>
 							<span className='text-sm font-medium'>Boshlanish sanasi</span>
-							<Input
+							{/* <Input
 								type='date'
 								value={toInputDateValue(from)}
 								onChange={e => setFrom(fromInputDateValue(e.target.value))}
+							/> */}
+							<DatePickerSingle
+								value={from}
+								onChange={date => {
+									if (date) setFrom(date)
+								}}
 							/>
 						</div>
 
 						<div className='space-y-1'>
 							<span className='text-sm font-medium'>Tugash sanasi</span>
-							<Input
+							{/* <Input
 								type='date'
 								value={toInputDateValue(to)}
 								onChange={e => setTo(fromInputDateValue(e.target.value))}
+							/> */}
+							<DatePickerSingle
+								value={to}
+								onChange={date => {
+									if (date) setTo(date)
+								}}
 							/>
 						</div>
 					</div>

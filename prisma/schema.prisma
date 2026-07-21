@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LanguageCode {
+  uz
+  ru
+  en
+}
+
+enum CurrencyCode {
+  UZS
+  USD
+  EUR
+  RUB
+}
+
+enum ExpenseStatus {
+  ACTIVE
+  DELETED
+}
+
+enum ExpenseSource {
+  COMMAND
+  MESSAGE
+  CALLBACK
+}
+
+enum BotStateType {
+  IDLE
+  ADD_EXPENSE_AMOUNT
+  ADD_EXPENSE_CATEGORY
+  ADD_EXPENSE_DESCRIPTION
+  DELETE_EXPENSE
+}
+
+model TelegramUser {
+  id                String            @id @default(uuid())
+  telegramId        BigInt            @unique
+  chatId            BigInt
+  username          String?
+  firstName         String?
+  lastName          String?
+  language          LanguageCode      @default(uz)
+  timezone          String            @default("Asia/Tashkent")
+  defaultCurrency   CurrencyCode      @default(UZS)
+  isBlocked         Boolean           @default(false)
+  lastActivityAt    DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  categories        ExpenseCategory[]
+  expenses          Expense[]
+  botState          BotState?
+  monthlySnapshots  MonthlyExpenseSnapshot[]
+
+  @@index([chatId])
+  @@map("telegram_users")
+}
+
+model ExpenseCategory {
+  id          String          @id @default(uuid())
+  userId      String
+  name        String
+  icon        String?
+  color       String?
+  sortOrder   Int             @default(0)
+  isDefault   Boolean         @default(false)
+  isArchived  Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  user        TelegramUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+
+  @@unique([userId, name])
+  @@index([userId, isArchived])
+  @@map("expense_categories")
+}
+
+model Expense {
+  id                 String           @id @default(uuid())
+  userId             String
+  categoryId         String?
+  amount             Decimal          @db.Decimal(14, 2)
+  currency           CurrencyCode     @default(UZS)
+  description        String?
+  source             ExpenseSource    @default(COMMAND)
+  status             ExpenseStatus    @default(ACTIVE)
+  spentAt            DateTime         @default(now())
+  telegramMessageId  Int?
+  deletedAt          DateTime?
+  deletedReason      String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  user               TelegramUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category           ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, spentAt])
+  @@index([userId, status, spentAt])
+  @@index([categoryId, spentAt])
+  @@map("expenses")
+}
+
+model BotState {
+  id          String        @id @default(uuid())
+  userId      String        @unique
+  state       BotStateType  @default(IDLE)
+  payload     Json?
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        TelegramUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@index([expiresAt])
+  @@map("bot_states")
+}
+
+model MonthlyExpenseSnapshot {
+  id             String        @id @default(uuid())
+  userId         String
+  year           Int
+  month          Int
+  currency       CurrencyCode  @default(UZS)
+  totalAmount    Decimal       @default(0) @db.Decimal(14, 2)
+  expenseCount   Int           @default(0)
+  generatedAt    DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user           TelegramUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year, month, currency])
+  @@index([userId, year, month])
+  @@map("monthly_expense_snapshots")
+}
