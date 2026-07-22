@@ -1,18 +1,39 @@
 import { orderUtils } from '@/utils/orders'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 const StatisticsSales = () => {
 	const [searchParams] = useSearchParams()
 	const from = searchParams.get('from') || undefined
 	const to = searchParams.get('to') || undefined
+
+	const backendFrom = useMemo(() => {
+		if (!from) return undefined
+		const d = new Date(from)
+		d.setHours(0, 0, 0, 0)
+		return d
+	}, [from])
+
+	const backendTo = useMemo(() => {
+		if (!to) return undefined
+		const d = new Date(to)
+		d.setHours(0, 0, 0, 0)
+		d.setDate(d.getDate() + 1)
+		return d
+	}, [to])
+
 	const { data: stats } = useQuery<{
 		totalOrders: number
 		totalPayments: number
 		totalDebts: number
 	}>({
-		queryKey: ['stats', from, to],
-		queryFn: () => orderUtils.getOrdersStats({ from, to }),
+		queryKey: ['stats', backendFrom?.toISOString(), backendTo?.toISOString()],
+		queryFn: () =>
+			orderUtils.getOrdersStats({
+				from: backendFrom?.toISOString(),
+				to: backendTo?.toISOString(),
+			}),
 	})
 
 	const data = [
