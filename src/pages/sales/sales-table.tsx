@@ -98,13 +98,13 @@ const SalesTable = () => {
 		{
 			queryKey: [
 				'get_all_orders',
-				currentPage,
-				postsPerPage,
 				debouncedSearch,
 				client,
 				paymentType,
 				backendFrom?.toISOString(),
 				backendTo?.toISOString(),
+				postsPerPage,
+				currentPage,
 			],
 			queryFn: async () =>
 				await orderUtils.getOrders({
@@ -136,12 +136,6 @@ const SalesTable = () => {
 			page: '1',
 		})
 	}
-
-	const totalPages = Math.max(1, Math.ceil((sales?.total || 1) / postsPerPage))
-
-	useEffect(() => {
-		if (currentPage > totalPages) setCurrentPage(1)
-	}, [currentPage, totalPages])
 
 	const paginated = sales?.data
 
