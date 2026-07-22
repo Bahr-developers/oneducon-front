@@ -32,11 +32,6 @@ const DebtsTable = () => {
 				search: debouncedSearch,
 			}),
 	})
-	const totalPages = Math.max(1, Math.ceil((debts?.total || 1) / postsPerPage))
-
-	useEffect(() => {
-		if (currentPage > totalPages) setCurrentPage(1)
-	}, [currentPage, totalPages])
 
 	const paginated = debts?.data || []
 	console.log(paginated?.length, paginated)

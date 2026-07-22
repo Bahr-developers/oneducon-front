@@ -50,15 +50,6 @@ const ExpensesTable = () => {
 
 	const expenses = expensesData?.data
 
-	const totalPages = Math.max(
-		1,
-		Math.ceil((expensesData?.total || 1) / postsPerPage),
-	)
-
-	useEffect(() => {
-		if (currentPage > totalPages) setCurrentPage(1)
-	}, [currentPage, totalPages])
-
 	const queryClient = useQueryClient()
 	const [editingExpense, setEditingExpense] = useState<expense | null>(null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
