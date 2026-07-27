@@ -32,8 +32,6 @@ export function StatCard({
 	icon: Icon,
 	tone,
 }: StatCardProps) {
-	// const isPositive = (trendPercent ?? 0) >= 0
-
 	return (
 		<article className='min-w-0 rounded-xl border bg-card p-3 shadow-sm'>
 			<div className='flex items-start justify-between gap-2'>
