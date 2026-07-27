@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
-import { formatCompactMoney, formatTrend } from '../lib/format'
+
 import type { DashboardCurrency } from '@/@types/dash-stats'
+import { formatCompactMoney } from '../lib/format'
 
 const TONE_STYLES = {
 	purple: 'bg-[#5C59E8]/10 text-[#5C59E8]',
@@ -31,11 +31,8 @@ export function StatCard({
 	currency,
 	icon: Icon,
 	tone,
-	trendPercent,
-	trendLabel = "O'tgan oyga nisbatan",
-	footerLabel,
 }: StatCardProps) {
-	const isPositive = (trendPercent ?? 0) >= 0
+	// const isPositive = (trendPercent ?? 0) >= 0
 
 	return (
 		<article className='min-w-0 rounded-xl border bg-card p-3 shadow-sm'>
