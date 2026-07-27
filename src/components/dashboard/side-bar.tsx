@@ -86,9 +86,13 @@ function useNavItems(): NavItem[] {
 export function AppSidebar({
 	collapsed,
 	onToggle,
+	mobile = false,
+	onNavigate,
 }: {
 	collapsed: boolean
 	onToggle: () => void
+	mobile?: boolean
+	onNavigate?: () => void
 }) {
 	const { pathname } = useLocation()
 	const { t } = useTranslation()
@@ -97,8 +101,11 @@ export function AppSidebar({
 	return (
 		<aside
 			className={cn(
-				'hidden md:flex sticky overflow-y-auto top-0 left-0 border-r ',
-				collapsed ? 'w-[52px]' : 'w-[275px]',
+				'sticky top-0 left-0 overflow-y-auto border-r bg-background',
+				mobile
+					? 'flex h-full w-full'
+					: 'hidden md:flex',
+				!mobile && (collapsed ? 'w-[52px]' : 'w-[275px]'),
 			)}
 		>
 			<div className='flex w-full flex-col'>
@@ -107,6 +114,7 @@ export function AppSidebar({
 						{!collapsed && (
 							<Link
 								to={'/dashboard'}
+								onClick={onNavigate}
 								className='text-start font-bold text-[#6A81FF] flex items-center gap-2'
 							>
 								<img src={imagelogo} alt='logoimage' className='w-[50px]' />
@@ -114,25 +122,27 @@ export function AppSidebar({
 							</Link>
 						)}
 					</div>
-					<button
-						onClick={onToggle}
-						aria-label='Toggle sidebar'
-						className={`${collapsed ? 'bg-gradient-to-tr from-[#6A81FF] to-[#2E4EFE] mx-auto text-white ' : 'text-neutral-500  hover:shadow-xl ml-auto'}  cursor-pointer flex justify-center items-center rounded-[4px] border w-6 h-6`}
-					>
-						{collapsed ? (
-							<ChevronRight
-								size={55}
-								strokeWidth={3}
-								className='font-bold w-4 h-4'
-							/>
-						) : (
-							<ChevronLeft
-								size={25}
-								strokeWidth={3}
-								className='font-bold w-4 h-4'
-							/>
-						)}
-					</button>
+					{!mobile && (
+						<button
+							onClick={onToggle}
+							aria-label='Toggle sidebar'
+							className={`${collapsed ? 'bg-gradient-to-tr from-[#6A81FF] to-[#2E4EFE] mx-auto text-white ' : 'text-neutral-500  hover:shadow-xl ml-auto'}  cursor-pointer flex justify-center items-center rounded-[4px] border w-6 h-6`}
+						>
+							{collapsed ? (
+								<ChevronRight
+									size={55}
+									strokeWidth={3}
+									className='font-bold w-4 h-4'
+								/>
+							) : (
+								<ChevronLeft
+									size={25}
+									strokeWidth={3}
+									className='font-bold w-4 h-4'
+								/>
+							)}
+						</button>
+					)}
 				</div>
 				<ScrollArea className='flex-1'>
 					<nav className='pr-2 py-3 space-y-2 overflow-y-auto'>
@@ -155,6 +165,7 @@ export function AppSidebar({
 
 									<NavLink
 										to={n.href}
+										onClick={onNavigate}
 										className={`flex mx-auto text-[15px] items-center gap-x-2 h-[44px] relative ${
 											// relative qo'shildi
 											collapsed

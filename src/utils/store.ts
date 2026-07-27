@@ -1,3 +1,4 @@
+import { StatisticsResponse } from "@/@types/dash-stats";
 import customAxios from "@/services";
 
 interface storeData {
@@ -10,17 +11,6 @@ interface storeData {
   link?: string;
 }
 
-export interface StatisticsResponse {
-  totalOrders: number;
-  totalPayments: number;
-  totalDebts: number;
-  totalCashBalance: number,
-  cashOnHand: number,
-  totalCostPrices: number,
-  totalCostPricesUsd: number,
-  totalSalePrices: number,
-  totalSalePricesUsd: number
-}
 
 export const storeUtils = {
   getStore: async () => {
