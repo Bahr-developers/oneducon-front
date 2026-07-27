@@ -57,7 +57,7 @@ export function StatCard({
 				{formatCompactMoney(value, currency)}
 			</p>
 
-			{typeof trendPercent === 'number' ? (
+			{/* {typeof trendPercent === 'number' ? (
 				<div className='mt-1.5 flex flex-wrap items-center gap-1 text-[10px] leading-tight'>
 					<span
 						className={cn(
@@ -75,8 +75,10 @@ export function StatCard({
 					<span className='truncate text-muted-foreground'>{trendLabel}</span>
 				</div>
 			) : footerLabel ? (
-				<p className='mt-1.5 text-[10px] text-muted-foreground'>{footerLabel}</p>
-			) : null}
+				<p className='mt-1.5 text-[10px] text-muted-foreground'>
+					{footerLabel}
+				</p>
+			) : null} */}
 		</article>
 	)
 }
