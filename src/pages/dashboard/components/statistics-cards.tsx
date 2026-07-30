@@ -1,15 +1,5 @@
-import {
-	Banknote,
-	ShoppingBag,
-	TrendingUp,
-	Undo2,
-	Wallet,
-} from 'lucide-react'
-import {
-	MOCK_RETURNS_USD,
-	MOCK_RETURNS_UZS,
-	STAT_TRENDS,
-} from '../constants/dashboard.mock'
+import { Banknote, ShoppingBag, TrendingUp, Wallet } from 'lucide-react'
+import { STAT_TRENDS } from '../constants/dashboard.mock'
 import { useDashboardCurrency } from '../hooks/use-dashboard-currency'
 import { useGeneralStats } from '../hooks/use-general-stats'
 import { DashboardError } from './dashboard-states'
@@ -30,7 +20,7 @@ export function StatisticsCards() {
 		? (data?.totalCostPricesUsd ?? 0)
 		: (data?.totalCostPrices ?? 0)
 	const profit = sales - expense
-	const returns = isUsd ? MOCK_RETURNS_USD : MOCK_RETURNS_UZS
+	// const returns = isUsd ? MOCK_RETURNS_USD : MOCK_RETURNS_UZS
 	const cash = data?.cashOnHand ?? 0
 
 	return (
@@ -59,14 +49,14 @@ export function StatisticsCards() {
 				tone='green'
 				trendPercent={STAT_TRENDS.profit}
 			/>
-			<StatCard
+			{/* <StatCard
 				title='Qaytarishlar'
 				value={returns}
 				currency={currency}
 				icon={Undo2}
 				tone='red'
 				trendPercent={STAT_TRENDS.returns}
-			/>
+			/> */}
 			<StatCard
 				title='Kassadagi pul'
 				value={cash}
