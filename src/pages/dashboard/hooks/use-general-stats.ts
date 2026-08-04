@@ -5,7 +5,6 @@ import { useDashboardDate } from './use-dashboard-date'
 
 export function useGeneralStats() {
 	const { backendFrom, backendTo } = useDashboardDate()
-
 	return useQuery({
 		queryKey: ['dashboard_general_stats', backendFrom, backendTo],
 		queryFn: () =>

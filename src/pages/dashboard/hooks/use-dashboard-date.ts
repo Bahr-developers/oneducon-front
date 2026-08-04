@@ -11,13 +11,12 @@ const parseDate = (value: string) => {
 }
 
 /** Sales page bilan bir xil: local 00:00 → ISO (masalan 2026-06-30T19:00:00.000Z) */
-const toBackendISO = (dateStr: string, endOfRange = false) => {
-	const d = new Date(dateStr)
-	d.setHours(0, 0, 0, 0)
-	if (endOfRange) {
-		d.setDate(d.getDate() + 1)
-	}
-	return d.toISOString()
+const toBackendISO = (dateStr: string) => {
+	const [year, month, day] = dateStr.split('-').map(Number)
+
+	if (!year || !month || !day) return ''
+
+	return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 export function useDashboardDate() {
@@ -30,7 +29,7 @@ export function useDashboardDate() {
 	const toDate = useMemo(() => parseDate(to), [to])
 
 	const backendFrom = useMemo(() => toBackendISO(from), [from])
-	const backendTo = useMemo(() => toBackendISO(to, true), [to])
+	const backendTo = useMemo(() => toBackendISO(to), [to])
 
 	const setRange = useCallback(
 		(nextFrom?: Date, nextTo?: Date) => {
