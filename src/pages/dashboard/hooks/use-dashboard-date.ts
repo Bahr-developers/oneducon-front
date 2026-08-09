@@ -1,16 +1,21 @@
 import { formatLocalDate } from '@/components/functions/format-locale-date'
 import { useQueryParams } from '@/hooks/query-params'
+import { startOfMonth } from 'date-fns'
 import { useCallback, useMemo } from 'react'
 
 const today = () => formatLocalDate(new Date())
 
+const startOfCurrentMonth = () =>
+	formatLocalDate(startOfMonth(new Date()))
+
 const parseDate = (value: string) => {
 	const [year, month, day] = value.split('-').map(Number)
+
 	if (!year || !month || !day) return undefined
+
 	return new Date(year, month - 1, day)
 }
 
-/** Sales page bilan bir xil: local 00:00 → ISO (masalan 2026-06-30T19:00:00.000Z) */
 const toBackendISO = (dateStr: string) => {
 	const [year, month, day] = dateStr.split('-').map(Number)
 
@@ -22,7 +27,10 @@ const toBackendISO = (dateStr: string) => {
 export function useDashboardDate() {
 	const { getParam, updateURL } = useQueryParams()
 
-	const from = getParam('from') || today()
+	// Default:
+	// from -> oyning 1-sanasi
+	// to   -> bugungi sana
+	const from = getParam('from') || startOfCurrentMonth()
 	const to = getParam('to') || today()
 
 	const fromDate = useMemo(() => parseDate(from), [from])
@@ -44,7 +52,11 @@ export function useDashboardDate() {
 	const setFrom = useCallback(
 		(date?: Date) => {
 			if (!date) return
-			updateURL({ from: formatLocalDate(date), to })
+
+			updateURL({
+				from: formatLocalDate(date),
+				to,
+			})
 		},
 		[to, updateURL],
 	)
@@ -52,7 +64,11 @@ export function useDashboardDate() {
 	const setTo = useCallback(
 		(date?: Date) => {
 			if (!date) return
-			updateURL({ from, to: formatLocalDate(date) })
+
+			updateURL({
+				from,
+				to: formatLocalDate(date),
+			})
 		},
 		[from, updateURL],
 	)
