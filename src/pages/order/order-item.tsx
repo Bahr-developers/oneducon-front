@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
-import { X } from 'lucide-react'
+import { Tally1Icon, X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
@@ -173,22 +173,23 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 						<h3 className='font-semibold text-base leading-tight line-clamp-1'>
 							{item.product.name}
 						</h3>
-						{/* <div>
-							<span>Narxi: </span>
-							<span className='font-medium text-foreground text-[15px]'>
-								{item.price.toLocaleString()} UZS
-							</span>
-						</div> */}
 
+						<div className='text-[13px] text-muted-foreground'>
+							Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
+						</div>
 						{constPrice && (
-							<div className='text-[13px] text-muted-foreground font-medium'>
-								Sotuv narxi: {item.product.sale_price?.toLocaleString()} UZS
+							<div className='text-[13px] flex gap-2 items-center text-muted-foreground'>
+								Tan narxi:{' '}
+								<span className='flex items-center gap-2'>
+									{item.product.cost_price?.toLocaleString()}
+									<span className='w-[2px] h-[15px] bg-gray-500 rounded-xl'></span>
+									{item.product.sale_price_usd?.toLocaleString()}$
+								</span>
 							</div>
 						)}
-
 						{/* {constPrice && (
-							<div className='text-[13px] text-muted-foreground'>
-								{item.price}: {item.price?.toLocaleString()} UZS
+							<div className='text-[13px] text-muted-foreground font-medium'>
+								Tan narxi(usd):{item.product.sale_price_usd?.toLocaleString()}$
 							</div>
 						)} */}
 					</div>

@@ -98,9 +98,9 @@ export default function SearchSelect({
 			/>
 
 			{isOpen && query && (
-				<ul className='absolute z-10 w-full bg-[#f3f3f3] border border-gray-200 dark:bg-background transition-colors rounded-2xl mt-1.5 max-h-[550px] overflow-y-auto shadow-lg p-2 space-y-2'>
+				<ul className='absolute z-[99999] w-full bg-[#f3f3f3] border border-gray-200 dark:bg-background transition-colors rounded-2xl mt-1.5 max-h-[550px] overflow-y-auto shadow-lg p-2 space-y-2'>
 					{isLoading ? (
-						<li className='px-3 py-3 text-gray-500 text-center bg-white rounded-xl shadow-sm'>
+						<li className='px-3 py-3 text-gray-500 text-center rounded-xl shadow-sm'>
 							Yuklanmoqda...
 						</li>
 					) : filtered?.data?.length > 0 ? (
@@ -112,10 +112,10 @@ export default function SearchSelect({
 								<li
 									key={product.id}
 									onClick={() => !disabled && handleSelect(product)}
-									className={`rounded-2xl bg-white shadow-sm border border-gray-100 px-4 py-3 transition-all flex justify-between items-center gap-3 ${
+									className={`rounded-2xl shadow-sm border border-gray-100 px-4 py-3 transition-all flex justify-between items-center gap-3 ${
 										disabled
 											? 'opacity-60 cursor-not-allowed'
-											: 'cursor-pointer hover:shadow-md hover:border-gray-200 hover:bg-gray-50'
+											: 'cursor-pointer hover:shadow-md'
 									}`}
 								>
 									<div className='flex-1 min-w-0'>
@@ -133,7 +133,7 @@ export default function SearchSelect({
 									</div>
 
 									<div className='shrink-0 text-right'>
-										<div className='flex flex-col gap-2 text-lg font-bold text-gray-700'>
+										<div className='flex flex-col gap-2 text-lg font-bold'>
 											<span>
 												Narxi: {product.sale_price?.toLocaleString()} so'm
 											</span>
@@ -144,7 +144,7 @@ export default function SearchSelect({
 							)
 						})
 					) : (
-						<li className='px-3 py-3 text-gray-500 text-center bg-white rounded-xl shadow-sm'>
+						<li className='px-3 py-3 text-gray-500 text-center rounded-xl shadow-sm'>
 							Hech narsa topilmadi
 						</li>
 					)}
