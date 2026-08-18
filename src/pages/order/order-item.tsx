@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
-import { Tally1Icon, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
