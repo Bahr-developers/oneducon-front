@@ -52,7 +52,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		}
 	}, [item.count, localCount])
 
-	// Narx o'zgarsa store ichidagi price ham yangilansin
 	useEffect(() => {
 		if (item.price !== selectedPrice) {
 			dispatch(
@@ -179,11 +178,11 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 						</div>
 						{constPrice && (
 							<div className='text-[13px] flex gap-2 items-center text-muted-foreground'>
-								Tan narxi:{' '}
+								Tan narxi:
 								<span className='flex items-center gap-2'>
 									{item.product.cost_price?.toLocaleString()}
 									<span className='w-[2px] h-[15px] bg-gray-500 rounded-xl'></span>
-									{item.product.sale_price_usd?.toLocaleString()}$
+									{item.product.cost_price_usd?.toLocaleString()}$
 								</span>
 							</div>
 						)}
