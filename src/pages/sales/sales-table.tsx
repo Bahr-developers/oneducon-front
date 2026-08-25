@@ -21,10 +21,12 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { Badge } from '@/components/ui/badge'
 import SelesTableSkeleton from './seles-table-skeleton'
 import { formatLocalDate } from '@/components/functions/format-locale-date'
-
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setPostsPerPage } from '@/store/paginationSlice.ts'
 const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
-
+	const dispatch = useDispatch()
 	const [from, setFrom] = useState<Date | undefined>(() => {
 		const value = getParam('from', '')
 		return value ? new Date(value) : undefined
@@ -40,8 +42,8 @@ const SalesTable = () => {
 		getParam('paymentType', ''),
 	)
 
-	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '5')),
+	const postsPerPage = useSelector(
+		(state: RootState) => state.pagination.postsPerPage,
 	)
 
 	const [currentPage, setCurrentPage] = useState<number>(() =>
@@ -307,7 +309,7 @@ const SalesTable = () => {
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {
-					setPostsPerPage(n)
+					dispatch(setPostsPerPage(n))
 					setCurrentPage(1)
 				}}
 				postsPerPage={postsPerPage}

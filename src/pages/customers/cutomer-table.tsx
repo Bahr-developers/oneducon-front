@@ -18,6 +18,9 @@ import { useEffect, useState } from 'react'
 import { useQueryParams } from '@/hooks/query-params'
 import { useDebounce } from '@/hooks/useDebounce'
 import PaginationContyent from '@/components/_components/pagination'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setPostsPerPage } from '@/store/paginationSlice.ts'
 
 const CustomerTableSkeleton = () => {
 	return (
@@ -45,8 +48,9 @@ const CustomerTableSkeleton = () => {
 const CustomeTable = () => {
 	const { updateURL, getParam } = useQueryParams()
 
-	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '5')),
+	const dispatch = useDispatch()
+	const postsPerPage = useSelector(
+		(state: RootState) => state.pagination.postsPerPage,
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
 		parseInt(getParam('page', '1')),
@@ -153,7 +157,7 @@ const CustomeTable = () => {
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {
-					setPostsPerPage(n)
+					dispatch(setPostsPerPage(n))
 					setCurrentPage(1)
 				}}
 				postsPerPage={postsPerPage}

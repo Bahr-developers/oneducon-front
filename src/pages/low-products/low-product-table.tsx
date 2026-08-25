@@ -14,9 +14,15 @@ import ProductsTableSkeleton from '../pruducts/product-skeleton'
 import { product } from '@/@types'
 import EditProsucts from '../pruducts/edit-products'
 import ProductView from '../pruducts/product-view'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setPostsPerPage } from '@/store/paginationSlice.ts'
 
 const LowProductTable = () => {
-	const [postsPerPage, setPostsPerPage] = useState<number>(5)
+	const dispatch = useDispatch()
+	const postsPerPage = useSelector(
+		(state: RootState) => state.pagination.postsPerPage,
+	)
 	const [currentPage, setCurrentPage] = useState<number>(1)
 	const { data: lowProducts, isLoading } = useQuery({
 		queryKey: ['get_low_products', currentPage, postsPerPage],
@@ -120,7 +126,7 @@ const LowProductTable = () => {
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {
-					setPostsPerPage(n)
+					dispatch(setPostsPerPage(n))
 					setCurrentPage(1)
 				}}
 				postsPerPage={postsPerPage}

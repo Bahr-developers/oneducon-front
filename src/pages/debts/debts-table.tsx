@@ -17,12 +17,19 @@ import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 import DebtsTableSkeleton from './debts-skeleton'
 import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setPostsPerPage } from '@/store/paginationSlice.ts'
 
 const DebtsTable = () => {
-	const [postsPerPage, setPostsPerPage] = useState<number>(5)
 	const [currentPage, setCurrentPage] = useState<number>(1)
 	const [search, setSearch] = useState('')
 	const debouncedSearch = useDebounce(search)
+	const dispatch = useDispatch()
+	const postsPerPage = useSelector(
+		(state: RootState) => state.pagination.postsPerPage,
+	)
+
 	const { data: debts, isLoading } = useQuery({
 		queryKey: ['debts_all', postsPerPage, currentPage, debouncedSearch],
 		queryFn: async () =>
@@ -32,6 +39,7 @@ const DebtsTable = () => {
 				search: debouncedSearch,
 			}),
 	})
+
 
 	const paginated = debts?.data || []
 	console.log(paginated?.length, paginated)
@@ -119,7 +127,7 @@ const DebtsTable = () => {
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {
-					setPostsPerPage(n)
+					dispatch(setPostsPerPage(n))
 					setCurrentPage(1)
 				}}
 				postsPerPage={postsPerPage}

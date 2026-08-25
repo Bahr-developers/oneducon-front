@@ -32,13 +32,16 @@ import { DeleteConfirm } from '@/components/ui/alerd-dialog'
 import { Button } from '@/components/ui/button'
 import { AxiosError } from 'axios'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useDispatch, useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+import { setPostsPerPage } from '@/store/paginationSlice.ts'
 
 const Productstable = () => {
 	const { updateURL, getParam } = useQueryParams()
 	const queryClient = useQueryClient()
-
-	const [postsPerPage, setPostsPerPage] = useState<number>(() =>
-		parseInt(getParam('limit', '5')),
+	const dispatch = useDispatch()
+	const postsPerPage = useSelector(
+		(state: RootState) => state.pagination.postsPerPage,
 	)
 	const [currentPage, setCurrentPage] = useState<number>(() =>
 		parseInt(getParam('page', '1')),
@@ -360,7 +363,7 @@ const Productstable = () => {
 			<PaginationContyent
 				currentPage={currentPage}
 				setPostPerPage={n => {
-					setPostsPerPage(n)
+					dispatch(setPostsPerPage(n))
 					setCurrentPage(1)
 				}}
 				postsPerPage={postsPerPage}

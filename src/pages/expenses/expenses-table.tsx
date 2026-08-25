@@ -135,6 +135,7 @@ const ExpensesTable = () => {
 				postsPerPage={postsPerPage}
 				setCurrentPage={n => setCurrentPage(n)}
 				totalPosts={expensesData?.total || 0}
+				pagesSize={[6,12,18,24,30]}
 			/>
 		</div>
 	)

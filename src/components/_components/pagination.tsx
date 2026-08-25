@@ -20,11 +20,12 @@ interface PropsType {
     postsPerPage: number
     totalPosts: number
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>
-    setPostPerPage: React.Dispatch<React.SetStateAction<number>>
-    currentPage: number
+    setPostPerPage: (value: number) => void
+    currentPage: number,
+    pagesSize?: number[]
 }
 
-const PaginationContyent = ({ postsPerPage, totalPosts, setCurrentPage, setPostPerPage, currentPage }: PropsType) => {
+const PaginationContyent = ({ postsPerPage, totalPosts, setCurrentPage, setPostPerPage, currentPage,pagesSize=[5,10,20,30,50] }: PropsType) => {
     const { t } = useTranslation();
     const totalPages = Math.ceil(totalPosts / postsPerPage);
     const pageNumbers = [];
@@ -65,15 +66,14 @@ const PaginationContyent = ({ postsPerPage, totalPosts, setCurrentPage, setPostP
         <div className="ml-0 flex items-center justify-between w-full gap-3 mt-5">
 
             <div className="flex items-center gap-2">
-                <Select onValueChange={(value) => setPostPerPage(Number(value))}>
+                <Select
+                    value={String(postsPerPage)}
+                    onValueChange={(value) => setPostPerPage(Number(value))}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={`${postsPerPage} tadan`} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value='5'>5 tadan</SelectItem>
-                        <SelectItem value="10">10 tadan</SelectItem>
-                        <SelectItem value="20">20 tadan</SelectItem>
-                        <SelectItem value="50">50 tadan</SelectItem>
+                        {pagesSize.map((item, idx) =><SelectItem key={idx} value={String(item)}>{item} tadan</SelectItem> )}
                     </SelectContent>
                 </Select>
             </div>
