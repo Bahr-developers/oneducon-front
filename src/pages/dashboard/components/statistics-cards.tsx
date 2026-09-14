@@ -22,9 +22,17 @@ export function StatisticsCards() {
 	const profit = sales - expense
 	// const returns = isUsd ? MOCK_RETURNS_USD : MOCK_RETURNS_UZS
 	const cash = data?.cashOnHand ?? 0
+	const totalCostPrisices = data?.totalCosts?._sum.cost_price ?? 0
 
 	return (
-		<div className='grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4'>
+		<div className='grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5'>
+			<StatCard
+				title='Umumiy summa'
+				value={totalCostPrisices}
+				currency='UZS'
+				icon={ShoppingBag}
+				tone='blue'
+			/>
 			<StatCard
 				title='Jami savdo'
 				value={sales}
