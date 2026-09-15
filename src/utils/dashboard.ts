@@ -67,11 +67,8 @@ export const dashboardUtils = {
 			totalCostPricesUsd: 0,
 			totalSalePrices: 0,
 			totalSalePricesUsd: 0, 
-			totalCosts: {
-				_sum: {
-					cost_price: 0,
-				},
-			},
+			totalCosts: 0,
+			totalCostsUsd: 0
 		}
 	},
 
