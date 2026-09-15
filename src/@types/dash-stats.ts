@@ -42,6 +42,7 @@ export interface StatisticsResponse {
 	totalSalePrices: number
 	totalSalePricesUsd: number
 	totalCosts: number,
+	totalCostsUsd: number
 }
 
 export interface getProductTopSold {
