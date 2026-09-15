@@ -1,4 +1,10 @@
-import { Banknote, ShoppingBag, TrendingUp, Wallet } from 'lucide-react'
+import {
+	Banknote,
+	ShoppingBag,
+	TrendingUp,
+	Wallet,
+	WalletMinimalIcon,
+} from 'lucide-react'
 import { STAT_TRENDS } from '../constants/dashboard.mock'
 import { useDashboardCurrency } from '../hooks/use-dashboard-currency'
 import { useGeneralStats } from '../hooks/use-general-stats'
@@ -22,15 +28,17 @@ export function StatisticsCards() {
 	const profit = sales - expense
 	// const returns = isUsd ? MOCK_RETURNS_USD : MOCK_RETURNS_UZS
 	const cash = data?.cashOnHand ?? 0
-	const totalCostPrisices = data?.totalCosts ?? 0
+	const totalCostPrisices = isUsd
+		? (data?.totalCostsUsd ?? 0)
+		: (data?.totalCosts ?? 0)
 
 	return (
 		<div className='grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-5'>
 			<StatCard
 				title='Umumiy summa'
 				value={totalCostPrisices}
-				currency='UZS'
-				icon={ShoppingBag}
+				currency={currency}
+				icon={WalletMinimalIcon}
 				tone='blue'
 			/>
 			<StatCard
