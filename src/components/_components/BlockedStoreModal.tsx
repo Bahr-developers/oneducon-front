@@ -1,6 +1,5 @@
 import {
     AlertCircle,
-    ArrowRight,
     Phone,
     ShieldAlert,
 } from 'lucide-react'
@@ -24,9 +23,6 @@ export function BlockedStoreModal({
     open,
     onOpenChange,
 }: BlockedStoreModalProps) {
-    const handleContactAdmin = () => {
-        window.open('tel:+998900167700')
-    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
