@@ -9,7 +9,6 @@ export default function DashboardLayout() {
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		// Bu yerda API yoki boshqa ishlar bo‘lishi mumkin
 		const timer = setTimeout(() => {
 			setLoading(false)
 		}, 500) // 2

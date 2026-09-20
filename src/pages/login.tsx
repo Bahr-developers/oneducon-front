@@ -5,10 +5,13 @@ import { useMutation } from '@tanstack/react-query'
 import { authUtils } from '@/utils/auth'
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import axios from 'axios'
+import {BlockedStoreModal} from "@/components/_components/BlockedStoreModal.tsx";
 
 const Login = () => {
 	const navigate = useNavigate()
 	const [showPassword, setShowPassword] = useState(false)
+	const [isBlockedModalOpen, setIsBlockedModalOpen] = useState(false)
 
 	const auth = useMutation({
 		mutationFn: authUtils.authStore,
@@ -19,7 +22,12 @@ const Login = () => {
 			}, 1000)
 		},
 		onError: err => {
-			console.log(err)
+			if (axios.isAxiosError(err)) {
+				if (err.response?.status === 402) {
+					setIsBlockedModalOpen(true)
+					return
+				}
+			}
 			toast.error('Login yoki parolda xatolik ❌ ')
 		},
 	})
@@ -38,6 +46,7 @@ const Login = () => {
 	}
 
 	return (
+		<>
 		<section className='h-screen'>
 			<div className='flex flex-col items-center justify-center px-6 py-5 mx-auto md:h-[85vh] lg:py-0'>
 				<Link
@@ -118,6 +127,11 @@ const Login = () => {
 				</div>
 			</div>
 		</section>
+		<BlockedStoreModal
+			open={isBlockedModalOpen}
+			onOpenChange={setIsBlockedModalOpen}
+		/>
+		</>
 	)
 }
 
