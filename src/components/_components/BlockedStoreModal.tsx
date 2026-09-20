@@ -86,16 +86,6 @@ export function BlockedStoreModal({
                 <DialogFooter className="mt-2 flex-col gap-2 sm:flex-col">
                     <Button
                         type="button"
-                        className="w-full"
-                        onClick={handleContactAdmin}
-                    >
-                        <Phone className="mr-2 h-4 w-4" />
-                        Admin bilan bog‘lanish
-                        <ArrowRight className="ml-auto h-4 w-4" />
-                    </Button>
-
-                    <Button
-                        type="button"
                         variant="ghost"
                         className="w-full"
                         onClick={() => onOpenChange(false)}
