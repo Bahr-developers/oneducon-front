@@ -40,18 +40,22 @@ export function formatCompactMoney(
 	currency: DashboardCurrency = 'UZS',
 ): string {
 	const amount = Number.isFinite(value) ? value : 0
-	const abs = Math.abs(amount)
 
-	if (abs >= 1_000_000_000) {
-		return `${(amount / 1_000_000_000).toFixed(2)} mlrd ${currency}`
-	}
-	if (abs >= 1_000_000) {
-		return `${(amount / 1_000_000).toFixed(1)} mln ${currency}`
-	}
-	if (abs >= 1_000) {
-		return `${(amount / 1_000).toFixed(1)} ming ${currency}`
-	}
-	return formatMoney(amount, currency)
+	const formatted =
+		currency === 'USD'
+			? amount
+				.toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+				})
+				.replace(/,/g, ' ')
+			: Math.trunc(amount)
+				.toLocaleString('en-US')
+				.replace(/,/g, ' ')
+
+	return currency === 'USD'
+		? `${formatted} $`
+		: `${formatted} so‘m`
 }
 
 export function formatTrend(percent: number): string {
