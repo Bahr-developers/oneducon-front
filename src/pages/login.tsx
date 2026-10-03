@@ -58,7 +58,7 @@ const Login = () => {
 
 			toast.success('Muvaffaqiyatli kirildi ✅')
 
-			navigate('/user')
+			navigate('/users')
 		},
 		onError: () => {
 			toast.error('Login yoki parolda xatolik ❌ ')
