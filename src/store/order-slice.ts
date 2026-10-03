@@ -36,7 +36,7 @@ interface OrderState {
 }
 
 const initialState: OrderState = {
-    items: [], // Boshlang'ich holat bo'sh bo'ladi
+    items: [],
     payments: [],
     debt: null,
     totalItemsAmount: 0,

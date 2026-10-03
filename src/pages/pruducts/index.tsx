@@ -18,7 +18,6 @@ const Products = () => {
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 		},
 		onError: err => {
-			console.log('Error callback', err) // Debug
 			const error = err as AxiosError<{ message: string }>
 			toast.error(error.response?.data.message || 'Hatolik mavjud')
 		},

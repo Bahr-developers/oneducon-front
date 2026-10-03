@@ -7,41 +7,84 @@ import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import axios from 'axios'
 import {BlockedStoreModal} from "@/components/_components/BlockedStoreModal.tsx";
+import {useDispatch} from "react-redux";
+import {setAuth} from "@/store/auth-slice.ts";
 
 const Login = () => {
 	const navigate = useNavigate()
 	const [showPassword, setShowPassword] = useState(false)
 	const [isBlockedModalOpen, setIsBlockedModalOpen] = useState(false)
+	const dispatch = useDispatch()
 
 	const auth = useMutation({
 		mutationFn: authUtils.authStore,
-		onSuccess: () => {
+		onSuccess: response => {
+			const { token, store } = response?.data
+			dispatch(
+				setAuth({
+					token,
+					role: 'STORE',
+					store,
+				})
+			)
+
 			toast.success('Muvaffaqiyatli kirildi ✅')
-			setTimeout(() => {
-				navigate('/dashboard')
-			}, 1000)
+
+			navigate('/dashboard')
 		},
 		onError: err => {
 			if (axios.isAxiosError(err)) {
+
 				if (err.response?.status === 402) {
 					setIsBlockedModalOpen(true)
 					return
 				}
 			}
+			console.log(err)
 			toast.error('Login yoki parolda xatolik ❌ ')
 		},
 	})
+	const authUser = useMutation({
+		mutationFn: authUtils.authAdmin,
+		onSuccess: response => {
+			const { token, user } = response?.data
+			dispatch(
+				setAuth({
+					token,
+					role: 'ADMIN',
+					user,
+				})
+			)
 
+			toast.success('Muvaffaqiyatli kirildi ✅')
+
+			navigate('/user')
+		},
+		onError: () => {
+			toast.error('Login yoki parolda xatolik ❌ ')
+		},
+	})
 	const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		const form = e.target as HTMLFormElement
-		try {
-			auth.mutate({
-				email: form.login.value,
-				password: form.password.value,
-			})
-		} catch (err) {
-			console.log(err)
+		if(form.login.value==='abrorbek@onedukon.uz'){
+			try {
+				authUser.mutate({
+					email: form.login.value,
+					password: form.password.value,
+				})
+			} catch (err) {
+				console.log(err)
+			}
+		} else {
+			try {
+				auth.mutate({
+					email: form.login.value,
+					password: form.password.value,
+				})
+			} catch (err) {
+				console.log(err)
+			}
 		}
 	}
 

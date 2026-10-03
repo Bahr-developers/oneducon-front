@@ -167,12 +167,8 @@ const Productstable = () => {
 	})
 
 	const handleBulkDelete = () => {
-		console.log('Tanlangan ID lar:', selectedIds)
 		deleteCheckProduct.mutate(selectedIds)
-		// backendga yuborish uchun:
-		// bulkDeleteMutation.mutate(selectedIds)
 	}
-	console.log(selectedIds)
 
 	return (
 		<div className='mt-4'>

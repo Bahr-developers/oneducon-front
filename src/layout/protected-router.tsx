@@ -1,13 +1,19 @@
 import { Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import type { RootState } from '@/store'
+
+interface ProtectedRouteProps {
+	children: React.ReactNode
+}
 
 export default function ProtectedRoute({
-	children,
-}: {
-	children: React.ReactNode
-}) {
-	const isAuth =
-		Boolean(localStorage.getItem('accessToken')) ||
-		Boolean(localStorage.getItem('refreshToken'))
+										   children,
+									   }: ProtectedRouteProps) {
+	const token = useSelector((state: RootState) => state.auth.token)
 
-	return isAuth ? <>{children}</> : <Navigate to='/' replace />
+	if (!token) {
+		return <Navigate to='/' replace />
+	}
+
+	return <>{children}</>
 }

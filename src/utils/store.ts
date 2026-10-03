@@ -9,6 +9,7 @@ interface storeData {
   user_id: number;
   usd_rate?: number;
   link?: string;
+  is_active?:boolean
 }
 
 
@@ -41,7 +42,7 @@ export const storeUtils = {
     password,
     user_id,
     usd_rate,
-    link,
+    link, is_active,
   }: storeData) => {
     const { data } = await customAxios.patch(`stores/${id}`, {
       name,
@@ -50,8 +51,22 @@ export const storeUtils = {
       user_id,
       usd_rate,
       link,
+      is_active,
     });
     return data;
+  },
+  toggleStoreStatus: async ({
+                              id,
+                              is_active,
+                            }: {
+    id: string
+    is_active: boolean
+  }) => {
+    const { data } = await customAxios.patch(`stores/${id}`, {
+      is_active,
+    })
+
+    return data
   },
   deleteStore: async (id: string) => {
     const { data } = await customAxios.delete(`stores/${id}`);

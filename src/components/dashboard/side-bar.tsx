@@ -198,15 +198,11 @@ export function AppSidebar({
 												</div>
 											</CustomTooltip>
 										)}
-
-										{/* --- TEXT VA BADGE QISMI (Ochiq holatda) --- */}
 										{!collapsed && (
 											<div className='flex-1 flex flex-row items-center justify-between pr-2'>
 												<span className={active ? 'text-[#6A81FF]' : ''}>
 													{t(n.labelKey)}
 												</span>
-
-												{/* Yangi Badge qismi */}
 												{n.isNew && (
 													<span className='bg-green-100 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200 shadow-sm'>
 														NEW
