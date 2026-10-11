@@ -59,6 +59,14 @@ const Products = lazy(
 	() => import('./pages/pruducts')
 )
 
+const Imports = lazy(
+	() => import('./pages/imports')
+)
+
+const ImportDetails = lazy(
+	() => import('./pages/imports/details')
+)
+
 const LowProducts = lazy(
 	() => import('./pages/low-products')
 )
@@ -205,6 +213,24 @@ const router = createBrowserRouter([
 								element: (
 									<SuspenseWrapper>
 										<Products />
+									</SuspenseWrapper>
+								),
+							},
+
+							{
+								path: 'dashboard/imports',
+								element: (
+									<SuspenseWrapper>
+										<Imports />
+									</SuspenseWrapper>
+								),
+							},
+
+							{
+								path: 'dashboard/imports/:id',
+								element: (
+									<SuspenseWrapper>
+										<ImportDetails />
 									</SuspenseWrapper>
 								),
 							},

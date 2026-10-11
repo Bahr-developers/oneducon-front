@@ -1,14 +1,5 @@
-import ExpensesTable from "./expenses-table";
+import ExpensesTable from './expenses-table'
 
-const Expenses = () => {
-    return (
-        <div className="w-full">
-            <div className="flex justify-between items-center mb-1">
-                <h2 className="font-medium text-2xl">Xarajatlar</h2>
-            </div>
-            <ExpensesTable />
-        </div>
-    );
-};
+const Expenses = () => <div className='mx-auto w-full max-w-[1500px] pb-8'><ExpensesTable /></div>
 
-export default Expenses;
+export default Expenses

@@ -1,48 +1,23 @@
-import { DatePicker } from "@/components/functions/date-picer";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { ListFilter } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { DateRangeFields } from '@/components/functions/date-range-fields'
+import { CalendarRange } from 'lucide-react'
 
-
-interface filterExperens {
-    to: Date | undefined,
-    from: Date | undefined,
-    setFrom: (value: Date | undefined) => void,
-    setTo: (value: Date | undefined) => void
+interface FilterExpensesProps {
+	to: Date | undefined
+	from: Date | undefined
+	setFrom: (value: Date | undefined) => void
+	setTo: (value: Date | undefined) => void
 }
 
+const FilterExpenses = ({ from, to, setFrom, setTo }: FilterExpensesProps) => {
+	return (
+		<div className='flex flex-col gap-3 rounded-xl border bg-background p-3 sm:flex-row sm:items-end sm:justify-between'>
+			<div className='flex items-center gap-2 text-sm font-medium'>
+				<div className='flex size-9 items-center justify-center rounded-lg bg-[#EEF1FF] text-[#536BE8] dark:bg-[#6A81FF]/15'><CalendarRange className='size-4' /></div>
+				<div><p>Sana oralig‘i</p><p className='text-xs font-normal text-muted-foreground'>Xarajatlarni davr bo‘yicha ko‘ring</p></div>
+			</div>
+			<DateRangeFields from={from} to={to} onFromChange={setFrom} onToChange={setTo} />
+		</div>
+	)
+}
 
-const FilterExpenses = ({ from, to, setFrom, setTo }: filterExperens) => {
-    const { i18n } = useTranslation()
-
-
-    return (
-        <Dialog>
-            <DialogTrigger className="flex items-center gap-x-2 cursor-pointer border p-2 rounded-sm px-3">  Filter
-                <ListFilter size={20} /></DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Filter</DialogTitle>
-                    <DialogDescription>
-                        Ma'lumotlarni filterlar xaridor,to'lov turi va vaqt bo'yicha
-                    </DialogDescription>
-                    <div className="flex items-center gap-2 my-3 w-full">
-                        <DatePicker date={from} setDate={setFrom} title={i18n.language == 'uz' ? 'dan' : 'от'} startTitle={i18n.language == 'uz' ? 'Boshlang`ich sana' : 'Дата начала'} />
-                        <DatePicker date={to} setDate={setTo} title={i18n.language == 'uz' ? 'gacha' : 'до'} startTitle={i18n.language == 'uz' ? 'Tugash sanasi' : 'Дата окончания'} />
-                    </div>
-                    <Button className="justify-center">Filterlash</Button>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
-    );
-};
-
-export default FilterExpenses;
+export default FilterExpenses

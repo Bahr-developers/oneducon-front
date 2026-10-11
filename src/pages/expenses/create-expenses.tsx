@@ -19,7 +19,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus } from 'lucide-react'
+import { LoaderCircle, Plus, ReceiptText } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ExpensesTypeUtils } from '@/utils/expenses-type'
 import { expensesType } from '@/@types'
@@ -87,22 +87,18 @@ const ExpenseForm: React.FC = () => {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger
-				onClick={() => setOpen(true)}
-				className='flex items-center gap-x-2 border p-2 rounded-sm text-sm cursor-pointer px-2'
-			>
-				Xarajat qo'shish <Plus />
-			</DialogTrigger>
-			<DialogContent className='lg:col-span-2 space-y-6 pb-0'>
-				<DialogHeader>
-					<DialogTitle>Yangi Xarajat Qo'shish</DialogTitle>
+			<DialogTrigger asChild><Button onClick={() => setOpen(true)} className='h-10 bg-[#6A81FF] text-white hover:bg-[#5B70E5]'><Plus /> Xarajat qo‘shish</Button></DialogTrigger>
+			<DialogContent className='overflow-hidden p-0 sm:max-w-[520px]'>
+				<DialogHeader className='border-b bg-muted/25 px-6 py-5'>
+					<div className='mb-1 flex size-10 items-center justify-center rounded-lg bg-[#EEF1FF] text-[#536BE8] dark:bg-[#6A81FF]/15'><ReceiptText className='size-5' /></div>
+					<DialogTitle>Yangi xarajat qo‘shish</DialogTitle>
 					<DialogDescription>
-						Xarajatlaringizni kuzatish uchun yangi xarajat qo'shing
+						Xarajat tafsilotlarini kiriting va jurnalga saqlang.
 					</DialogDescription>
 				</DialogHeader>
 				<form
 					onSubmit={handleSubmit}
-					className='space-y-6 flex flex-col justify-between'
+					className='flex flex-col justify-between space-y-5 px-6 pb-6'
 				>
 					{/* Definition Field */}
 					<div className='space-y-2'>
@@ -115,9 +111,7 @@ const ExpenseForm: React.FC = () => {
 							required
 							className='h-12'
 						/>
-						<p className='text-sm text-muted-foreground'>
-							Xarajatning qisqa tavsifini kiriting
-						</p>
+						<p className='text-xs text-muted-foreground'>Xarajatning qisqa va tushunarli tavsifini yozing.</p>
 					</div>
 					<div className='space-y-2'>
 						<Label htmlFor='price'>Summa (UZS)</Label>
@@ -160,9 +154,7 @@ const ExpenseForm: React.FC = () => {
 							Bekor qilish
 						</Button>
 						<Button disabled={createExpenses.isPending} type='submit'>
-							{createExpenses.isPending
-								? 'Xarajatni ...'
-								: "Xarajatni qo'shish"}
+							{createExpenses.isPending ? <><LoaderCircle className='animate-spin' /> Saqlanmoqda...</> : <><Plus /> Xarajatni qo‘shish</>}
 						</Button>
 					</div>
 				</form>

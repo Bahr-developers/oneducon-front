@@ -53,15 +53,15 @@ export const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className='sm:max-w-[500px]'>
-				<DialogHeader>
+			<DialogContent className='overflow-hidden p-0 sm:max-w-[500px]'>
+				<DialogHeader className='border-b bg-muted/25 px-6 py-5'>
 					<DialogTitle>Xarajatni tahrirlash</DialogTitle>
 					<DialogDescription>
 						Xarajat ma'lumotlarini o'zgartiring va saqlang.
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className='grid gap-4 py-4'>
+				<div className='grid gap-4 px-6 py-2'>
 					<div className='grid gap-2'>
 						<Label htmlFor='definition'>Ta'rif</Label>
 						<Input
@@ -120,7 +120,7 @@ export const EditExpenseModal: React.FC<EditExpenseModalProps> = ({
 					</div>
 				</div>
 
-				<DialogFooter>
+				<DialogFooter className='border-t bg-muted/20 px-6 py-4'>
 					<Button variant='outline' onClick={onClose}>
 						Bekor qilish
 					</Button>

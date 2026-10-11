@@ -12,6 +12,7 @@ import {
 	Users,
 	Combine,
 	Expand,
+	PackagePlus,
 } from 'lucide-react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ScrollArea } from '../ui/scroll-area'
@@ -58,6 +59,11 @@ function useNavItems(): NavItem[] {
 			labelKey: 'Mahsulotlar',
 			href: '/dashboard/products',
 			icon: PackageSearch,
+		},
+		{
+			labelKey: 'Mahsulot kirimi',
+			href: '/dashboard/imports',
+			icon: PackagePlus,
 		},
 		{
 			labelKey: 'Kam qolgan mahsulotlar',
