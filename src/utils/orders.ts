@@ -1,3 +1,4 @@
+import type { OrderDetailsResponse } from '@/@types/order'
 import customAxios from "@/services"
 
 interface OrderItem {
@@ -90,7 +91,7 @@ export const orderUtils = {
   },
 
   getOrderByID: async (id: string) => {
-    const { data } = await customAxios.get(`orders/${id}`);
+    const { data } = await customAxios.get<OrderDetailsResponse>(`orders/${id}`);
     return data;
   },
   getOrdersStats: async (params?: GetOrdersParams) => {

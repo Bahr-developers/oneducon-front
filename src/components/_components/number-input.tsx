@@ -9,6 +9,7 @@ interface NumberInputProps {
 	placeholder?: string
 	className?: string
 	readonly?: boolean
+	disabled?: boolean
 }
 
 const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
@@ -19,6 +20,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 			placeholder = 'Raqam kiriting',
 			className = '',
 			readonly = false,
+			disabled = false,
 			onKeyDown,
 			onFocus,
 		},
@@ -96,6 +98,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 				inputMode='decimal' // Mobil telefonda nuqtali klaviatura chiqishi uchun
 				value={inputValue}
 				readOnly={readonly}
+				disabled={disabled}
 				onChange={handleChange}
 				onKeyDown={onKeyDown}
 				onFocus={onFocus}

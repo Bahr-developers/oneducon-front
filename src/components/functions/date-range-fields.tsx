@@ -12,6 +12,9 @@ interface DateRangeFieldsProps {
 	onFromChange: (date: Date | undefined) => void
 	onToChange: (date: Date | undefined) => void
 	className?: string
+	showClear?: boolean
+	fromPlaceholder?: string
+	toPlaceholder?: string
 }
 
 function formatDisplayDate(date: Date) {
@@ -50,10 +53,10 @@ function DateField({
 						type='button'
 						variant='outline'
 						aria-label={`${label} sanasini tanlash`}
-						className={cn('h-10 w-full justify-start bg-background px-3 text-left font-normal sm:w-[170px]', !value && 'text-muted-foreground')}
+						className={cn('h-11 w-full justify-start bg-background px-3 text-left font-normal sm:w-[170px]', !value && 'text-muted-foreground')}
 					>
 						<CalendarIcon className='text-[#6A81FF]' />
-						{value ? formatDisplayDate(value) : placeholder}
+						<span className='min-w-0 flex-1 truncate'>{value ? formatDisplayDate(value) : placeholder}</span>
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent align='end' className='w-auto p-0'>
@@ -76,14 +79,23 @@ function DateField({
 	)
 }
 
-export function DateRangeFields({ from, to, onFromChange, onToChange, className }: DateRangeFieldsProps) {
+export function DateRangeFields({
+	from,
+	to,
+	onFromChange,
+	onToChange,
+	className,
+	showClear = true,
+	fromPlaceholder = 'Boshlanish sanasi',
+	toPlaceholder = 'Tugash sanasi',
+}: DateRangeFieldsProps) {
 	const hasValue = Boolean(from || to)
 
 	return (
 		<div className={cn('flex flex-col gap-2 sm:flex-row sm:items-end', className)}>
 			<DateField
 				label='Dan'
-				placeholder='Boshlanish sanasi'
+				placeholder={fromPlaceholder}
 				value={from}
 				onChange={date => {
 					onFromChange(date)
@@ -93,12 +105,12 @@ export function DateRangeFields({ from, to, onFromChange, onToChange, className 
 			/>
 			<DateField
 				label='Gacha'
-				placeholder='Tugash sanasi'
+				placeholder={toPlaceholder}
 				value={to}
 				onChange={onToChange}
 				disabled={date => Boolean(from && dayValue(date) < dayValue(from))}
 			/>
-			{hasValue && (
+			{showClear && hasValue && (
 				<Button
 					type='button'
 					variant='ghost'
@@ -106,7 +118,7 @@ export function DateRangeFields({ from, to, onFromChange, onToChange, className 
 						onFromChange(undefined)
 						onToChange(undefined)
 					}}
-					className='h-10 text-muted-foreground hover:text-foreground'
+					className='h-11 text-muted-foreground hover:text-foreground'
 				>
 					<X /> Tozalash
 				</Button>

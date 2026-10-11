@@ -43,6 +43,10 @@ const SelersPage = lazy(
 	() => import('./pages/sales')
 )
 
+const SaleDetails = lazy(
+	() => import('./pages/sales/details')
+)
+
 const Expenses = lazy(
 	() => import('./pages/expenses')
 )
@@ -57,6 +61,10 @@ const DebtsHistore = lazy(
 
 const Products = lazy(
 	() => import('./pages/pruducts')
+)
+
+const ProductDetails = lazy(
+	() => import('./pages/pruducts/details')
 )
 
 const Imports = lazy(
@@ -182,6 +190,15 @@ const router = createBrowserRouter([
 							},
 
 							{
+								path: 'dashboard/selers/:id',
+								element: (
+									<SuspenseWrapper>
+										<SaleDetails />
+									</SuspenseWrapper>
+								),
+							},
+
+							{
 								path: 'dashboard/expenses',
 								element: (
 									<SuspenseWrapper>
@@ -213,6 +230,15 @@ const router = createBrowserRouter([
 								element: (
 									<SuspenseWrapper>
 										<Products />
+									</SuspenseWrapper>
+								),
+							},
+
+							{
+								path: 'dashboard/products/:id',
+								element: (
+									<SuspenseWrapper>
+										<ProductDetails />
 									</SuspenseWrapper>
 								),
 							},

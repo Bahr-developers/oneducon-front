@@ -27,12 +27,12 @@ import NumberInput from '@/components/_components/number-input'
 
 interface EditProductProps {
 	product: product
+	showLabel?: boolean
 }
 
-const EditProduct = ({ product }: EditProductProps) => {
+const EditProduct = ({ product, showLabel = false }: EditProductProps) => {
 	const [open, setOpen] = useState(false)
 	const [barcode, setBarcode] = useState(product?.barcode || '')
-	const [wholesalePriceUZS, setWholesalePriceUZS] = useState(0)
 	const [data, setData] = useState({
 		name: product?.name,
 		count: product?.quantity ?? 0,
@@ -64,6 +64,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 		onSuccess: data => {
 			toast.success(data?.message)
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
+			queryClient.invalidateQueries({ queryKey: ['product-details', product.id] })
 			setOpen(false)
 		},
 		onError: err => {
@@ -87,7 +88,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 			sale_price_usd: Number(data?.saler_narxi_dol),
 			usd_rate: Number(data?.usd_rate),
 			barcode,
-			wholesale_price: wholesalePriceUZS ? wholesalePriceUZS : null,
+			wholesale_price: data.wholesale_price ? Number(data.wholesale_price) : null,
 		})
 	}
 
@@ -171,13 +172,15 @@ const EditProduct = ({ product }: EditProductProps) => {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger className='flex items-center gap-x-2 cursor-pointer'>
-				<Pencil size={20} />
+			<DialogTrigger asChild>
+				<Button variant='outline' size={showLabel ? 'default' : 'icon'} aria-label={showLabel ? undefined : 'Mahsulotni tahrirlash'}>
+					<Pencil /> {showLabel && 'Tahrirlash'}
+				</Button>
 			</DialogTrigger>
 
 			<DialogContent w='md:w-[900px]'>
 				<DialogHeader>
-					<DialogTitle>Edit Product</DialogTitle>
+					<DialogTitle>Mahsulotni tahrirlash</DialogTitle>
 					<div className='grid grid-cols-2 gap-4'>
 						<label className='flex flex-col space-y-1'>
 							<span>Nomi</span>
@@ -195,6 +198,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 							<span>Miqdori</span>
 							<NumberInput
 								value={data?.count}
+								disabled
 								className='h-12'
 								onChange={({ raw }) =>
 									setData(prev => ({ ...prev, count: raw }))
@@ -282,7 +286,7 @@ const EditProduct = ({ product }: EditProductProps) => {
 									value={data?.wholesale_price}
 									className='h-12 pr-10'
 									placeholder='Masalan: 5 000 000'
-									onChange={({ raw }) => setWholesalePriceUZS(raw)}
+									onChange={({ raw }) => setData(prev => ({ ...prev, wholesale_price: raw }))}
 								/>
 							</div>
 						</label>

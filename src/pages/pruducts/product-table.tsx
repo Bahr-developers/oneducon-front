@@ -14,14 +14,12 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import EditProsucts from './edit-products'
 import { Input } from '@/components/ui/input'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
 import { categoryType, product } from '@/@types'
 import { categoryUtils } from '@/utils/categories'
-import ProductView from './product-view'
-import { Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -35,6 +33,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState } from '@/store'
 import { setPostsPerPage } from '@/store/paginationSlice.ts'
+import { Link } from 'react-router-dom'
 
 const Productstable = () => {
 	const { updateURL, getParam } = useQueryParams()
@@ -119,17 +118,6 @@ const Productstable = () => {
 		}
 	}
 
-	const deleteProduct = useMutation({
-		mutationFn: productUtils?.deleteProduct,
-		onSuccess: () => {
-			toast.success("Mahsulot o'chirildi.")
-			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
-			setSelectedIds(prev => prev.filter(id => !currentPageIds.includes(id)))
-		},
-		onError: err => {
-			console.log(err)
-		},
-	})
 	const deleteCheckProduct = useMutation({
 		mutationFn: productUtils.deleteBulk,
 		onSuccess: () => {
@@ -269,7 +257,7 @@ const Productstable = () => {
 								<TableHead className='font-semibold'>Miqdori</TableHead>
 								<TableHead className='font-semibold'>O&apos;lchov</TableHead>
 								<TableHead className='text-center font-semibold'>
-									Amallar
+									Batafsil
 								</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -329,13 +317,11 @@ const Productstable = () => {
 											{el?.unit?.name}
 										</TableCell>
 										<TableCell className='text-right'>
-											<div className='flex gap-x-4 justify-center items-center'>
-												<EditProsucts product={el} />
-												<ProductView {...el} />
-												<DeleteConfirm
-													onConfirm={() => deleteProduct.mutate(el?.id)}
-												/>
-											</div>
+											<Button variant='ghost' size='sm' asChild className='text-[#536BE8] hover:bg-[#EEF1FF] hover:text-[#4359C5] dark:hover:bg-[#6A81FF]/15'>
+												<Link to={`/dashboard/products/${el.id}`}>
+													Ko‘rish <ChevronRight />
+												</Link>
+											</Button>
 										</TableCell>
 									</TableRow>
 								))}

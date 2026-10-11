@@ -1,3 +1,4 @@
+import type { InventoryMovementsResponse, ProductDetailsResponse } from '@/@types/products'
 import customAxios from "@/services"
 
 interface productData {
@@ -26,6 +27,12 @@ interface getParams {
 interface exportFile {
     categoryId?: string | null,
     search?: string
+}
+
+interface inventoryMovementParams {
+    id: string
+    page?: number
+    limit?: number
 }
 
 export const productUtils = {
@@ -65,7 +72,17 @@ export const productUtils = {
         return data
     },
     getProductByID: async (id: string) => {
-        const { data } = await customAxios.get(`products/${id}`)
+        const { data } = await customAxios.get<ProductDetailsResponse>(`products/${id}`)
+        return data
+    },
+    getInventoryMovements: async ({ id, page, limit }: inventoryMovementParams) => {
+        const params = new URLSearchParams()
+        if (page) params.set('page', String(page))
+        if (limit) params.set('limit', String(limit))
+
+        const { data } = await customAxios.get<InventoryMovementsResponse>(
+            `products/${id}/inventory-movements?${params.toString()}`,
+        )
         return data
     },
     postProduct: async (product: productData) => {

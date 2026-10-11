@@ -1,12 +1,7 @@
+import type { client, paymentType } from '@/@types'
+import { DateRangeFields } from '@/components/functions/date-range-fields'
 import { Button } from '@/components/ui/button'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
 	Select,
 	SelectContent,
@@ -14,13 +9,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
-import { client, paymentType } from '@/@types'
 import { customerUtils } from '@/utils/customer'
 import { paymentUtils } from '@/utils/payment-type'
 import { useQuery } from '@tanstack/react-query'
-import { ListFilter } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import DatePickerSingle from '@/components/functions/DatePicerSingle'
+import { Search, X } from 'lucide-react'
 
 interface PropsFilter {
 	setFrom: (date: Date | undefined) => void
@@ -31,6 +23,10 @@ interface PropsFilter {
 	setClient: (value: string) => void
 	paymentType: string
 	setPaymentType: (value: string) => void
+	hasActiveFilter: boolean
+	onClear: () => void
+	searchQuery: string
+	setSearchQuery: (value: string) => void
 }
 
 const FilterData = ({
@@ -42,9 +38,11 @@ const FilterData = ({
 	setClient,
 	paymentType,
 	setPaymentType,
+	hasActiveFilter,
+	onClear,
+	searchQuery,
+	setSearchQuery,
 }: PropsFilter) => {
-	const [open, setOpen] = useState(false)
-
 	const { data: customers } = useQuery<{ data: client[] }>({
 		queryKey: ['customers'],
 		queryFn: customerUtils.getCustomerAll,
@@ -55,122 +53,55 @@ const FilterData = ({
 		queryFn: paymentUtils.getPayments,
 	})
 
-	const hasActiveFilter = useMemo(() => {
-		return !!from || !!to || !!client || !!paymentType
-	}, [from, to, client, paymentType])
-
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant='outline' className='flex items-center gap-x-2'>
-					Filter
-					<ListFilter size={18} />
-				</Button>
-			</DialogTrigger>
-
-			<DialogContent className='sm:max-w-[520px]'>
-				<DialogHeader>
-					<DialogTitle>Filter</DialogTitle>
-					<DialogDescription>
-						Ma&apos;lumotlarni xaridor, to&apos;lov turi va vaqt bo&apos;yicha
-						filterlang
-					</DialogDescription>
-				</DialogHeader>
-
-				<div className='w-full flex flex-col gap-y-4 py-4'>
-					<div className='flex items-center w-full justify-between gap-x-4'>
-						<div className='w-full space-y-1'>
-							<span className='text-sm font-medium'>Xaridor</span>
-							<Select
-								value={client || undefined}
-								onValueChange={value => setClient(value)}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue placeholder='Xaridor' />
-								</SelectTrigger>
-								<SelectContent className='z-[70]'>
-									<SelectItem value='all'>Barchasi</SelectItem>
-									{customers?.data?.map(item => (
-										<SelectItem key={item.id} value={String(item.id)}>
-											{item.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className='w-full space-y-1'>
-							<span className='text-sm font-medium'>To&apos;lov turi</span>
-							<Select
-								value={paymentType || undefined}
-								onValueChange={value => setPaymentType(value)}
-							>
-								<SelectTrigger className='w-full'>
-									<SelectValue placeholder="To'lov turi" />
-								</SelectTrigger>
-								<SelectContent className='z-[70]'>
-									<SelectItem value='all'>Barchasi</SelectItem>
-									{paymentTypes?.data?.map(type => (
-										<SelectItem key={type.id} value={String(type.id)}>
-											{type.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</div>
-
-					<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-						<div className='space-y-1'>
-							<span className='text-sm font-medium'>Boshlanish sanasi</span>
-							{/* <Input
-								type='date'
-								value={toInputDateValue(from)}
-								onChange={e => setFrom(fromInputDateValue(e.target.value))}
-							/> */}
-							<DatePickerSingle
-								value={from}
-								onChange={date => {
-									if (date) setFrom(date)
-								}}
-							/>
-						</div>
-
-						<div className='space-y-1'>
-							<span className='text-sm font-medium'>Tugash sanasi</span>
-							{/* <Input
-								type='date'
-								value={toInputDateValue(to)}
-								onChange={e => setTo(fromInputDateValue(e.target.value))}
-							/> */}
-							<DatePickerSingle
-								value={to}
-								onChange={date => {
-									if (date) setTo(date)
-								}}
-							/>
-						</div>
-					</div>
-
-					<div className='flex justify-end gap-2 pt-2'>
-						<Button
-							variant='outline'
-							onClick={() => {
-								setClient('')
-								setPaymentType('')
-								setFrom(undefined)
-								setTo(undefined)
-							}}
-							className={hasActiveFilter ? '' : 'hidden'}
-						>
-							Tozalash
-						</Button>
-
-						<Button onClick={() => setOpen(false)}>Yopish</Button>
-					</div>
+		<div className='grid grid-cols-1 items-end gap-3 sm:grid-cols-2 xl:flex xl:flex-nowrap'>
+			<div className='min-w-0 space-y-1.5 sm:col-span-2 xl:col-auto xl:min-w-[240px] xl:flex-[1.4]'>
+				<label htmlFor='sales-search' className='block text-xs text-muted-foreground'>Qidirish</label>
+				<div className='relative'>
+					<Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
+					<Input id='sales-search' type='search' placeholder='Buyurtma yoki xaridor...' className='h-11 bg-background pl-10' value={searchQuery} onChange={event => setSearchQuery(event.target.value)} />
 				</div>
-			</DialogContent>
-		</Dialog>
+			</div>
+
+			<div className='min-w-0 space-y-1.5 xl:w-[170px] xl:shrink-0'>
+				<label className='block text-xs text-muted-foreground'>Xaridor</label>
+				<Select value={client || 'all'} onValueChange={value => setClient(value === 'all' ? '' : value)}>
+					<SelectTrigger className='h-11 w-full data-[size=default]:h-11'><SelectValue placeholder='Barcha xaridorlar' /></SelectTrigger>
+					<SelectContent>
+						<SelectItem value='all'>Barcha xaridorlar</SelectItem>
+						{customers?.data?.map(item => <SelectItem key={item.id} value={String(item.id)}>{item.name}</SelectItem>)}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<div className='min-w-0 space-y-1.5 xl:w-[170px] xl:shrink-0'>
+				<label className='block text-xs text-muted-foreground'>To‘lov turi</label>
+				<Select value={paymentType || 'all'} onValueChange={value => setPaymentType(value === 'all' ? '' : value)}>
+					<SelectTrigger className='h-11 w-full data-[size=default]:h-11'><SelectValue placeholder='Barcha to‘lovlar' /></SelectTrigger>
+					<SelectContent>
+						<SelectItem value='all'>Barcha to‘lovlar</SelectItem>
+						{paymentTypes?.data?.map(type => <SelectItem key={type.id} value={String(type.id)}>{type.name}</SelectItem>)}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<DateRangeFields
+				from={from}
+				to={to}
+				onFromChange={setFrom}
+				onToChange={setTo}
+				showClear={false}
+				fromPlaceholder='Sana tanlang'
+				toPlaceholder='Sana tanlang'
+				className='sm:col-span-2 sm:[&>div]:flex-1 sm:[&_button]:w-full xl:col-auto xl:w-[312px] xl:shrink-0 xl:[&>div]:w-[152px]'
+			/>
+
+			{hasActiveFilter && (
+				<Button type='button' variant='outline' onClick={onClear} className='h-11 sm:col-span-2 xl:col-auto xl:shrink-0'>
+					<X /> Tozalash
+				</Button>
+			)}
+		</div>
 	)
 }
 

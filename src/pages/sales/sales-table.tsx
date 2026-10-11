@@ -1,4 +1,3 @@
-import { Input } from '@/components/ui/input'
 import {
 	Table,
 	TableBody,
@@ -8,14 +7,13 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { HandCoins, Search } from 'lucide-react'
+import { ChevronRight, HandCoins } from 'lucide-react'
 import FilterData from './filter-data'
 import { useQuery } from '@tanstack/react-query'
 import { orderUtils } from '@/utils/orders'
 import { order } from '@/@types'
 import PaginationContyent from '@/components/_components/pagination'
 import { useEffect, useMemo, useState } from 'react'
-import ViewSale from './view-sale'
 import { useQueryParams } from '@/hooks/query-params'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Badge } from '@/components/ui/badge'
@@ -24,17 +22,24 @@ import { formatLocalDate } from '@/components/functions/format-locale-date'
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState } from '@/store'
 import { setPostsPerPage } from '@/store/paginationSlice.ts'
+import { Link } from 'react-router-dom'
+
+function parseDateParam(value: string) {
+	if (!value) return undefined
+	const [year, month, day] = value.split('-').map(Number)
+	if (!year || !month || !day) return undefined
+	return new Date(year, month - 1, day)
+}
+
 const SalesTable = () => {
 	const { updateURL, getParam } = useQueryParams()
 	const dispatch = useDispatch()
 	const [from, setFrom] = useState<Date | undefined>(() => {
-		const value = getParam('from', '')
-		return value ? new Date(value) : undefined
+		return parseDateParam(getParam('from', ''))
 	})
 
 	const [to, setTo] = useState<Date | undefined>(() => {
-		const value = getParam('to', '')
-		return value ? new Date(value) : undefined
+		return parseDateParam(getParam('to', ''))
 	})
 
 	const [client, setClient] = useState<string>(() => getParam('client', ''))
@@ -142,42 +147,25 @@ const SalesTable = () => {
 	const paginated = sales?.data
 
 	const isFilterActive =
-		!!from || !!to || !!client || !!paymentType || !!debouncedSearch
+		!!from || !!to || !!client || !!paymentType || !!searchQuery
 
 	return (
 		<div className='mt-10'>
-			<div className='flex justify-between items-center gap-3 mb-5 flex-wrap'>
-				<div className='relative flex-1 min-w-[300px] max-w-[450px]'>
-					<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-					<Input
-						type='search'
-						placeholder='Qidirish...'
-						className='pl-10 h-11 bg-background'
-						value={searchQuery}
-						onChange={e => setSearchQuery(e.target.value)}
-					/>
-				</div>
-
-				<div className='flex justify-center gap-2.5'>
-					<FilterData
-						from={from}
-						setFrom={setFrom}
-						to={to}
-						setTo={setTo}
-						client={client}
-						setClient={setClient}
-						paymentType={paymentType}
-						setPaymentType={setPaymentType}
-					/>
-
-					<Button
-						variant='outline'
-						className={isFilterActive ? '' : 'hidden'}
-						onClick={resetFilter}
-					>
-						Filterni tozalash
-					</Button>
-				</div>
+			<div className='mb-5 rounded-xl border bg-background p-3'>
+				<FilterData
+					from={from}
+					setFrom={setFrom}
+					to={to}
+					setTo={setTo}
+					client={client}
+					setClient={setClient}
+					paymentType={paymentType}
+					setPaymentType={setPaymentType}
+					hasActiveFilter={isFilterActive}
+					onClear={resetFilter}
+					searchQuery={searchQuery}
+					setSearchQuery={setSearchQuery}
+				/>
 			</div>
 
 			<div className='border rounded-xl overflow-hidden bg-card'>
@@ -185,7 +173,7 @@ const SalesTable = () => {
 					<TableHeader>
 						<TableRow className='bg-muted/50 hover:bg-muted/50 border-b'>
 							<TableHead className='w-[100px] font-semibold'>№</TableHead>
-							<TableHead className='font-semibold'>Mahsulotlar(3)</TableHead>
+							<TableHead className='font-semibold'>Mahsulotlar</TableHead>
 							<TableHead className='font-semibold'>Xaridor</TableHead>
 							<TableHead className='font-semibold'>Umumiy narxi</TableHead>
 							<TableHead className='font-semibold'>
@@ -194,7 +182,7 @@ const SalesTable = () => {
 							<TableHead className='font-semibold'>Qarzdorlik narxi</TableHead>
 							<TableHead className='font-semibold'>Yaratilgan sana</TableHead>
 							<TableHead className='text-center font-semibold'>
-								Amallar
+								Batafsil
 							</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -279,13 +267,9 @@ const SalesTable = () => {
 										</TableCell>
 
 										<TableCell className='text-right'>
-											<div className='flex gap-x-2 justify-center items-center'>
-												<ViewSale {...el} />
-												<Button variant='outline' size='sm' className='gap-2'>
-													Sotish
-													<HandCoins className='h-4 w-4' />
-												</Button>
-											</div>
+											<Button variant='ghost' size='sm' asChild className='text-[#536BE8] hover:bg-[#EEF1FF] hover:text-[#4359C5] dark:hover:bg-[#6A81FF]/15'>
+												<Link to={`/dashboard/selers/${el.id}`}>Ko‘rish <ChevronRight /></Link>
+											</Button>
 										</TableCell>
 									</TableRow>
 								)
