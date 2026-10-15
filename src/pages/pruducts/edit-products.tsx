@@ -198,7 +198,6 @@ const EditProduct = ({ product, showLabel = false }: EditProductProps) => {
 							<span>Miqdori</span>
 							<NumberInput
 								value={data?.count}
-								disabled
 								className='h-12'
 								onChange={({ raw }) =>
 									setData(prev => ({ ...prev, count: raw }))
