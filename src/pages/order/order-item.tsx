@@ -4,27 +4,17 @@ import { X } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { useAppDispatch } from '@/store/hooks'
 import { updateOrderItem, removeOrderItem } from '@/store/order-slice'
-import { product } from '@/@types'
+import type { OrderItem as OrderItemData } from '@/store/order-slice'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
 interface OrderItemProps {
-	item: {
-		id: string
-		product: product
-		count: number
-		discount: number
-		price: number
-	}
+	item: OrderItemData
 	constPrice: boolean
 }
 
 const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const dispatch = useAppDispatch()
-	const [discountMode, setDiscountMode] = useState<'amount' | 'percent'>(
-		'amount',
-	)
-
 	const [localCount, setLocalCount] = useState(item.count.toString())
 
 	// Har bir item uchun alohida switch holati
@@ -57,14 +47,17 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 			dispatch(
 				updateOrderItem({
 					id: item.id,
-					updates: { price: selectedPrice },
+					updates: {
+						price: selectedPrice,
+						discount: Math.min(item.discount, selectedPrice),
+					},
 				}),
 			)
 		}
-	}, [dispatch, item.id, item.price, selectedPrice])
+	}, [dispatch, item.id, item.price, item.discount, selectedPrice])
 
 	const handleCountChange = (value: string) => {
-		let normalizedValue = value.replace(',', '.')
+		const normalizedValue = value.replace(',', '.')
 
 		setLocalCount(normalizedValue)
 
@@ -91,7 +84,7 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	}
 
 	const handleBlur = () => {
-		let currentVal = Number(localCount.replace(',', '.'))
+		const currentVal = Number(localCount.replace(',', '.'))
 
 		if (!currentVal || currentVal <= 0) {
 			setLocalCount('1')
@@ -106,23 +99,19 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 		}
 	}
 
-	const handleDiscountChange = (val: { raw: number }) => {
-		const enteredValue = Number(val?.raw ?? 0)
-		if (isNaN(enteredValue)) return
+	const subtotal = item.price * item.count
+	const totalPrice = (item.price - item.discount) * item.count
 
-		let discountValue = 0
+	const handleTotalPriceChange = ({ raw: enteredTotal }: { raw: number }) => {
+		if (!Number.isFinite(enteredTotal) || item.count <= 0) return
 
-		if (discountMode === 'percent') {
-			const safePercent = Math.min(100, Math.max(0, enteredValue))
-			discountValue = (selectedPrice * safePercent) / 100
-		} else {
-			discountValue = Math.min(selectedPrice, Math.max(0, enteredValue))
-		}
+		const finalTotal = Math.min(subtotal, Math.max(0, enteredTotal))
+		const discountPerItem = (subtotal - finalTotal) / item.count
 
 		dispatch(
 			updateOrderItem({
 				id: item.id,
-				updates: { discount: discountValue },
+				updates: { discount: discountPerItem },
 			}),
 		)
 	}
@@ -134,13 +123,6 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 	const handleToggle = (checked: boolean) => {
 		setUseAltPrice(checked)
 	}
-
-	const totalPrice = (item.price - item.discount) * item.count
-
-	const discountInputValue =
-		discountMode === 'percent' && item.price > 0
-			? (item.discount / item.price) * 100
-			: item.discount
 
 	return (
 		<div className='group relative w-full flex flex-col md:flex-row items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all duration-200 pt-5'>
@@ -217,41 +199,22 @@ const OrderItem = ({ item, constPrice }: OrderItemProps) => {
 				</div>
 
 				<div className='flex flex-col gap-1.5'>
-					<label className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'>
-						Chegirma
+					<label
+						htmlFor={`final-total-${item.id}`}
+						className='text-[10px] uppercase font-bold text-muted-foreground tracking-wider ml-1'
+					>
+						Chegirmadan keyingi summa
 					</label>
-					<div className='flex items-center gap-1'>
-						<NumberInput
-							value={discountInputValue}
-							onChange={handleDiscountChange}
-							placeholder='0'
-							className='w-24 h-9 text-right pr-3 font-medium'
-						/>
-						<div className='flex h-9 rounded-md border overflow-hidden'>
-							<button
-								type='button'
-								onClick={() => setDiscountMode('percent')}
-								className={`px-2 text-xs font-semibold transition-colors ${
-									discountMode === 'percent'
-										? 'bg-primary text-primary-foreground'
-										: 'bg-background text-muted-foreground hover:bg-muted'
-								}`}
-							>
-								%
-							</button>
-							<button
-								type='button'
-								onClick={() => setDiscountMode('amount')}
-								className={`px-2 text-xs font-semibold transition-colors ${
-									discountMode === 'amount'
-										? 'bg-primary text-primary-foreground'
-										: 'bg-background text-muted-foreground hover:bg-muted'
-								}`}
-							>
-								UZS
-							</button>
-						</div>
-					</div>
+					<NumberInput
+						id={`final-total-${item.id}`}
+						value={Number(totalPrice.toFixed(2))}
+						onChange={handleTotalPriceChange}
+						onFocus={event => event.target.select()}
+						max={subtotal}
+						disabled={item.count <= 0}
+						placeholder='0'
+						className='w-36 h-9 text-right pr-3 font-medium'
+					/>
 				</div>
 			</div>
 

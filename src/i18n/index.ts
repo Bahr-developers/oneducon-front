@@ -1,7 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-// JSON fayllarni to‘g‘ri yuklash (Agar `resolveJsonModule` yoqilgan bo‘lsa)
 import enJSON from "../locales/en.json";
 import ruJSON from "../locales/ru.json";
 import uzJSON from "../locales/uz.json";

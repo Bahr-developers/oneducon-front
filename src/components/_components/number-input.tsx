@@ -2,6 +2,8 @@ import React, { useState, useEffect, forwardRef } from 'react'
 import { Input } from '../ui/input'
 
 interface NumberInputProps {
+	id?: string
+	max?: number
 	value?: number
 	onChange?: (data: { formatted: string; raw: number }) => void
 	onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
@@ -15,6 +17,8 @@ interface NumberInputProps {
 const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 	(
 		{
+			id,
+			max,
 			value,
 			onChange,
 			placeholder = 'Raqam kiriting',
@@ -78,6 +82,10 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 				return // 2 xonadan oshsa yozdirmaymiz
 			}
 
+			if (max !== undefined && Number(raw) > max) {
+				raw = max.toString()
+			}
+
 			// 4. Ekranga chiqarish uchun formatlaymiz
 			const formatted = formatNumber(raw)
 			setInputValue(formatted)
@@ -94,6 +102,7 @@ const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
 		return (
 			<Input
 				ref={ref}
+				id={id}
 				type='text'
 				inputMode='decimal' // Mobil telefonda nuqtali klaviatura chiqishi uchun
 				value={inputValue}
