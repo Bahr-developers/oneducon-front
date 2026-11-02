@@ -27,9 +27,12 @@ import { Link } from 'react-router-dom'
 import { ProductSearch } from './product-search'
 
 const integerPattern = /^\d+$/
+const decimalPattern = /^\d*\.?\d*$/
 
-function optionalInteger(value: string) {
-	return value === '' || (integerPattern.test(value) && Number(value) >= 0)
+function isNonNegativePrice(value: string, decimal = false) {
+	const number = Number(value)
+	return value !== '' && Number.isFinite(number) && number >= 0 &&
+		(decimal ? decimalPattern.test(value) : Number.isSafeInteger(number) && integerPattern.test(value))
 }
 
 function getErrorMessage(error: unknown) {
@@ -68,12 +71,14 @@ export default function ImportsPage() {
 	const validationError = useMemo(() => {
 		if (items.length === 0) return 'Kamida bitta mahsulot tanlang'
 		for (const item of items) {
-			if (!integerPattern.test(item.quantity) || Number(item.quantity) <= 0)
+			if (!integerPattern.test(item.quantity) || !Number.isSafeInteger(Number(item.quantity)) || Number(item.quantity) <= 0)
 				return `${item.product.name}: miqdor musbat butun son bo‘lishi kerak`
-			if (!optionalInteger(item.costPrice) || item.costPrice === '')
+			if (!isNonNegativePrice(item.costPrice))
 				return `${item.product.name}: tannarx 0 yoki undan katta butun son bo‘lishi kerak`
-			if (!optionalInteger(item.salePrice) || !optionalInteger(item.wholesalePrice))
+			if (!isNonNegativePrice(item.salePrice) || !isNonNegativePrice(item.wholesalePrice))
 				return `${item.product.name}: narxlar 0 yoki undan katta butun son bo‘lishi kerak`
+			if (!isNonNegativePrice(item.costPriceUsd, true) || !isNonNegativePrice(item.salePriceUsd, true))
+				return `${item.product.name}: USD narxlari 0 yoki undan katta son bo‘lishi kerak`
 		}
 		if (note.length > 1000) return 'Izoh 1000 belgidan oshmasligi kerak'
 		return null
@@ -102,23 +107,26 @@ export default function ImportsPage() {
 				quantity: '1',
 				costPrice: String(selected.cost_price ?? 0),
 				salePrice: String(selected.sale_price ?? 0),
-				wholesalePrice:
-					selected.wholesale_price === null || selected.wholesale_price === undefined
-						? ''
-						: String(selected.wholesale_price),
+				costPriceUsd: String(selected.cost_price_usd ?? 0),
+				salePriceUsd: String(selected.sale_price_usd ?? 0),
+				wholesalePrice: String(selected.wholesale_price ?? selected.cost_price ?? 0),
 			},
 		])
 	}
 
 	const updateItem = (id: string, field: keyof Omit<ImportItemDraft, 'product'>, value: string) => {
+		const decimal = field === 'costPriceUsd' || field === 'salePriceUsd'
+		const normalizedValue = decimal ? value.replace(',', '.') : value
+		if (!(decimal ? decimalPattern : /^\d*$/).test(normalizedValue)) return
 		setItems(current =>
 			current.map(item =>
-				item.product.id === id ? { ...item, [field]: value.replace(/\D/g, '') } : item,
+				item.product.id === id ? { ...item, [field]: normalizedValue } : item,
 			),
 		)
 	}
 
 	const submit = () => {
+		if (createImport.isPending) return
 		if (validationError) {
 			toast.error(validationError)
 			return
@@ -128,17 +136,12 @@ export default function ImportsPage() {
 				productId: Number(item.product.id),
 				quantity: Number(item.quantity),
 				costPrice: Number(item.costPrice),
-				...(item.salePrice !== '' && Number(item.salePrice) !== Number(item.product.sale_price)
-					? { salePrice: Number(item.salePrice) }
-					: {}),
-				...(item.wholesalePrice !== '' &&
-				(item.product.wholesale_price === null ||
-					item.product.wholesale_price === undefined ||
-					Number(item.wholesalePrice) !== Number(item.product.wholesale_price))
-					? { wholesalePrice: Number(item.wholesalePrice) }
-					: {}),
+				salePrice: Number(item.salePrice),
+				costPriceUsd: Number(item.costPriceUsd),
+				salePriceUsd: Number(item.salePriceUsd),
+				wholesalePrice: Number(item.wholesalePrice),
 			})),
-			...(note.trim() ? { note: note.trim() } : {}),
+			note: note.trim(),
 		}
 		createImport.mutate(payload)
 	}
@@ -187,8 +190,8 @@ export default function ImportsPage() {
 										<span>Mahsulot</span>
 										<span>Miqdor *</span>
 										<span>Tannarx *</span>
-										<span>Sotuv narxi</span>
-										<span>Ulgurji narx</span>
+										<span>Sotuv narxi *</span>
+										<span>Ulgurji narx (UZS) *</span>
 										<span className='text-right'>Qator jami</span>
 										<span />
 									</div>
@@ -205,9 +208,15 @@ export default function ImportsPage() {
 											</div>
 										</div>
 										<NumberField ariaLabel={`${item.product.name} miqdori`} value={item.quantity} onChange={value => updateItem(item.product.id, 'quantity', value)} />
-										<NumberField ariaLabel={`${item.product.name} tannarxi`} value={item.costPrice} onChange={value => updateItem(item.product.id, 'costPrice', value)} />
-										<NumberField ariaLabel={`${item.product.name} sotuv narxi`} value={item.salePrice} onChange={value => updateItem(item.product.id, 'salePrice', value)} changed={Number(item.salePrice) !== Number(item.product.sale_price)} />
-										<NumberField ariaLabel={`${item.product.name} ulgurji narxi`} placeholder='Belgilanmagan' value={item.wholesalePrice} onChange={value => updateItem(item.product.id, 'wholesalePrice', value)} changed={item.wholesalePrice !== '' && Number(item.wholesalePrice) !== Number(item.product.wholesale_price)} />
+										<div className='space-y-2'>
+											<NumberField ariaLabel={`${item.product.name} tannarxi (UZS)`} currency='UZS' value={item.costPrice} onChange={value => updateItem(item.product.id, 'costPrice', value)} />
+											<NumberField ariaLabel={`${item.product.name} tannarxi (USD)`} currency='USD' value={item.costPriceUsd} onChange={value => updateItem(item.product.id, 'costPriceUsd', value)} changed={Number(item.costPriceUsd) !== Number(item.product.cost_price_usd ?? 0)} />
+										</div>
+										<div className='space-y-2'>
+											<NumberField ariaLabel={`${item.product.name} sotuv narxi (UZS)`} currency='UZS' value={item.salePrice} onChange={value => updateItem(item.product.id, 'salePrice', value)} changed={Number(item.salePrice) !== Number(item.product.sale_price)} />
+											<NumberField ariaLabel={`${item.product.name} sotuv narxi (USD)`} currency='USD' value={item.salePriceUsd} onChange={value => updateItem(item.product.id, 'salePriceUsd', value)} changed={Number(item.salePriceUsd) !== Number(item.product.sale_price_usd ?? 0)} />
+										</div>
+										<NumberField ariaLabel={`${item.product.name} ulgurji narxi`} value={item.wholesalePrice} onChange={value => updateItem(item.product.id, 'wholesalePrice', value)} changed={Number(item.wholesalePrice) !== Number(item.product.wholesale_price)} />
 										<div className='text-right text-sm font-medium tabular-nums'>{formatPrice(Number(item.quantity || 0) * Number(item.costPrice || 0))}</div>
 										<Button type='button' variant='ghost' size='icon' aria-label={`${item.product.name}ni olib tashlash`} onClick={() => setItems(current => current.filter(row => row.product.id !== item.product.id))} className='text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30'>
 											<Trash2 />
@@ -283,9 +292,26 @@ export default function ImportsPage() {
 	)
 }
 
-function NumberField({ value, onChange, placeholder, ariaLabel, changed = false }: { value: string; onChange: (value: string) => void; placeholder?: string; ariaLabel: string; changed?: boolean }) {
+interface NumberFieldProps {
+	value: string
+	onChange: (value: string) => void
+	ariaLabel: string
+	currency?: 'UZS' | 'USD'
+	changed?: boolean
+}
+
+function NumberField({ value, onChange, ariaLabel, currency, changed = false }: NumberFieldProps) {
 	return (
-		<Input aria-label={ariaLabel} inputMode='numeric' value={value} onChange={event => onChange(event.target.value)} placeholder={placeholder} className={changed ? 'h-10 border-[#6A81FF] bg-[#F5F7FF] text-sm dark:bg-[#6A81FF]/10' : 'h-10 text-sm'} />
+		<div className='relative'>
+			<Input
+				aria-label={ariaLabel}
+				inputMode={currency === 'USD' ? 'decimal' : 'numeric'}
+				value={value}
+				onChange={event => onChange(event.target.value)}
+				className={`h-10 text-sm ${currency ? 'pr-12' : ''} ${changed ? 'border-[#6A81FF] bg-[#F5F7FF] dark:bg-[#6A81FF]/10' : ''}`}
+			/>
+			{currency && <span aria-hidden='true' className='pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground'>{currency}</span>}
+		</div>
 	)
 }
 

@@ -5,6 +5,8 @@ export interface ImportItemDraft {
 	quantity: string
 	costPrice: string
 	salePrice: string
+	costPriceUsd: string
+	salePriceUsd: string
 	wholesalePrice: string
 }
 
@@ -23,13 +25,15 @@ export interface CreateImportItem {
 	productId: number
 	quantity: number
 	costPrice: number
-	salePrice?: number
-	wholesalePrice?: number
+	salePrice: number
+	costPriceUsd: number
+	salePriceUsd: number
+	wholesalePrice: number
 }
 
 export interface CreateImportPayload {
 	items: CreateImportItem[]
-	note?: string
+	note: string
 }
 
 export interface ImportHistoryItem {
