@@ -3,6 +3,7 @@ import type { product } from './index'
 export interface ImportItemDraft {
 	product: product
 	quantity: string
+	usdRate: string
 	costPrice: string
 	salePrice: string
 	costPriceUsd: string
@@ -22,6 +23,7 @@ export interface ImportDetailItem {
 }
 
 export interface CreateImportItem {
+	usd_rate: number
 	productId: number
 	quantity: number
 	costPrice: number

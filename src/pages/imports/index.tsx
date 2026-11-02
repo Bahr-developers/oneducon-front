@@ -29,6 +29,41 @@ import { ProductSearch } from './product-search'
 const integerPattern = /^\d+$/
 const decimalPattern = /^\d*\.?\d*$/
 
+type ImportItemField = keyof Omit<ImportItemDraft, 'product'>
+
+function convertPrice(value: string, rate: number, currency: 'UZS' | 'USD') {
+	if (value === '' || !Number.isFinite(Number(value))) return ''
+	const converted = currency === 'UZS'
+		? Math.round(Number(value) * rate)
+		: Math.round((Number(value) / rate) * 100) / 100
+	return Number.isFinite(converted) ? String(converted) : ''
+}
+
+function updateImportItem(item: ImportItemDraft, field: ImportItemField, value: string): ImportItemDraft {
+	const updated = { ...item, [field]: value }
+	const rate = Number(updated.usdRate)
+	if (!Number.isFinite(rate) || rate <= 0) return updated
+
+	switch (field) {
+		case 'usdRate':
+			return {
+				...updated,
+				costPrice: convertPrice(updated.costPriceUsd, rate, 'UZS'),
+				salePrice: convertPrice(updated.salePriceUsd, rate, 'UZS'),
+			}
+		case 'costPrice':
+			return { ...updated, costPriceUsd: convertPrice(value, rate, 'USD') }
+		case 'costPriceUsd':
+			return { ...updated, costPrice: convertPrice(value, rate, 'UZS') }
+		case 'salePrice':
+			return { ...updated, salePriceUsd: convertPrice(value, rate, 'USD') }
+		case 'salePriceUsd':
+			return { ...updated, salePrice: convertPrice(value, rate, 'UZS') }
+		default:
+			return updated
+	}
+}
+
 function isNonNegativePrice(value: string, decimal = false) {
 	const number = Number(value)
 	return value !== '' && Number.isFinite(number) && number >= 0 &&
@@ -71,6 +106,8 @@ export default function ImportsPage() {
 	const validationError = useMemo(() => {
 		if (items.length === 0) return 'Kamida bitta mahsulot tanlang'
 		for (const item of items) {
+			if (!isNonNegativePrice(item.usdRate, true) || Number(item.usdRate) <= 0)
+				return `${item.product.name}: USD kursi 0 dan katta son bo‘lishi kerak`
 			if (!integerPattern.test(item.quantity) || !Number.isSafeInteger(Number(item.quantity)) || Number(item.quantity) <= 0)
 				return `${item.product.name}: miqdor musbat butun son bo‘lishi kerak`
 			if (!isNonNegativePrice(item.costPrice))
@@ -105,6 +142,7 @@ export default function ImportsPage() {
 			{
 				product: selected,
 				quantity: '1',
+				usdRate: selected.usd_rate > 0 ? String(selected.usd_rate) : '',
 				costPrice: String(selected.cost_price ?? 0),
 				salePrice: String(selected.sale_price ?? 0),
 				costPriceUsd: String(selected.cost_price_usd ?? 0),
@@ -114,13 +152,13 @@ export default function ImportsPage() {
 		])
 	}
 
-	const updateItem = (id: string, field: keyof Omit<ImportItemDraft, 'product'>, value: string) => {
-		const decimal = field === 'costPriceUsd' || field === 'salePriceUsd'
+	const updateItem = (id: string, field: ImportItemField, value: string) => {
+		const decimal = field === 'costPriceUsd' || field === 'salePriceUsd' || field === 'usdRate'
 		const normalizedValue = decimal ? value.replace(',', '.') : value
 		if (!(decimal ? decimalPattern : /^\d*$/).test(normalizedValue)) return
 		setItems(current =>
 			current.map(item =>
-				item.product.id === id ? { ...item, [field]: normalizedValue } : item,
+				item.product.id === id ? updateImportItem(item, field, normalizedValue) : item,
 			),
 		)
 	}
@@ -133,6 +171,7 @@ export default function ImportsPage() {
 		}
 		const payload: CreateImportPayload = {
 			items: items.map(item => ({
+				usd_rate: Number(item.usdRate),
 				productId: Number(item.product.id),
 				quantity: Number(item.quantity),
 				costPrice: Number(item.costPrice),
@@ -185,10 +224,11 @@ export default function ImportsPage() {
 							</div>
 						) : (
 							<div className='overflow-x-auto'>
-								<div className='min-w-[1080px]'>
-									<div className='grid grid-cols-[minmax(210px,1.5fr)_100px_140px_140px_140px_150px_42px] gap-3 border-b bg-muted/20 px-4 py-2.5 text-xs font-medium text-muted-foreground'>
+								<div className='min-w-[1240px]'>
+									<div className='grid grid-cols-[minmax(210px,1.5fr)_100px_140px_140px_140px_140px_150px_42px] gap-3 border-b bg-muted/20 px-4 py-2.5 text-xs font-medium text-muted-foreground'>
 										<span>Mahsulot</span>
 										<span>Miqdor *</span>
+										<span>USD kursi (UZS) *</span>
 										<span>Tannarx *</span>
 										<span>Sotuv narxi *</span>
 										<span>Ulgurji narx (UZS) *</span>
@@ -197,7 +237,7 @@ export default function ImportsPage() {
 									</div>
 									<div className='divide-y'>
 								{items.map((item, index) => (
-									<div key={item.product.id} className='grid grid-cols-[minmax(210px,1.5fr)_100px_140px_140px_140px_150px_42px] items-center gap-3 px-4 py-3'>
+									<div key={item.product.id} className='grid grid-cols-[minmax(210px,1.5fr)_100px_140px_140px_140px_140px_150px_42px] items-center gap-3 px-4 py-3'>
 										<div className='min-w-0'>
 											<div className='flex items-start gap-3'>
 												<span className='flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#EEF1FF] text-sm font-medium text-[#536BE8] dark:bg-[#6A81FF]/15'>{index + 1}</span>
@@ -208,6 +248,7 @@ export default function ImportsPage() {
 											</div>
 										</div>
 										<NumberField ariaLabel={`${item.product.name} miqdori`} value={item.quantity} onChange={value => updateItem(item.product.id, 'quantity', value)} />
+										<NumberField ariaLabel={`${item.product.name} USD kursi`} decimal value={item.usdRate} onChange={value => updateItem(item.product.id, 'usdRate', value)} changed={Number(item.usdRate) !== Number(item.product.usd_rate)} />
 										<div className='space-y-2'>
 											<NumberField ariaLabel={`${item.product.name} tannarxi (UZS)`} currency='UZS' value={item.costPrice} onChange={value => updateItem(item.product.id, 'costPrice', value)} />
 											<NumberField ariaLabel={`${item.product.name} tannarxi (USD)`} currency='USD' value={item.costPriceUsd} onChange={value => updateItem(item.product.id, 'costPriceUsd', value)} changed={Number(item.costPriceUsd) !== Number(item.product.cost_price_usd ?? 0)} />
@@ -297,15 +338,16 @@ interface NumberFieldProps {
 	onChange: (value: string) => void
 	ariaLabel: string
 	currency?: 'UZS' | 'USD'
+	decimal?: boolean
 	changed?: boolean
 }
 
-function NumberField({ value, onChange, ariaLabel, currency, changed = false }: NumberFieldProps) {
+function NumberField({ value, onChange, ariaLabel, currency, decimal = currency === 'USD', changed = false }: NumberFieldProps) {
 	return (
 		<div className='relative'>
 			<Input
 				aria-label={ariaLabel}
-				inputMode={currency === 'USD' ? 'decimal' : 'numeric'}
+				inputMode={decimal ? 'decimal' : 'numeric'}
 				value={value}
 				onChange={event => onChange(event.target.value)}
 				className={`h-10 text-sm ${currency ? 'pr-12' : ''} ${changed ? 'border-[#6A81FF] bg-[#F5F7FF] dark:bg-[#6A81FF]/10' : ''}`}
