@@ -20,7 +20,7 @@ export interface Payment {
 
 export interface Debt {
     price: number;
-    return_time: string;
+    return_time?: string;
     reminder: string;
     client_id: number;
 }

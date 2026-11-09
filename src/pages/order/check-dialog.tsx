@@ -28,7 +28,7 @@ export interface ReceiptPayment {
 
 export interface ReceiptDebt {
 	price: number
-	return_time: string
+	return_time?: string
 	reminder?: string
 	client_id: number
 }
@@ -530,10 +530,12 @@ const ReceiptPreviewModal = ({
 														<span>{formatMoney(debt.price)} UZS</span>
 													</div>
 
-													<div className='flex justify-between gap-2'>
-														<span>Qaytarish sanasi:</span>
-														<span>{formatShortDate(debt.return_time)}</span>
-													</div>
+													{debt.return_time && (
+														<div className='flex justify-between gap-2'>
+															<span>Qaytarish sanasi:</span>
+															<span>{formatShortDate(debt.return_time)}</span>
+														</div>
+													)}
 
 													{debt.reminder && (
 														<div className='flex justify-between gap-2'>

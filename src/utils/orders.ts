@@ -15,7 +15,7 @@ interface PaymentItem {
 
 interface DebtItem {
     price: number
-    return_time: string
+    return_time?: string
     reminder: string
     client_id: number
 }
@@ -111,10 +111,6 @@ export const orderUtils = {
       payments: order.payments.map((p) => ({
         ...p,
         payment_type_id: Number(p.payment_type_id), // raqamga aylantiramiz
-      })),
-      debts: order.debts.map((d) => ({
-        ...d,
-        return_time: d.return_time,
       })),
     };
     const { data } = await customAxios.post("orders", formattedOrder);

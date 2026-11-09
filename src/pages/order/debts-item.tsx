@@ -41,7 +41,7 @@ const DebtsItem = ({
 			dispatch(
 				setDebt({
 					price: remainingDebt,
-					return_time: returnTime?.toISOString() || '',
+					...(returnTime && { return_time: returnTime.toISOString() }),
 					reminder: reminder,
 					client_id: Number(selectedUser?.id),
 				}),
@@ -143,7 +143,7 @@ const DebtsItem = ({
 					<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
 						<div className='space-y-1.5'>
 							<label className='text-xs font-medium text-muted-foreground ml-1 flex items-center gap-1'>
-								<Calendar className='w-3.5 h-3.5' /> Qaytarish vaqti
+								<Calendar className='w-3.5 h-3.5' /> Qaytarish vaqti (ixtiyoriy)
 							</label>
 							<div className='bg-background rounded-md border overflow-hidden'>
 								<DatePicker

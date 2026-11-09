@@ -142,13 +142,11 @@ export default function OrderProducts() {
 	const handleSaveOrder = () => {
 		const finalOrderData = {
 			...orderData,
-			// debts ichidagi return_time undefined bo'lib qolmasligi uchun kerak bo'lsa shu yerda normalize qilsa bo'ladi
 			debts:
 				debt && debt?.price > 0 && remainingDebt > 0
 					? [
 							{
 								...debt,
-								return_time: debt?.return_time,
 								reminder,
 								client_id: debt?.client_id || Number(selectedUser?.id),
 							},
@@ -262,7 +260,7 @@ export default function OrderProducts() {
 							<div className='mt-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg'>
 								<p className='text-sm text-yellow-800 dark:text-yellow-200'>
 									⚠️ Diqqat: {remainingDebt?.toLocaleString()} UZS qarz
-									qolmoqda. Qaytarish vaqtini belgilashni unutmang!
+									qolmoqda.
 								</p>
 							</div>
 						)}
@@ -314,7 +312,7 @@ export default function OrderProducts() {
 							disabled={
 								items?.length === 0 ||
 								items.every(i => !i.product) ||
-								(hasDebt && (!selectedUser || !returnTime)) ||
+								(hasDebt && !selectedUser) ||
 								createOrder.isPending
 							}
 						>
