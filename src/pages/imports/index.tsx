@@ -123,7 +123,7 @@ export default function ImportsPage() {
 
 	const createImport = useMutation({
 		mutationFn: (payload: CreateImportPayload) => importUtils.create(payload),
-		onSuccess: response => {
+		onSuccess: (response, payload) => {
 			toast.success(`Kirim saqlandi: ${formatPrice(response.data.total_price)}`)
 			setItems([])
 			setNote('')
@@ -131,6 +131,11 @@ export default function ImportsPage() {
 			queryClient.invalidateQueries({ queryKey: ['imports-history'] })
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 			queryClient.invalidateQueries({ queryKey: ['import-product-search'] })
+			for (const item of payload.items) {
+				const id = String(item.productId)
+				queryClient.invalidateQueries({ queryKey: ['product-details', id] })
+				queryClient.invalidateQueries({ queryKey: ['product-inventory-movements', id] })
+			}
 		},
 		onError: error => toast.error(getErrorMessage(error)),
 	})

@@ -13,9 +13,15 @@ const Products = () => {
 			const result = await productUtils.postProductImport(formData)
 			return result
 		},
-		onSuccess: () => {
-			toast.success('Fayl yuklandi')
+		onSuccess: response => {
+			if (response.results.failed > 0) {
+				toast.error(response.message)
+			} else {
+				toast.success(response.message)
+			}
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
+			queryClient.invalidateQueries({ queryKey: ['product-details'] })
+			queryClient.invalidateQueries({ queryKey: ['product-inventory-movements'] })
 		},
 		onError: err => {
 			const error = err as AxiosError<{ message: string }>

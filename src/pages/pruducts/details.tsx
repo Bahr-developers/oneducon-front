@@ -138,7 +138,7 @@ export default function ProductDetailsPage() {
 						<p className='mt-2 flex items-center gap-2 text-sm text-muted-foreground'><Barcode className='size-4' /> {product.barcode || 'Shtrix-kod belgilanmagan'}</p>
 					</div>
 					<div className='flex flex-wrap gap-2'>
-						<EditProduct product={product} showLabel />
+						<EditProduct key={product.id} product={product} showLabel />
 						<DeleteConfirm title='O‘chirish' variant='outline' onConfirm={() => deleteProduct.mutate(product.id)} />
 					</div>
 				</div>

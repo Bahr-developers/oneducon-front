@@ -18,6 +18,11 @@ interface productData {
     wholesale_price: number| null
 }
 
+type ProductPatch = Partial<Omit<productData, 'id' | 'store_id'>> & {
+    id: string
+    expected_quantity?: number
+}
+
 interface getParams {
     limit?: number,
     page?: number,
@@ -93,7 +98,7 @@ export const productUtils = {
         const { data } = await customAxios.post(`products/import`, file)
         return data
     },
-    patchProduct: async (product: productData) => {
+    patchProduct: async (product: ProductPatch) => {
         const { id, ...rest } = product
         const { data } = await customAxios.patch(`products/${id}`, rest)
         return data
