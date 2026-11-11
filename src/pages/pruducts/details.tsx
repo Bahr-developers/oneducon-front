@@ -36,6 +36,8 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import EditProduct from './edit-products'
+import { useAppDispatch } from '@/store/hooks'
+import { deselectProducts, updateSelectedLabels } from '@/store/product-selection-slice'
 
 function positiveInteger(value: string, fallback: number) {
 	const parsed = Number(value)
@@ -72,6 +74,7 @@ export default function ProductDetailsPage() {
 	const { id = '' } = useParams()
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
+	const dispatch = useAppDispatch()
 	const { getParam, updateURL } = useQueryParams()
 	const [page, setPage] = useState(() => positiveInteger(getParam('page'), 1))
 	const [limit, setLimit] = useState(() => positiveInteger(getParam('limit'), 20))
@@ -93,8 +96,9 @@ export default function ProductDetailsPage() {
 
 	const deleteProduct = useMutation({
 		mutationFn: productUtils.deleteProduct,
-		onSuccess: () => {
+		onSuccess: (_, productId) => {
 			toast.success("Mahsulot o‘chirildi")
+			dispatch(deselectProducts([productId]))
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 			navigate('/dashboard/products')
 		},
@@ -138,7 +142,12 @@ export default function ProductDetailsPage() {
 						<p className='mt-2 flex items-center gap-2 text-sm text-muted-foreground'><Barcode className='size-4' /> {product.barcode || 'Shtrix-kod belgilanmagan'}</p>
 					</div>
 					<div className='flex flex-wrap gap-2'>
-						<EditProduct key={product.id} product={product} showLabel />
+						<EditProduct
+							key={product.id}
+							product={product}
+							showLabel
+							onSaved={changes => dispatch(updateSelectedLabels([changes]))}
+						/>
 						<DeleteConfirm title='O‘chirish' variant='outline' onConfirm={() => deleteProduct.mutate(product.id)} />
 					</div>
 				</div>

@@ -29,14 +29,14 @@ const item: product = {
 
 const patchProduct = vi.mocked(productUtils.patchProduct)
 
-function openEditor() {
+function openEditor(initialProduct = item) {
 	const queryClient = new QueryClient()
 	const editor = (product: product) => (
 		<QueryClientProvider client={queryClient}>
 			<EditProduct product={product} showLabel />
 		</QueryClientProvider>
 	)
-	const view = render(editor(item))
+	const view = render(editor(initialProduct))
 	fireEvent.click(screen.getByRole('button', { name: 'Tahrirlash' }))
 	return { refreshProduct: (product: product) => view.rerender(editor(product)) }
 }
@@ -44,6 +44,35 @@ function openEditor() {
 afterEach(() => {
 	cleanup()
 	vi.resetAllMocks()
+})
+
+describe('Product barcode edits', () => {
+	it('generates and saves a 12-digit barcode for an empty field', async () => {
+		patchProduct.mockResolvedValueOnce({ message: 'yangilandi' })
+		openEditor()
+		const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Barcode' })
+		const generator = screen.getByRole('button', { name: '12 raqamli barcode yaratish' })
+
+		fireEvent.click(generator)
+		const barcode = input.value
+		expect(barcode).toMatch(/^\d{12}$/)
+		expect(input).toHaveFocus()
+		expect(generator).not.toBeInTheDocument()
+		expect(patchProduct).not.toHaveBeenCalled()
+
+		fireEvent.click(screen.getByRole('button', { name: 'Saqlash' }))
+		await waitFor(() => expect(patchProduct).toHaveBeenCalledWith({ id: item.id, barcode }))
+	})
+
+	it('keeps an existing barcode and shows the generator when the field is cleared', () => {
+		openEditor({ ...item, barcode: '0123456789012' })
+		const input = screen.getByRole('textbox', { name: 'Barcode' })
+		expect(input).toHaveValue('0123456789012')
+		expect(screen.queryByRole('button', { name: '12 raqamli barcode yaratish' })).toBeNull()
+
+		fireEvent.change(input, { target: { value: '' } })
+		expect(screen.getByRole('button', { name: '12 raqamli barcode yaratish' })).toBeVisible()
+	})
 })
 
 describe('Product stock edits', () => {

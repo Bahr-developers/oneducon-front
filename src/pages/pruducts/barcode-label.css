@@ -1,0 +1,58 @@
+.barcode-label {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	gap: var(--label-gap);
+	width: var(--label-width);
+	height: var(--label-height);
+	padding: var(--label-padding);
+	margin: 0;
+	background: #fff;
+	color: #000;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: center;
+}
+
+.barcode-label__name {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--label-name-lines);
+	overflow: hidden;
+	overflow-wrap: anywhere;
+	margin: 0;
+	font-size: var(--label-font-size);
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.barcode-label__symbol {
+	display: block;
+	justify-self: center;
+	height: 100%;
+	max-width: 100%;
+	min-height: 0;
+	color: #000;
+}
+
+.barcode-label__value {
+	margin: 0;
+	font-family: monospace;
+	line-height: 1.15;
+	white-space: pre;
+}
+
+.barcode-print-document {
+	margin: 0;
+	padding: 0;
+	background: #fff;
+}
+
+@media print {
+	.barcode-print-document .barcode-label {
+		break-inside: avoid;
+	}
+
+	.barcode-print-document .barcode-label + .barcode-label {
+		break-before: page;
+	}
+}

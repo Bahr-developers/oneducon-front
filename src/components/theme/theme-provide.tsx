@@ -27,26 +27,31 @@ export function ThemeProvider({
 	storageKey = 'vite-ui-theme',
 	...props
 }: ThemeProviderProps) {
-	const [theme, setTheme] = useState<Theme>(
-		() => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
-	)
+	const [theme, setTheme] = useState<Theme>(() => {
+		const savedTheme = localStorage.getItem(storageKey)
+		return savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
+			? savedTheme
+			: defaultTheme
+	})
 
 	useEffect(() => {
-		const root = window.document.documentElement
+		const root = document.documentElement
+		const applyTheme = (resolvedTheme: 'light' | 'dark') => {
+			root.classList.toggle('light', resolvedTheme === 'light')
+			root.classList.toggle('dark', resolvedTheme === 'dark')
+			root.style.colorScheme = resolvedTheme
+		}
 
-		root.classList.remove('light', 'dark')
-		localStorage.setItem('mammm', 'aaaaa')
-		if (theme === 'system') {
-			const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-				.matches
-				? 'dark'
-				: 'light'
-
-			root.classList.add(systemTheme)
+		if (theme !== 'system') {
+			applyTheme(theme)
 			return
 		}
 
-		root.classList.add(theme)
+		const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+		const syncWithSystem = () => applyTheme(systemTheme.matches ? 'dark' : 'light')
+		syncWithSystem()
+		systemTheme.addEventListener('change', syncWithSystem)
+		return () => systemTheme.removeEventListener('change', syncWithSystem)
 	}, [theme])
 
 	const value = {

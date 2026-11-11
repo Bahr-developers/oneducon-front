@@ -8,7 +8,7 @@ import { Provider } from 'react-redux'
 import { it, expect, vi } from 'vitest'
 import OrderProducts from '.'
 
-vi.mock('@/services', () => ({ default: { post: vi.fn() } }))
+vi.mock('@/services', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 vi.mock('@/utils/payment-type', () => ({
 	paymentUtils: { getPayments: async () => ({ data: [] }) },
 }))
@@ -21,10 +21,24 @@ vi.mock('react-i18next', () => ({
 	useTranslation: () => ({ i18n: { language: 'uz' }, t: (key: string) => key }),
 }))
 
-it('saves a credit sale once a customer is selected without requiring a return date', async () => {
+it('saves a credit sale without a return date and opens the store receipt', async () => {
 	const store = configureStore({ reducer: { order: orderReducer } })
 	const queryClient = new QueryClient()
-	vi.mocked(customAxios.post).mockResolvedValueOnce({ data: { success: true } })
+	vi.mocked(customAxios.get).mockResolvedValueOnce({
+		data: { success: true, data: { name: 'Test do‘kon' } },
+	})
+	vi.mocked(customAxios.post).mockResolvedValueOnce({
+		data: {
+			success: true,
+			data: {
+				id: '20',
+				order_number: 57,
+				created_at: '2026-11-11T07:15:00.000Z',
+				store_id: '1',
+				items: [{ product_id: 10, count: 1, price: 10000, discount: 0, name: 'Saqlangan mahsulot' }],
+			},
+		},
+	})
 
 	const item: product = {
 		id: '10', name: 'Test mahsulot', store_id: '1', quantity: 10,
@@ -50,11 +64,20 @@ it('saves a credit sale once a customer is selected without requiring a return d
 	fireEvent.change(screen.getByPlaceholderText('Mijozni qidiring...'), { target: { value: 'Test' } })
 	fireEvent.click(await screen.findByText('Test mijoz'))
 	expect(save).toBeEnabled()
-	fireEvent.click(screen.getByRole('checkbox', { name: /Chek chiqarish/ }))
 	fireEvent.click(save)
 
 	await waitFor(() => expect(customAxios.post).toHaveBeenCalledWith('orders', expect.objectContaining({
 		client_id: 3,
 		debts: [{ client_id: 3, price: 10000, reminder: '' }],
 	})))
+	const receiptDialog = await screen.findByRole('dialog', { name: 'Sotuv cheki' })
+	expect(receiptDialog).toBeVisible()
+	expect(await screen.findByText('Test do‘kon')).toBeVisible()
+	expect(customAxios.get).toHaveBeenCalledWith('stores/1')
+	expect(screen.queryByText('Adukon')).not.toBeInTheDocument()
+	expect(receiptDialog.querySelector('img')).toBeNull()
+	expect(screen.getByText('Saqlangan mahsulot')).toBeVisible()
+	expect(screen.getByText('57')).toBeVisible()
+	expect(screen.getByText('Qarz summasi')).toBeVisible()
+	expect(screen.getByRole('button', { name: 'Chop etish' })).toBeEnabled()
 })

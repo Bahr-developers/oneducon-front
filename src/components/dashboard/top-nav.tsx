@@ -6,7 +6,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '../ui/sheet'
-import { AppSidebar } from './side-bar'
+import { AdminSidebar } from './admin-side-bar'
 import { Profile } from '../menu/profile'
 import { ModeToggle } from '../menu/mode-toggle'
 import { Link } from 'react-router-dom'
@@ -33,7 +33,7 @@ export function TopNav() {
 							className='w-[280px] p-0 sm:max-w-[280px]'
 						>
 							<SheetTitle className='sr-only'>Navigatsiya</SheetTitle>
-							<AppSidebar
+								<AdminSidebar
 								collapsed={false}
 								onToggle={() => {}}
 								mobile

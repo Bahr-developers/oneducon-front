@@ -88,6 +88,9 @@ const authSlice = createSlice({
             localStorage.removeItem('role')
             localStorage.removeItem('user')
             localStorage.removeItem('store')
+            localStorage.removeItem('storeId')
+            localStorage.removeItem('usd_rate')
+            localStorage.removeItem('created_at')
         },
     },
 })

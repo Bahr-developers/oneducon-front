@@ -70,7 +70,7 @@ export function AdminSidebar({
                     <div className='flex items-center gap-3 justify-center'>
                         {!collapsed && (
                             <Link
-                                to={'/dashboard'}
+                                to='/users'
                                 onClick={onNavigate}
                                 className='text-start font-bold text-[#6A81FF] flex items-center gap-2'
                             >

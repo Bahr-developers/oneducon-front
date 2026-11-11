@@ -1,48 +1,98 @@
+import { ChevronsUpDown, LogOut, Settings, UserRound } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Link, useMatch, useNavigate } from 'react-router-dom'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import sel from '@/assets/svg/language-select.svg'
-import logout from '@/assets/svg/logout.svg'
-import { Avatar, AvatarImage } from '../ui/avatar'
-import { NavigateFunction, NavLink, useNavigate } from 'react-router-dom'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import AvatarImg from '@/assets/svg/user.svg'
-const handleLogout = (navigate: NavigateFunction) => {
-	localStorage.removeItem('accessToken')
-	localStorage.removeItem('refreshToken')
-	navigate('/')
-}
+import { cn } from '@/lib/utils'
+import { logout } from '@/store/auth-slice'
+import { useAppDispatch } from '@/store/hooks'
 
-export function Profile() {
+const profilePath = '/dashboard/profile'
+
+export function Profile({
+	placement = 'header',
+	onNavigate,
+}: {
+	placement?: 'header' | 'sidebar' | 'collapsed-sidebar'
+	onNavigate?: () => void
+}) {
 	const navigate = useNavigate()
+	const dispatch = useAppDispatch()
+	const queryClient = useQueryClient()
+	const profileActive = !!useMatch(profilePath)
+	const inSidebar = placement !== 'header'
+	const collapsed = placement === 'collapsed-sidebar'
+
+	const handleLogout = () => {
+		onNavigate?.()
+		dispatch(logout())
+		queryClient.clear()
+		navigate('/', { replace: true })
+	}
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger className='outline-none focus:outline-none flex justify-between items-center gap-3'>
-				<Avatar>
-					<div className=' w-10 h-10 rounded-full bg-[#F4F4F4] flex items-center justify-center'>
-						<AvatarImage className='' src={AvatarImg} alt='' />
-					</div>
-				</Avatar>
+		<DropdownMenu modal={!inSidebar}>
+			<DropdownMenuTrigger
+				aria-label='Profil menyusi'
+				title={collapsed ? 'Profil' : undefined}
+				className={cn(
+					'cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring',
+					inSidebar &&
+						'flex min-h-11 w-full items-center gap-2.5 px-2.5 text-left text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent',
+					collapsed && 'justify-center px-0',
+					inSidebar && profileActive && 'bg-sidebar-accent',
+				)}
+			>
+				{inSidebar ? (
+					<>
+						<span className='flex size-8 shrink-0 items-center justify-center rounded-md bg-[#536BE8]/12 text-[#4056C8] dark:text-[#A6B2FF]'>
+							<UserRound className='size-4' aria-hidden='true' />
+						</span>
+						{!collapsed && (
+							<>
+								<span className='flex-1'>Profil</span>
+								<ChevronsUpDown className='size-4 text-muted-foreground' aria-hidden='true' />
+							</>
+						)}
+					</>
+				) : (
+					<Avatar className='bg-[#F4F4F4]'>
+						<AvatarImage src={AvatarImg} alt='' />
+					</Avatar>
+				)}
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className='flex flex-col items-start py-3.5 px-3 justify-end'>
-				<DropdownMenuItem asChild className='flex items-center w-full'>
-					<NavLink
-						to={`/dashboard/profile`}
-						className='flex items-center w-full'
-					>
-						<span className='flex-1 text-left'>Profil</span>
-						<img className='-rotate-90 w-2 h-2' src={sel} alt='sel image' />
-					</NavLink>
+			<DropdownMenuContent
+				side={collapsed ? 'right' : inSidebar ? 'top' : 'bottom'}
+				align={placement === 'sidebar' ? 'start' : 'end'}
+				sideOffset={8}
+				collisionPadding={8}
+				className='w-52 motion-reduce:animate-none'
+			>
+				<DropdownMenuItem asChild>
+					<Link to={profilePath} onClick={onNavigate}>
+						<UserRound aria-hidden='true' />
+						Profil
+					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem
-					className='flex items-center w-full'
-					onClick={() => handleLogout(navigate)}
-				>
-					<span className='flex-1 text-left'>Chiqish</span>
-					<img className='w-4 h-3.5' src={logout} alt='logout image' />
+				{inSidebar && (
+					<DropdownMenuItem asChild>
+						<Link to={`${profilePath}?activeTab=settings`} onClick={onNavigate}>
+							<Settings aria-hidden='true' />
+							Sozlamalar
+						</Link>
+					</DropdownMenuItem>
+				)}
+				<DropdownMenuSeparator />
+				<DropdownMenuItem variant='destructive' onSelect={handleLogout}>
+					<LogOut aria-hidden='true' />
+					Chiqish
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

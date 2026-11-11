@@ -17,10 +17,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { productUtils } from '@/utils/products'
-import { categoryType, product } from '@/@types'
+import type { categoryType, product } from '@/@types'
 import { categoryUtils } from '@/utils/categories'
 import { ChevronRight, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PaginationContyent from '@/components/_components/pagination'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useQueryParams } from '@/hooks/query-params'
@@ -30,21 +30,28 @@ import { DeleteConfirm } from '@/components/ui/alerd-dialog'
 import { Button } from '@/components/ui/button'
 import { AxiosError } from 'axios'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useDispatch, useSelector } from 'react-redux'
-import type { RootState } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import {
+	clearProductSelection,
+	deselectProducts,
+	selectProducts,
+	updateSelectedLabels,
+} from '@/store/product-selection-slice'
 import { setPostsPerPage } from '@/store/paginationSlice.ts'
 import { Link } from 'react-router-dom'
+import BarcodePrintDialog from './barcode-print-dialog'
 
 const Productstable = () => {
-	const { updateURL, getParam } = useQueryParams()
+	const { updateURL, getParam, searchParams } = useQueryParams()
 	const queryClient = useQueryClient()
-	const dispatch = useDispatch()
-	const postsPerPage = useSelector(
-		(state: RootState) => state.pagination.postsPerPage,
-	)
-	const [currentPage, setCurrentPage] = useState<number>(() =>
-		parseInt(getParam('page', '1')),
-	)
+	const dispatch = useAppDispatch()
+	const postsPerPage = useAppSelector(state => state.pagination.postsPerPage)
+	const selection = useAppSelector(state => state.productSelection)
+	const selectedProducts = useMemo(() => Object.values(selection), [selection])
+	const [currentPage, setCurrentPage] = useState(() => {
+		const page = Number(getParam('page', '1'))
+		return Number.isSafeInteger(page) && page > 0 ? page : 1
+	})
 	const [searchQuery, setSearchQuery] = useState<string>(() =>
 		getParam('search', ''),
 	)
@@ -52,17 +59,10 @@ const Productstable = () => {
 		getParam('category', ''),
 	)
 
-	const [selectedIds, setSelectedIds] = useState<string[]>([])
+	const debouncedSearch = useDebounce(searchQuery.trim(), 500)
+	const isSearching = debouncedSearch !== searchQuery.trim()
 
-	const removeParam = (key: string) => {
-		const url = new URL(window.location.href)
-		url.searchParams.delete(key)
-		window.history.replaceState({}, '', url.toString())
-	}
-
-	const debouncedSearch = useDebounce(searchQuery, 500)
-
-	const { data: procusts, isLoading } = useQuery<{
+	const { data: products, isLoading, isFetching, isError } = useQuery<{
 		data: product[]
 		total: number
 	}>({
@@ -73,8 +73,9 @@ const Productstable = () => {
 			postsPerPage,
 			currentPage,
 		],
-		queryFn: async () =>
-			await productUtils.getProducts({
+		enabled: !isSearching,
+		queryFn: () =>
+			productUtils.getProducts({
 				limit: postsPerPage,
 				page: currentPage,
 				search: debouncedSearch,
@@ -83,51 +84,48 @@ const Productstable = () => {
 	})
 
 	useEffect(() => {
-		updateURL({
+		if (isSearching) return
+
+		const params = {
 			search: debouncedSearch,
 			category: selectedCategory,
-			page: currentPage?.toString(),
-			limit: postsPerPage?.toString(),
-		})
-	}, [debouncedSearch, selectedCategory, currentPage, postsPerPage, updateURL])
+			page: String(currentPage),
+			limit: String(postsPerPage),
+		}
+		if (Object.entries(params).some(([key, value]) => (searchParams.get(key) ?? '') !== value)) {
+			updateURL(params)
+		}
+	}, [isSearching, debouncedSearch, selectedCategory, currentPage, postsPerPage, searchParams, updateURL])
+
+	useEffect(() => {
+		if (products && !isFetching && !isSearching && !isError) {
+			dispatch(updateSelectedLabels(products.data.map(({ id, name, barcode }) => ({
+				id, name, barcode: barcode ?? null,
+			}))))
+		}
+	}, [products, isFetching, isSearching, isError, dispatch])
 
 	const { data: categories, isLoading: categoriesLoading } = useQuery({
 		queryKey: ['get_all_categories'],
 		queryFn: categoryUtils.getCategory,
 	})
 
-	const paginated = procusts?.data ?? []
-
-	const currentPageIds = paginated.map(item => item.id)
-
-	const isAllSelected =
-		currentPageIds.length > 0 &&
-		currentPageIds.every(id => selectedIds.includes(id))
-
-	const handleSelectOne = (id: string, checked: boolean) => {
-		setSelectedIds(prev =>
-			checked ? [...new Set([...prev, id])] : prev.filter(item => item !== id),
-		)
-	}
-
-	const handleSelectAll = (checked: boolean) => {
-		if (checked) {
-			setSelectedIds(prev => [...new Set([...prev, ...currentPageIds])])
-		} else {
-			setSelectedIds(prev => prev.filter(id => !currentPageIds.includes(id)))
-		}
+	const paginated = isSearching ? [] : products?.data ?? []
+	const selectedOnPage = paginated.filter(item => selection[item.id]).length
+	const pageChecked = selectedOnPage > 0 && (selectedOnPage === paginated.length || 'indeterminate')
+	const setProductsChecked = (items: product[], checked: boolean) => {
+		dispatch(checked ? selectProducts(items) : deselectProducts(items.map(item => item.id)))
 	}
 
 	const deleteCheckProduct = useMutation({
 		mutationFn: productUtils.deleteBulk,
-		onSuccess: () => {
+		onSuccess: (_, deletedIds) => {
 			toast.success("Mahsulotlar o'chirildi.")
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
-			setSelectedIds([])
+			dispatch(deselectProducts(deletedIds))
+			setCurrentPage(1)
 		},
-		onError: err => {
-			console.log(err)
-		},
+		onError: () => toast.error('Tanlangan mahsulotlarni o‘chirib bo‘lmadi'),
 	})
 
 	const downloadMutation = useMutation({
@@ -154,10 +152,6 @@ const Productstable = () => {
 		},
 	})
 
-	const handleBulkDelete = () => {
-		deleteCheckProduct.mutate(selectedIds)
-	}
-
 	return (
 		<div className='mt-4'>
 			<div className='border rounded-xl p-4 bg-card'>
@@ -166,22 +160,18 @@ const Productstable = () => {
 						<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
 						<Input
 							type='search'
+							aria-label='Mahsulotlarni qidirish'
 							placeholder='Qidirish...'
 							value={searchQuery}
-							onChange={e => setSearchQuery(e.target.value)}
+							onChange={e => {
+								setSearchQuery(e.target.value)
+								setCurrentPage(1)
+							}}
 							className='h-12 pl-10 bg-background'
 						/>
 					</div>
 
-					<div className='flex items-center gap-x-2 flex-wrap'>
-						{/* <Button
-							variant='destructive'
-							className='cursor-pointer h-12'
-							disabled={selectedIds.length === 0}
-							onClick={handleBulkDelete}
-						>
-							Tanlanganlarni o‘chirish ({selectedIds.length})
-						</Button> */}
+					<div className='flex flex-wrap items-center gap-2'>
 
 						<Button
 							className='cursor-pointer h-12'
@@ -194,17 +184,13 @@ const Productstable = () => {
 						</Button>
 
 						<Select
-							value={selectedCategory}
+							value={selectedCategory || 'all'}
 							onValueChange={value => {
-								if (value === 'all') {
-									removeParam('category')
-									setSelectedCategory('')
-								} else {
-									setSelectedCategory(value)
-								}
+								setSelectedCategory(value === 'all' ? '' : value)
+								setCurrentPage(1)
 							}}
 						>
-							<SelectTrigger className='w-full sm:w-[280px] h-11'>
+							<SelectTrigger aria-label='Kategoriya bo‘yicha filtrlash' className='w-full sm:w-[280px] h-11'>
 								<SelectValue placeholder='Barchasi' />
 							</SelectTrigger>
 							<SelectContent>
@@ -227,22 +213,44 @@ const Productstable = () => {
 					</div>
 				</div>
 
+				<div className='mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2'>
+					<p className='text-sm text-muted-foreground' role='status'>
+						<span className='font-medium tabular-nums text-foreground'>{selectedProducts.length}</span> ta mahsulot tanlangan
+					</p>
+					<div className='flex flex-wrap items-center gap-2'>
+						{selectedProducts.length > 0 && (
+							<>
+								<Button variant='ghost' size='sm' onClick={() => dispatch(clearProductSelection())}>
+									Tanlovni tozalash
+								</Button>
+								<DeleteConfirm
+									title='O‘chirish'
+									disabled={deleteCheckProduct.isPending}
+									description={`Barcha sahifalardan tanlangan ${selectedProducts.length} ta mahsulot o‘chiriladi.`}
+									onConfirm={() => deleteCheckProduct.mutate(Object.keys(selection))}
+								/>
+							</>
+						)}
+						<BarcodePrintDialog
+							products={selectedProducts}
+							disabled={!selectedProducts.length || deleteCheckProduct.isPending}
+							onRemove={id => dispatch(deselectProducts([id]))}
+						/>
+					</div>
+				</div>
+
 				<div className='rounded-lg border overflow-hidden'>
 					<Table>
 						<TableHeader>
 							<TableRow className='bg-muted/50 hover:bg-muted/50 border-b'>
-								<TableHead className='w-[50px] font-semibold flex items-center'>
+								<TableHead className='w-[50px]'>
 									<Checkbox
-										checked={isAllSelected}
-										onCheckedChange={checked => handleSelectAll(!!checked)}
-										aria-label='Barchasini tanlash'
+										checked={pageChecked}
+										disabled={paginated.length === 0}
+									onCheckedChange={checked => setProductsChecked(paginated, checked === true)}
+										aria-label='Joriy sahifadagi mahsulotlarni tanlash'
 										className='border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
 									/>
-									{selectedIds.length ? (
-										<DeleteConfirm onConfirm={handleBulkDelete} />
-									) : (
-										''
-									)}
 								</TableHead>
 								<TableHead className='w-[60px] font-semibold'>№</TableHead>
 								<TableHead className='font-semibold'>Nomi</TableHead>
@@ -262,21 +270,20 @@ const Productstable = () => {
 							</TableRow>
 						</TableHeader>
 
-						{isLoading ? (
+						{isLoading || isSearching ? (
 							<ProductsTableSkeleton />
 						) : paginated.length > 0 ? (
 							<TableBody>
 								{paginated.map((el: product, index: number) => (
 									<TableRow
 										key={el?.id}
+										data-state={selection[el.id] ? 'selected' : undefined}
 										className='hover:bg-muted/50 transition-colors'
 									>
 										<TableCell>
 											<Checkbox
-												checked={selectedIds.includes(el.id)}
-												onCheckedChange={checked =>
-													handleSelectOne(el.id, !!checked)
-												}
+												checked={Boolean(selection[el.id])}
+												onCheckedChange={checked => setProductsChecked([el], checked === true)}
 												aria-label={`${el.name} ni tanlash`}
 												className='border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
 											/>
@@ -333,7 +340,7 @@ const Productstable = () => {
 										colSpan={10}
 										className='h-24 text-center text-muted-foreground'
 									>
-										Mahsulotlar topilmadi
+										{isError ? 'Mahsulotlarni yuklab bo‘lmadi' : 'Mahsulotlar topilmadi'}
 									</TableCell>
 								</TableRow>
 							</TableBody>
@@ -350,7 +357,7 @@ const Productstable = () => {
 				}}
 				postsPerPage={postsPerPage}
 				setCurrentPage={n => setCurrentPage(n)}
-				totalPosts={procusts?.total || 0}
+				totalPosts={isSearching ? 0 : products?.total ?? 0}
 			/>
 		</div>
 	)

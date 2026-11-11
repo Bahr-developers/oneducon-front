@@ -31,10 +31,10 @@ const Products = () => {
 
 	return (
 		<div className='w-full'>
-			<div className='flex justify-between items-center'>
+			<div className='flex flex-wrap items-center justify-between gap-3'>
 				<h2 className='text-xl font-medium'>Mahsulotlar</h2>
 
-				<div className='flex items-center gap-x-4'>
+				<div className='flex flex-wrap items-center gap-3'>
 					<ProductCreate />
 					<ProductImportButton
 						loading={importFile.isPending}

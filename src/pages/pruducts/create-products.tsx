@@ -17,6 +17,7 @@ import { categoryType, product } from '@/@types'
 import { categoryUtils } from '@/utils/categories'
 import { unitUtils } from '@/utils/units'
 import toast from 'react-hot-toast'
+import { ProductBarcodeField } from './product-barcode-field'
 
 interface ProductFormData {
 	name: string | ''
@@ -40,7 +41,7 @@ const ProductCreate = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const inputRefs = useRef<(HTMLInputElement | HTMLButtonElement | null)[]>([])
 	const [wholesalePriceUZS, setWholesalePriceUZS] = useState(0)
-	const [barcode, setBArcode] = useState('')
+	const [barcode, setBarcode] = useState('')
 	// Validate form - all required fields filled
 	const queryClient = useQueryClient()
 	const isFormValid = useMemo(() => {
@@ -209,7 +210,7 @@ const ProductCreate = () => {
 			unit_id: +data.unitId!,
 			store_id: +storeId,
 			usd_rate: usdRate,
-			barcode: barcode,
+			barcode,
 			wholesale_price: wholesalePriceUZS
 				? wholesalePriceUZS
 				: data.tan_narx_uzb!,
@@ -220,6 +221,7 @@ const ProductCreate = () => {
 
 	const handleReset = () => {
 		setData({})
+		setBarcode('')
 		setOpen(false)
 	}
 
@@ -458,22 +460,13 @@ const ProductCreate = () => {
 								</div>
 							</label>
 
-							<label className='w-full flex col-span-1 flex-col space-y-2'>
-								<span className='text-sm font-medium flex items-center gap-2'>
-									Barcode
-								</span>
-								<div className='relative'>
-									<Input
-										ref={el => {
-											inputRefs.current[5] = el
-										}}
-										type='text'
-										className='h-12 pr-10'
-										placeholder='4780087820048'
-										onChange={e => setBArcode(e.target.value)}
-									/>
-								</div>
-							</label>
+							<ProductBarcodeField
+								value={barcode}
+								onChange={setBarcode}
+								inputRef={input => {
+									inputRefs.current[5] = input
+								}}
+							/>
 							<label className='w-full flex col-span-1 flex-col space-y-2'>
 								<span className='text-sm font-medium flex items-center gap-2'>
 									Ulgurji narxi (UZS)

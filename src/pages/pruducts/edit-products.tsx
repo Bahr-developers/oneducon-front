@@ -25,10 +25,12 @@ import { unitUtils } from '@/utils/units'
 import { productUtils } from '@/utils/products'
 import { AxiosError } from 'axios'
 import NumberInput from '@/components/_components/number-input'
+import { ProductBarcodeField } from './product-barcode-field'
 
 interface EditProductProps {
 	product: product
 	showLabel?: boolean
+	onSaved?: (changes: { id: string; name?: string; barcode?: string }) => void
 }
 
 function getFormData(product: product) {
@@ -65,7 +67,7 @@ function getPatchValues(data: ReturnType<typeof getFormData>) {
 	}
 }
 
-const EditProduct = ({ product, showLabel = false }: EditProductProps) => {
+const EditProduct = ({ product, showLabel = false, onSaved }: EditProductProps) => {
 	const [open, setOpen] = useState(false)
 	const [initialData, setInitialData] = useState(() => getFormData(product))
 	const [data, setData] = useState(initialData)
@@ -87,6 +89,7 @@ const EditProduct = ({ product, showLabel = false }: EditProductProps) => {
 		mutationFn: productUtils.patchProduct,
 		onSuccess: (data, changes) => {
 			toast.success(data?.message)
+			onSaved?.({ id: changes.id, name: changes.name, barcode: changes.barcode })
 			queryClient.invalidateQueries({ queryKey: ['get_all_products'] })
 			queryClient.invalidateQueries({ queryKey: ['product-details', product.id] })
 			if (changes.quantity !== undefined) {
@@ -299,21 +302,11 @@ const EditProduct = ({ product, showLabel = false }: EditProductProps) => {
 							/>
 						</label>
 
-						<label className='w-full flex col-span-1 flex-col space-y-2'>
-							<span className='text-sm font-medium flex items-center gap-2'>
-								Barcode
-							</span>
-							<div className='relative'>
-								<Input
-									type='text'
-									step='0.01'
-									className='h-12 pr-10'
-									placeholder='Misol: 4780087820048'
-									value={data.barcode}
-									onChange={e => setData(prev => ({ ...prev, barcode: e.target.value }))}
-								/>
-							</div>
-						</label>
+						<ProductBarcodeField
+							value={data.barcode}
+							onChange={barcode => setData(prev => ({ ...prev, barcode }))}
+							generateWhenEmpty
+						/>
 						<label className='w-full flex col-span-1 flex-col space-y-2'>
 							<span className='text-sm font-medium flex items-center gap-2'>
 								Ulgurji narxi (UZS)

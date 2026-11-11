@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit'
 import orderReducer from './order-slice'
 import paginationReducer from './paginationSlice'
 import authReducer from './auth-slice'
+import productSelectionReducer from './product-selection-slice'
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         order: orderReducer,
         pagination: paginationReducer,
+        productSelection: productSelectionReducer,
     },
 })
 

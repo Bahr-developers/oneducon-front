@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
 	Store,
@@ -27,17 +27,21 @@ import {
 	EyeOff,
 	CheckCircle2,
 	AlertCircle,
+	Settings,
 } from 'lucide-react'
 import NumberInput from '@/components/_components/number-input'
 import { storeUtils } from '@/utils/store'
 import toast from 'react-hot-toast'
 import { useQueryParams } from '@/hooks/query-params'
+import { AppearanceSettings } from './appearance-settings'
 
 const StoreProfile = () => {
 	const queryClient = useQueryClient()
 	const storeId = localStorage.getItem('storeId') || ''
 
 	const { updateURL, getParam } = useQueryParams()
+	const requestedTab = getParam('activeTab')
+	const activeTab = requestedTab === 'security' || requestedTab === 'settings' ? requestedTab : 'general'
 
 	// Form states
 	const [name, setName] = useState('')
@@ -51,18 +55,8 @@ const StoreProfile = () => {
 	const [showPassword, setShowPassword] = useState(false)
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-	const [activeTab, setActiveTab] = useState<string>(() =>
-		getParam('activeTab', 'general'),
-	)
-
-	useEffect(() => {
-		updateURL({
-			activeTab: activeTab,
-		})
-	}, [activeTab, updateURL])
-
 	// Store ma'lumotlarini olish
-	const { data: storeData, isLoading } = useQuery({
+	const { data: storeData, isFetching, refetch } = useQuery({
 		queryKey: ['store', storeId],
 		queryFn: () => storeUtils.getStoreByID(storeId),
 		enabled: !!storeId,
@@ -191,47 +185,54 @@ const StoreProfile = () => {
 		})
 	}
 
-	if (isLoading) {
-		return (
-			<div className='flex items-center justify-center h-screen'>
-				<Loader2 className='w-8 h-8 animate-spin text-primary' />
-			</div>
-		)
-	}
-
-	if (!storeData) {
-		return (
-			<div className='flex flex-col items-center justify-center h-screen gap-4'>
-				<AlertCircle className='w-16 h-16 text-red-500' />
-				<p className='text-lg text-muted-foreground'>
-					Do'kon ma'lumotlari topilmadi
-				</p>
-			</div>
-		)
-	}
+	const store = storeData?.data
+	const storeStatus = !store && (
+		<Card>
+			<CardContent className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground' role='status'>
+				{isFetching ? (
+					<>
+						<Loader2 className='size-4 animate-spin motion-reduce:animate-none' aria-hidden='true' />
+						Do‘kon ma’lumotlari yuklanmoqda…
+					</>
+				) : (
+					<>
+						<span>Do‘kon ma’lumotlarini yuklab bo‘lmadi.</span>
+						{storeId && (
+							<Button type='button' variant='outline' size='sm' onClick={() => void refetch()}>
+								Qayta urinish
+							</Button>
+						)}
+					</>
+				)}
+			</CardContent>
+		</Card>
+	)
 
 	return (
-		<div className='container max-w-4xl mx-auto p-6 space-y-6'>
+		<div className='mx-auto max-w-4xl space-y-5 sm:px-3 sm:py-3'>
 			{/* Header */}
 			<div className='flex items-center gap-4'>
-				<Avatar className='w-20 h-20 border-4 border-primary/20'>
-					<AvatarImage src='/store-logo.png' />
-					<AvatarFallback className='text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold'>
-						{name?.charAt(0).toUpperCase()}
+				<Avatar className='size-14 rounded-xl sm:size-16' aria-hidden='true'>
+					<AvatarFallback className='rounded-xl bg-[#536BE8]/12 text-xl font-semibold text-[#4056C8] dark:text-[#A6B2FF]'>
+						{store?.name?.trim().charAt(0).toUpperCase() || <Store className='size-5' />}
 					</AvatarFallback>
 				</Avatar>
-				<div className='flex-1'>
-					<h1 className='text-3xl font-bold'>{name}</h1>
-					<p className='text-muted-foreground'>{email}</p>
-					<div className='flex gap-2 mt-2'>
-						<Badge variant='secondary' className='gap-1'>
-							<Store className='w-3 h-3' />
-							Store ID: {storeId}
-						</Badge>
-						<Badge variant='outline' className='gap-1'>
-							<User className='w-3 h-3' />
-							User ID: {storeData.user_id}
-						</Badge>
+				<div className='min-w-0 flex-1'>
+					<h1 className='text-xl font-semibold wrap-anywhere sm:text-2xl'>{store?.name || 'Profil'}</h1>
+					{store?.email && <p className='text-sm wrap-anywhere text-muted-foreground'>{store.email}</p>}
+					<div className='mt-2 flex flex-wrap gap-2'>
+						{storeId && (
+							<Badge variant='secondary' className='gap-1'>
+								<Store className='size-3' aria-hidden='true' />
+								Do‘kon ID {storeId}
+							</Badge>
+						)}
+						{store?.user_id && (
+							<Badge variant='outline' className='gap-1'>
+								<User className='size-3' aria-hidden='true' />
+								Foydalanuvchi ID {store.user_id}
+							</Badge>
+						)}
 					</div>
 				</div>
 			</div>
@@ -239,25 +240,29 @@ const StoreProfile = () => {
 			<Separator />
 
 			{/* Tabs */}
-			<Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
-				<TabsList className='grid w-full grid-cols-3'>
-					<TabsTrigger value='general' className='gap-2'>
-						<User className='w-4 h-4' />
+			<Tabs
+				value={activeTab}
+				onValueChange={tab => updateURL({ activeTab: tab === 'general' ? '' : tab })}
+				className='w-full gap-4'
+			>
+				<TabsList aria-label='Profil bo‘limlari' className='grid h-auto w-full grid-cols-3'>
+					<TabsTrigger value='general' className='min-h-10 gap-2 px-1'>
+						<User className='hidden sm:block' aria-hidden='true' />
 						Umumiy
 					</TabsTrigger>
-					<TabsTrigger value='security' className='gap-2'>
-						<Lock className='w-4 h-4' />
+					<TabsTrigger value='security' className='min-h-10 gap-2 px-1'>
+						<Lock className='hidden sm:block' aria-hidden='true' />
 						Xavfsizlik
 					</TabsTrigger>
-					<TabsTrigger value='settings' className='gap-2'>
-						<DollarSign className='w-4 h-4' />
+					<TabsTrigger value='settings' className='min-h-10 gap-2 px-1'>
+						<Settings className='hidden sm:block' aria-hidden='true' />
 						Sozlamalar
 					</TabsTrigger>
 				</TabsList>
 
 				{/* UMUMIY MA'LUMOTLAR */}
 				<TabsContent value='general' className='space-y-4'>
-					<Card>
+					{storeStatus || <Card>
 						<CardHeader>
 							<CardTitle className='flex items-center gap-2'>
 								<User className='w-5 h-5' />
@@ -334,12 +339,12 @@ const StoreProfile = () => {
 								)}
 							</Button>
 						</CardContent>
-					</Card>
+					</Card>}
 				</TabsContent>
 
 				{/* XAVFSIZLIK */}
 				<TabsContent value='security' className='space-y-4'>
-					<Card>
+					{storeStatus || <Card>
 						<CardHeader>
 							<CardTitle className='flex items-center gap-2'>
 								<Lock className='w-5 h-5' />
@@ -454,12 +459,13 @@ const StoreProfile = () => {
 								)}
 							</Button>
 						</CardContent>
-					</Card>
+					</Card>}
 				</TabsContent>
 
 				{/* SOZLAMALAR */}
 				<TabsContent value='settings' className='space-y-4'>
-					<Card>
+					<AppearanceSettings />
+					{storeStatus || <Card>
 						<CardHeader>
 							<CardTitle className='flex items-center gap-2'>
 								<DollarSign className='w-5 h-5' />
@@ -473,6 +479,7 @@ const StoreProfile = () => {
 							<div className='space-y-2'>
 								<Label htmlFor='usdRate'>USD kursi (UZS) *</Label>
 								<NumberInput
+									id='usdRate'
 									value={usdRate}
 									onChange={val => setUsdRate(val.raw)}
 									placeholder='12500'
@@ -540,7 +547,7 @@ const StoreProfile = () => {
 								)}
 							</Button>
 						</CardContent>
-					</Card>
+					</Card>}
 				</TabsContent>
 			</Tabs>
 		</div>

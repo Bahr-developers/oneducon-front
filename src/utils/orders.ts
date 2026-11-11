@@ -8,6 +8,17 @@ interface OrderItem {
     price: number
 }
 
+interface CreateOrderResponse {
+    success: boolean
+    data?: {
+        id: string
+        order_number: number
+        created_at: string
+        store_id: string
+        items?: (OrderItem & { name: string })[]
+    }
+}
+
 interface PaymentItem {
     payment_type_id: number
     price: number
@@ -113,7 +124,7 @@ export const orderUtils = {
         payment_type_id: Number(p.payment_type_id), // raqamga aylantiramiz
       })),
     };
-    const { data } = await customAxios.post("orders", formattedOrder);
+    const { data } = await customAxios.post<CreateOrderResponse>("orders", formattedOrder);
     return data;
   },
 

@@ -19,14 +19,15 @@ import { orderUtils } from '@/utils/orders'
 import toast from 'react-hot-toast'
 import { AxiosError } from 'axios'
 import { useMemo, useState } from 'react'
-import { client, product } from '@/@types'
+import type { client, paymentType, product } from '@/@types'
 import UniversalSearchSelect from '@/components/_components/search-select'
 import CreateCustomer from '../customers/create-cus'
 import { customerUtils } from '@/utils/customer'
+import { storeUtils } from '@/utils/store'
 import SearchSelect from './search-select'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import ReceiptPreviewModal from './check-dialog'
+import ReceiptPreviewModal, { type ReceiptItem, type ReceiptOrder } from './check-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 
 export default function OrderProducts() {
@@ -43,11 +44,24 @@ export default function OrderProducts() {
 
 	const [openCheck, setOpenCheck] = useState(false)
 	const [showReceiptAfterSave, setShowReceiptAfterSave] = useState(true)
-	const [receiptData, setReceiptData] = useState<any | null>(null)
+	const [receiptData, setReceiptData] = useState<{
+		order: ReceiptOrder
+		client: client | null
+		storeId: string | null
+	} | null>(null)
 
-	const storeId = Number(localStorage.getItem('storeId') || 1)
+	const activeStoreId = localStorage.getItem('storeId')
+	const storeId = Number(activeStoreId || 1)
+	const receiptStoreId = (openCheck ? receiptData?.storeId : null) ?? activeStoreId
+	const { data: receiptStore, isLoading: receiptStoreLoading } = useQuery<{
+		data: { name: string | null } | null
+	}>({
+		queryKey: ['store', receiptStoreId],
+		queryFn: () => storeUtils.getStoreByID(receiptStoreId!),
+		enabled: !!receiptStoreId && (showReceiptAfterSave || openCheck),
+	})
 
-	const { data: paymentTypes } = useQuery({
+	const { data: paymentTypes } = useQuery<{ data: paymentType[] }>({
 		queryKey: ['get_payment'],
 		queryFn: paymentUtils.getPayments,
 	})
@@ -101,14 +115,30 @@ export default function OrderProducts() {
 			payload,
 		}: {
 			payload: typeof orderData
-			receipt: typeof orderData
+			receiptItems: ReceiptItem[]
+			receiptClient: client | null
 		}) => orderUtils.postOrder(payload),
 
-		onSuccess: (_response, variables) => {
+		onSuccess: ({ data: savedOrder }, { payload, receiptItems, receiptClient }) => {
 			toast.success('Sotuv amalga oshirildi')
 
 			if (showReceiptAfterSave) {
-				setReceiptData(variables.receipt)
+				setReceiptData({
+					storeId: savedOrder?.store_id ?? activeStoreId,
+					client: receiptClient,
+					order: {
+						id: savedOrder?.id,
+						order_number: savedOrder?.order_number,
+						created_at: savedOrder?.created_at ?? new Date().toISOString(),
+						client_id: payload.client_id,
+						items: savedOrder?.items ?? receiptItems,
+						payments: payload.payments.map(payment => ({
+							...payment,
+							name: paymentTypes?.data.find(type => Number(type.id) === payment.payment_type_id)?.name,
+						})),
+						debts: payload.debts,
+					},
+				})
 				setOpenCheck(true)
 			}
 
@@ -154,9 +184,14 @@ export default function OrderProducts() {
 					: [],
 		}
 
+		const productNames = new Map(items.map(item => [item.product_id, item.product?.name]))
 		createOrder.mutate({
 			payload: finalOrderData,
-			receipt: finalOrderData,
+			receiptItems: finalOrderData.items.map(item => ({
+				...item,
+				name: productNames.get(item.product_id),
+			})),
+			receiptClient: selectedUser,
 		})
 	}
 
@@ -302,7 +337,7 @@ export default function OrderProducts() {
 								className='border-gray-400 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
 							/>
 							<Label htmlFor='show-receipt-after-save'>
-								Chek chiqarish(test rejim)
+								Chek chiqarish
 							</Label>
 						</div>
 
@@ -330,8 +365,10 @@ export default function OrderProducts() {
 			</div>
 			{receiptData && (
 				<ReceiptPreviewModal
-					order={receiptData}
-					companyName='adukon'
+					order={receiptData.order}
+					client={receiptData.client}
+					storeName={receiptStore?.data?.name}
+					storeLoading={receiptStoreLoading}
 					onOpenChange={setOpenCheck}
 					open={openCheck}
 				/>
