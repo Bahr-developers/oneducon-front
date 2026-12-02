@@ -14,7 +14,6 @@ export function useBarcodeScanner(onScan: (code: string) => void) {
                     clearTimeout(timeoutRef.current);
                 }
                 timeoutRef.current = setTimeout(() => {
-                    // barcode yakunlandi
                     if (buffer.current.length > 0) {
                         onScan(buffer.current);
                     }
